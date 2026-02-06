@@ -1,0 +1,34 @@
+# Archivos que NO deben compartirse
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+*.log
+
+# Base de datos temporal
+*.db-shm
+*.db-wal
+
+# Archivos de respaldo
+*_backup_*.db
+
+# Entorno
+.env
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Sistema
+.DS_Store
+Thumbs.db
