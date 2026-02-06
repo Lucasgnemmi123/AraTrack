@@ -1,0 +1,688 @@
+{% extends "layout.html" %}
+
+{% block title %}Editar Viaje - Sistema de Viajes{% endblock %}
+
+{% block content %}
+<div class="form-section">
+    <h2>Editar Viaje Existente</h2>
+
+    <!-- PASO 1: Buscar Número de Viaje -->
+    <div id="paso1-buscar" class="search-section">
+        <h3 style="color: #d40511;">Paso 1: Buscar Viaje</h3>
+        <div class="form-row">
+            <div class="form-group">
+                <label for="buscar_numero_viaje">Número de Viaje *</label>
+                <input type="text" id="buscar_numero_viaje" required placeholder="Ej: 100">
+            </div>
+            <div class="form-group">
+                <button type="button" onclick="buscarCentrosCosto()" class="btn" style="background: #0066cc; margin-top: 1.8rem;">Buscar Centros</button>
+            </div>
+        </div>
+        <div id="mensaje-busqueda" style="margin-top: 1rem;"></div>
+    </div>
+
+    <!-- PASO 2: Seleccionar Centro de Costo (oculto inicialmente) -->
+    <div id="paso2-centros" style="display: none; margin-top: 2rem;">
+        <hr>
+        <h3 style="color: #d40511;">Paso 2: Seleccionar Centro de Costo</h3>
+        <div class="form-group">
+            <label for="select_centro_costo">Centro de Costo *</label>
+            <select id="select_centro_costo" onchange="cargarViajeCompleto()" style="font-size: 1rem; padding: 0.75rem;">
+                <option value="">Seleccionar centro de costo...</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- PASO 3: Formulario Completo de Edición (oculto inicialmente) -->
+    <div id="paso3-formulario" style="display: none; margin-top: 2rem;">
+        <hr>
+        <h3 style="color: #d40511;">Paso 3: Editar Datos del Viaje</h3>
+        
+        <div class="info-box" style="background: #e3f2fd; border-left: 4px solid #2196f3; padding: 1rem; margin-bottom: 1.5rem;">
+            <p style="margin: 0;"><strong>Viaje:</strong> <span id="info_numero_viaje"></span> | <strong>🏢 Centro:</strong> <span id="info_centro_costo"></span></p>
+        </div>
+
+        <form id="formEditar">
+            <!-- FORMULARIO SE LLENA DINÁMICAMENTE -->
+        </form>
+
+        <div id="mensaje-resultado-edit" class="mensaje" style="display: none; margin-top: 1rem;"></div>
+    </div>
+</div>
+
+<style>
+.search-section {
+    background: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 8px;
+    border: 2px solid #e0e0e0;
+}
+
+.comida-item-edit {
+    background: #f8f9fa;
+    padding: 1rem;
+    margin: 0.5rem 0;
+    border-left: 3px solid #28a745;
+    border-radius: 4px;
+}
+</style>
+
+<script>
+let numeroViajeActual = '';
+let centrosCostoDisponibles = [];
+let contadorComidasEdit = 0;
+
+// PASO 1: Buscar centros de costo
+function buscarCentrosCosto() {
+    const numeroViaje = document.getElementById('buscar_numero_viaje').value.trim();
+    const mensajeBusqueda = document.getElementById('mensaje-busqueda');
+    
+    if (!numeroViaje) {
+        mensajeBusqueda.innerHTML = '<p style="color: #d40511;">Ingresa un número de viaje</p>';
+        return;
+    }
+    
+    numeroViajeActual = numeroViaje;
+    mensajeBusqueda.innerHTML = '<p style="color: #666;">Buscando centros de costo...</p>';
+    
+    fetch(`/api/buscar-centros-costo/${numeroViaje}`)
+        .then(response => response.json())
+        .then(centros => {
+            if (centros && centros.length > 0) {
+                centrosCostoDisponibles = centros;
+                mostrarCentrosCosto(centros);
+                mensajeBusqueda.innerHTML = `<p style="color: #28a745;">Se encontraron ${centros.length} centro(s) de costo</p>`;
+            } else {
+                mensajeBusqueda.innerHTML = '<p style="color: #d40511;">No se encontraron registros para este viaje</p>';
+                document.getElementById('paso2-centros').style.display = 'none';
+                document.getElementById('paso3-formulario').style.display = 'none';
+            }
+        })
+        .catch(error => {
+            mensajeBusqueda.innerHTML = '<p style="color: #d40511;">Error al buscar: ' + error.message + '</p>';
+        });
+}
+
+// PASO 2: Mostrar centros disponibles
+function mostrarCentrosCosto(centros) {
+    const select = document.getElementById('select_centro_costo');
+    select.innerHTML = '<option value="">Seleccionar centro de costo...</option>';
+    
+    centros.forEach(centro => {
+        const option = document.createElement('option');
+        option.value = centro.codigo;
+        option.textContent = `${centro.codigo} - ${centro.casino}`;
+        select.appendChild(option);
+    });
+    
+    document.getElementById('paso2-centros').style.display = 'block';
+    document.getElementById('paso3-formulario').style.display = 'none';
+    document.getElementById('paso2-centros').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+// PASO 3: Cargar viaje completo
+function cargarViajeCompleto() {
+    const centroCosto = document.getElementById('select_centro_costo').value;
+    
+    if (!centroCosto) {
+        document.getElementById('paso3-formulario').style.display = 'none';
+        return;
+    }
+    
+    fetch('/api/buscar-viaje', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+            numero_viaje: numeroViajeActual,
+            centro_costo: centroCosto
+        })
+    })
+    .then(response => response.json())
+    .then(result => {
+        if (result.success) {
+            llenarFormulario(result.viaje, result.comidas);
+            document.getElementById('paso3-formulario').style.display = 'block';
+            setTimeout(() => {
+                document.getElementById('paso3-formulario').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 100);
+        } else {
+            alert('No se pudo cargar el viaje');
+        }
+    })
+    .catch(error => {
+        alert('Error: ' + error.message);
+    });
+}
+
+function llenarFormulario(viaje, comidas) {
+    document.getElementById('info_numero_viaje').textContent = viaje.numero_viaje || '';
+    document.getElementById('info_centro_costo').textContent = viaje.costo_codigo || '';
+    
+    const form = document.getElementById('formEditar');
+    form.innerHTML = `
+        <input type="hidden" id="edit_numero_viaje" value="${viaje.numero_viaje || ''}">
+        <input type="hidden" id="edit_centro_costo" value="${viaje.costo_codigo || ''}">
+        
+        <div style="background: #d40511; color: white; padding: 1rem; margin-bottom: 1rem; border-radius: 4px;">
+            <h4 style="margin: 0; color: white;">INFORMACIÓN PRINCIPAL DEL VIAJE</h4>
+        </div>
+        
+        <div class="form-row">
+            <div class="form-group">
+                <label>Número de Viaje</label>
+                <input type="text" value="${viaje.numero_viaje || ''}" readonly style="background: #f0f0f0;">
+            </div>
+            <div class="form-group">
+                <label>Centro de Costo</label>
+                <input type="text" value="${viaje.costo_codigo || ''}" readonly style="background: #f0f0f0;">
+            </div>
+            <div class="form-group">
+                <label for="edit_fecha">Fecha *</label>
+                <input type="date" id="edit_fecha" value="${viaje.fecha || ''}" required>
+            </div>
+        </div>
+
+        <h3 style="color: #d40511; margin-top: 1.5rem;">🏢 Casino y Ruta</h3>
+        <div class="form-row">
+            <div class="form-group">
+                <label for="edit_casino">Casino</label>
+                <input type="text" id="edit_casino" value="${viaje.casino || ''}">
+            </div>
+            <div class="form-group">
+                <label for="edit_ruta">Ruta</label>
+                <input type="text" id="edit_ruta" value="${viaje.ruta || ''}">
+            </div>
+        </div>
+
+        <h3 style="color: #d40511; margin-top: 1.5rem;">🚚 Datos del Camión</h3>
+        <div class="form-row">
+            <div class="form-group">
+                <label for="edit_tipo_camion">Tipo de Camión</label>
+                <input type="text" id="edit_tipo_camion" value="${viaje.tipo_camion || ''}">
+            </div>
+            <div class="form-group">
+                <label for="edit_patente_camion">Patente Camión *</label>
+                <input type="text" id="edit_patente_camion" value="${viaje.patente_camion || ''}" required style="text-transform: uppercase;">
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="edit_patente_semi">Patente Semi</label>
+                <input type="text" id="edit_patente_semi" value="${viaje.patente_semi || ''}">
+            </div>
+            <div class="form-group">
+                <label for="edit_numero_rampa">N° de Rampla</label>
+                <input type="text" id="edit_numero_rampa" value="${viaje.numero_rampa || ''}">
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="edit_peso_camion">Peso Camión</label>
+                <input type="text" id="edit_peso_camion" value="${viaje.peso_camion || ''}">
+            </div>
+            <div class="form-group">
+                <label for="edit_numero_camion">N° Camión</label>
+                <input type="text" id="edit_numero_camion" value="${viaje.numero_camion || ''}">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="edit_termografos_gps">Termógrafos / GPS</label>
+            <input type="text" id="edit_termografos_gps" value="${viaje.termografos_gps || ''}">
+        </div>
+
+        <h3 style="color: #d40511; margin-top: 1.5rem;">👤 Datos del Conductor</h3>
+        <div class="form-row">
+            <div class="form-group">
+                <label for="edit_chofer">Conductor *</label>
+                <input type="text" id="edit_chofer" value="${viaje.conductor || ''}" required>
+            </div>
+            <div class="form-group">
+                <label for="edit_celular">Celular</label>
+                <input type="text" id="edit_celular" value="${viaje.celular || ''}">
+            </div>
+            <div class="form-group">
+                <label for="edit_rut">RUT</label>
+                <input type="text" id="edit_rut" value="${viaje.rut || ''}">
+            </div>
+        </div>
+
+        <h3 style="color: #d40511; margin-top: 1.5rem;">⏰ Horarios DHL</h3>
+        <div class="form-row">
+            <div class="form-group">
+                <label for="edit_hora_llegada">Fecha y Hora Llegada DHL</label>
+                <input type="datetime-local" id="edit_hora_llegada" value="${viaje.fecha_hora_llegada_dhl || ''}">
+            </div>
+            <div class="form-group">
+                <label for="edit_hora_salida">Fecha y Hora Salida DHL</label>
+                <input type="datetime-local" id="edit_hora_salida" value="${viaje.fecha_hora_salida_dhl || ''}">
+            </div>
+        </div>
+
+        <h3 style="color: #d40511; margin-top: 1.5rem;">📦 Activos Salida</h3>
+        <div class="form-row">
+            <div class="form-group">
+                <label for="edit_num_wencos">N° Wencos</label>
+                <input type="number" id="edit_num_wencos" value="${viaje.num_wencos || 0}" min="0">
+            </div>
+            <div class="form-group">
+                <label for="edit_bin">BIN</label>
+                <input type="text" id="edit_bin" value="${viaje.bin || ''}">
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="edit_pallets">Pallets</label>
+                <input type="number" id="edit_pallets" value="${viaje.pallets || 0}" min="0">
+            </div>
+            <div class="form-group">
+                <label for="edit_pallets_chep">Pallets CHEP</label>
+                <input type="number" id="edit_pallets_chep" value="${viaje.pallets_chep || 0}" min="0">
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="edit_pallets_pl_negro_grueso">Pallets PL Negro Grueso</label>
+                <input type="text" id="edit_pallets_pl_negro_grueso" value="${viaje.pallets_pl_negro_grueso || ''}">
+            </div>
+            <div class="form-group">
+                <label for="edit_pallets_pl_negro_alternativo">Pallets PL Negro Alternativo</label>
+                <input type="text" id="edit_pallets_pl_negro_alternativo" value="${viaje.pallets_pl_negro_alternativo || ''}">
+            </div>
+        </div>
+
+        <h4 style="margin-top: 1rem;">Congelado</h4>
+        <div class="form-row">
+            <div class="form-group">
+                <label for="edit_pallets_congelado">Pallets Congelado</label>
+                <input type="number" id="edit_pallets_congelado" value="${viaje.pallets_congelado || 0}" min="0">
+            </div>
+            <div class="form-group">
+                <label for="edit_wencos_congelado">Wencos Congelado</label>
+                <input type="number" id="edit_wencos_congelado" value="${viaje.wencos_congelado || 0}" min="0">
+            </div>
+            <div class="form-group">
+                <label><input type="checkbox" id="edit_check_congelado" ${(viaje.check_congelado === 'X' || viaje.check_congelado === 'x' || viaje.check_congelado === '1' || viaje.check_congelado === 1) ? 'checked' : ''}> Congelado</label>
+            </div>
+        </div>
+
+        <h4 style="margin-top: 1rem;">Refrigerado</h4>
+        <div class="form-row">
+            <div class="form-group">
+                <label for="edit_pallets_refrigerado">Pallets Refrigerado</label>
+                <input type="number" id="edit_pallets_refrigerado" value="${viaje.pallets_refrigerado || 0}" min="0">
+            </div>
+            <div class="form-group">
+                <label for="edit_wencos_refrigerado">Wencos Refrigerado</label>
+                <input type="number" id="edit_wencos_refrigerado" value="${viaje.wencos_refrigerado || 0}" min="0">
+            </div>
+            <div class="form-group">
+                <label><input type="checkbox" id="edit_check_refrigerado" ${(viaje.check_refrigerado === 'X' || viaje.check_refrigerado === 'x' || viaje.check_refrigerado === '1' || viaje.check_refrigerado === 1) ? 'checked' : ''}> Refrigerado</label>
+            </div>
+        </div>
+
+        <h4 style="margin-top: 1rem;">Abarrote</h4>
+        <div class="form-row">
+            <div class="form-group">
+                <label for="edit_pallets_abarrote">Pallets Abarrote</label>
+                <input type="number" id="edit_pallets_abarrote" value="${viaje.pallets_abarrote || 0}" min="0">
+            </div>
+            <div class="form-group">
+                <label><input type="checkbox" id="edit_check_abarrote" ${(viaje.check_abarrote === 'X' || viaje.check_abarrote === 'x' || viaje.check_abarrote === '1' || viaje.check_abarrote === 1) ? 'checked' : ''}> Abarrote</label>
+            </div>
+        </div>
+
+        <h3 style="color: #d40511; margin-top: 1.5rem;">Verificaciones</h3>
+        <div class="form-row">
+            <div class="form-group">
+                <label><input type="checkbox" id="edit_check_implementos" ${(viaje.check_implementos === 'X' || viaje.check_implementos === 'x' || viaje.check_implementos === '1' || viaje.check_implementos === 1) ? 'checked' : ''}> Implementos</label>
+            </div>
+            <div class="form-group">
+                <label><input type="checkbox" id="edit_check_aseo" ${(viaje.check_aseo === 'X' || viaje.check_aseo === 'x' || viaje.check_aseo === '1' || viaje.check_aseo === 1) ? 'checked' : ''}> Aseo</label>
+            </div>
+            <div class="form-group">
+                <label><input type="checkbox" id="edit_check_trazabilidad" ${(viaje.check_trazabilidad === 'X' || viaje.check_trazabilidad === 'x' || viaje.check_trazabilidad === '1' || viaje.check_trazabilidad === 1) ? 'checked' : ''}> Trazabilidad</label>
+            </div>
+        </div>
+        
+        <div class="form-row" style="margin-top: 0.5rem;">
+            <div class="form-group">
+                <label><input type="checkbox" id="edit_check_plataforma_wtck" ${(viaje.check_plataforma_wtck === 'X' || viaje.check_plataforma_wtck === 'x' || viaje.check_plataforma_wtck === '1' || viaje.check_plataforma_wtck === 1) ? 'checked' : ''}> Plataforma WTCK</label>
+            </div>
+            <div class="form-group">
+                <label><input type="checkbox" id="edit_check_env_correo_wtck" ${(viaje.check_env_correo_wtck === 'X' || viaje.check_env_correo_wtck === 'x' || viaje.check_env_correo_wtck === '1' || viaje.check_env_correo_wtck === 1) ? 'checked' : ''}> Envío Correo WTCK</label>
+            </div>
+            <div class="form-group">
+                <label><input type="checkbox" id="edit_check_revision_planilla_despacho" ${(viaje.check_revision_planilla_despacho === 'X' || viaje.check_revision_planilla_despacho === 'x' || viaje.check_revision_planilla_despacho === '1' || viaje.check_revision_planilla_despacho === 1) ? 'checked' : ''}> Revisión Planilla Despacho</label>
+            </div>
+        </div>
+
+        <h3 style="color: #d40511; margin-top: 1.5rem;">📄 Guías de Despacho</h3>
+        <div class="form-row">
+            ${[1,2,3,4,5].map(i => `
+                <div class="form-group">
+                    <label for="edit_guia_${i}">Guía ${i}</label>
+                    <input type="text" id="edit_guia_${i}" value="${viaje[`guia_${i}`] || ''}">
+                </div>
+            `).join('')}
+        </div>
+        <div class="form-row">
+            ${[6,7,8,9,10].map(i => `
+                <div class="form-group">
+                    <label for="edit_guia_${i}">Guía ${i}</label>
+                    <input type="text" id="edit_guia_${i}" value="${viaje[`guia_${i}`] || ''}">
+                </div>
+            `).join('')}
+        </div>
+        <div class="form-row">
+            ${[11,12,13,14].map(i => `
+                <div class="form-group">
+                    <label for="edit_guia_${i}">Guía ${i}</label>
+                    <input type="text" id="edit_guia_${i}" value="${viaje[`guia_${i}`] || ''}">
+                </div>
+            `).join('')}
+        </div>
+
+        <h3 style="color: #d40511; margin-top: 1.5rem;">🔒 Sellos</h3>
+        <h4>Sellos Salida</h4>
+        <div class="form-row">
+            ${[1,2,3,4,5].map(i => `
+                <div class="form-group">
+                    <label for="edit_sello_salida_${i}p">Sello Salida ${i}</label>
+                    <input type="text" id="edit_sello_salida_${i}p" value="${viaje[`sello_salida_${i}p`] || ''}">
+                </div>
+            `).join('')}
+        </div>
+
+        <h4>Sellos Retorno</h4>
+        <div class="form-row">
+            ${[1,2,3,4,5].map(i => `
+                <div class="form-group">
+                    <label for="edit_sello_retorno_${i}p">Sello Retorno ${i}</label>
+                    <input type="text" id="edit_sello_retorno_${i}p" value="${viaje[`sello_retorno_${i}p`] || ''}">
+                </div>
+            `).join('')}
+        </div>
+
+        <h3 style="color: #d40511; margin-top: 1.5rem;">Certificados y Revisión</h3>
+        <div class="form-row">
+            <div class="form-group">
+                <label for="edit_numero_certificado_fumigacion">N° Certificado Fumigación</label>
+                <input type="text" id="edit_numero_certificado_fumigacion" value="${viaje.numero_certificado_fumigacion || ''}">
+            </div>
+            <div class="form-group">
+                <label for="edit_revision_limpieza_camion_acciones">Revisión Limpieza Camión</label>
+                <input type="text" id="edit_revision_limpieza_camion_acciones" value="${viaje.revision_limpieza_camion_acciones || ''}">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="edit_administrativo_responsable">Administrativo Responsable</label>
+            <select id="edit_administrativo_responsable" class="select2" style="width: 100%;">
+                <option value="">Seleccione un administrativo...</option>
+            </select>
+        </div>
+
+        <h3 style="color: #d40511; margin-top: 1.5rem;">🍽️ Comidas Preparadas</h3>
+        <div id="edit-comidas-container">
+            ${comidas.map((comida, index) => `
+                <div class="comida-item-edit" id="comida-edit-${index}">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Guía Comida</label>
+                            <input type="text" class="comida_guia" value="${comida.guia_comida || ''}">
+                        </div>
+                        <div class="form-group">
+                            <label>Descripción</label>
+                            <input type="text" class="comida_descripcion" value="${comida.descripcion || ''}">
+                        </div>
+                        <div class="form-group">
+                            <label>Kilos</label>
+                            <input type="number" class="comida_kilo" value="${comida.kilo || 0}" step="0.01" min="0">
+                        </div>
+                        <div class="form-group">
+                            <label>Bultos</label>
+                            <input type="number" class="comida_bultos" value="${comida.bultos || 0}" min="0">
+                        </div>
+                        <div class="form-group">
+                            <button type="button" onclick="eliminarComidaEdit(${index})" class="btn" style="background: #dc3545; margin-top: 1.8rem;">🗑️</button>
+                        </div>
+                    </div>
+                </div>
+            `).join('')}
+        </div>
+        <button type="button" onclick="agregarComidaEdit()" class="btn" style="background: #28a745; margin-top: 1rem;">➕ Agregar Comida</button>
+
+
+        <div style="display: flex; gap: 1rem; margin-top: 2rem; padding-top: 1rem; border-top: 2px solid #e0e0e0;">
+            <button type="submit" class="btn" style="flex: 1; background: #28a745; font-size: 1.1rem; padding: 1rem;">💾 Actualizar</button>
+            <button type="button" onclick="confirmarEliminar()" class="btn" style="flex: 1; background: #dc3545; font-size: 1.1rem; padding: 1rem;">🗑️ Eliminar</button>
+            <button type="button" onclick="cancelarEdicion()" class="btn" style="background: #6c757d; padding: 1rem;">↩️ Cancelar</button>
+        </div>
+    `;
+    
+    contadorComidasEdit = comidas.length;
+    document.getElementById('formEditar').addEventListener('submit', actualizarViaje);
+    
+    // Cargar administrativos en el select2
+    cargarAdministrativosEdicion(viaje.administrativo_responsable || '');
+}
+
+function agregarComidaEdit() {
+    // Limitar a 20 comidas máximo
+    if (contadorComidasEdit >= 20) {
+        alert('Máximo 20 comidas permitidas');
+        return;
+    }
+    
+    const container = document.getElementById('edit-comidas-container');
+    const index = contadorComidasEdit++;
+    
+    container.insertAdjacentHTML('beforeend', `
+        <div class="comida-item-edit" id="comida-edit-${index}">
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Guía Comida</label>
+                    <input type="text" class="comida_guia">
+                </div>
+                <div class="form-group">
+                    <label>Descripción</label>
+                    <input type="text" class="comida_descripcion">
+                </div>
+                <div class="form-group">
+                    <label>Kilos</label>
+                    <input type="number" class="comida_kilo" value="0" step="0.01" min="0">
+                </div>
+                <div class="form-group">
+                    <label>Bultos</label>
+                    <input type="number" class="comida_bultos" value="0" min="0">
+                </div>
+                <div class="form-group">
+                    <button type="button" onclick="eliminarComidaEdit(${index})" class="btn" style="background: #dc3545; margin-top: 1.8rem;">🗑️</button>
+                </div>
+            </div>
+        </div>
+    `);
+}
+
+function eliminarComidaEdit(index) {
+    const elemento = document.getElementById(`comida-edit-${index}`);
+    if (elemento && confirm('¿Eliminar esta comida?')) {
+        elemento.remove();
+    }
+}
+
+function actualizarViaje(e) {
+    e.preventDefault();
+    
+    const data = {
+        numero_viaje: document.getElementById('edit_numero_viaje').value,
+        centro_costo: document.getElementById('edit_centro_costo').value,
+        fecha: document.getElementById('edit_fecha').value,
+        casino: document.getElementById('edit_casino').value,
+        ruta: document.getElementById('edit_ruta').value,
+        tipo_camion: document.getElementById('edit_tipo_camion').value,
+        patente_camion: document.getElementById('edit_patente_camion').value,
+        patente_semi: document.getElementById('edit_patente_semi').value,
+        numero_rampa: document.getElementById('edit_numero_rampa').value,
+        peso_camion: document.getElementById('edit_peso_camion').value,
+        numero_camion: document.getElementById('edit_numero_camion').value,
+        termografos_gps: document.getElementById('edit_termografos_gps').value,
+        chofer: document.getElementById('edit_chofer').value,
+        celular: document.getElementById('edit_celular').value,
+        rut: document.getElementById('edit_rut').value,
+        hora_salida: document.getElementById('edit_hora_salida').value,
+        hora_llegada: document.getElementById('edit_hora_llegada').value,
+        num_wencos: document.getElementById('edit_num_wencos').value,
+        bin: document.getElementById('edit_bin').value,
+        pallets: document.getElementById('edit_pallets').value,
+        pallets_chep: document.getElementById('edit_pallets_chep').value,
+        pallets_pl_negro_grueso: document.getElementById('edit_pallets_pl_negro_grueso').value,
+        pallets_pl_negro_alternativo: document.getElementById('edit_pallets_pl_negro_alternativo').value,
+        pallets_congelado: document.getElementById('edit_pallets_congelado').value,
+        wencos_congelado: document.getElementById('edit_wencos_congelado').value,
+        check_congelado: document.getElementById('edit_check_congelado').checked ? 'X' : '',
+        pallets_refrigerado: document.getElementById('edit_pallets_refrigerado').value,
+        wencos_refrigerado: document.getElementById('edit_wencos_refrigerado').value,
+        check_refrigerado: document.getElementById('edit_check_refrigerado').checked ? 'X' : '',
+        pallets_abarrote: document.getElementById('edit_pallets_abarrote').value,
+
+        check_abarrote: document.getElementById('edit_check_abarrote').checked ? 'X' : '',
+        check_implementos: document.getElementById('edit_check_implementos').checked ? 'X' : '',
+        check_aseo: document.getElementById('edit_check_aseo').checked ? 'X' : '',
+        check_trazabilidad: document.getElementById('edit_check_trazabilidad').checked ? 'X' : '',
+        check_plataforma_wtck: document.getElementById('edit_check_plataforma_wtck').checked ? 'X' : '',
+        check_env_correo_wtck: document.getElementById('edit_check_env_correo_wtck').checked ? 'X' : '',
+        check_revision_planilla_despacho: document.getElementById('edit_check_revision_planilla_despacho').checked ? 'X' : '',
+        numero_certificado_fumigacion: document.getElementById('edit_numero_certificado_fumigacion').value,
+        revision_limpieza_camion_acciones: document.getElementById('edit_revision_limpieza_camion_acciones').value,
+        administrativo_responsable: document.getElementById('edit_administrativo_responsable').value,
+        comidas: []
+    };
+    
+    for (let i = 1; i <= 14; i++) {
+        data[`guia_${i}`] = document.getElementById(`edit_guia_${i}`).value;
+    }
+    
+    for (let i = 1; i <= 5; i++) {
+        data[`sello_salida_${i}p`] = document.getElementById(`edit_sello_salida_${i}p`).value;
+        data[`sello_retorno_${i}p`] = document.getElementById(`edit_sello_retorno_${i}p`).value;
+    }
+    
+    const comidasItems = document.querySelectorAll('.comida-item-edit');
+    comidasItems.forEach(item => {
+        const descripcion = item.querySelector('.comida_descripcion').value.trim();
+        if (descripcion) {
+            data.comidas.push({
+                guia_comida: item.querySelector('.comida_guia').value,
+                descripcion: descripcion,
+                kilo: parseFloat(item.querySelector('.comida_kilo').value) || 0,
+                bultos: parseInt(item.querySelector('.comida_bultos').value) || 0
+            });
+        }
+    });
+    
+    fetch('/api/actualizar-viaje', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(result => {
+        const mensaje = document.getElementById('mensaje-resultado-edit');
+        mensaje.style.display = 'block';
+        
+        if (result.success) {
+            mensaje.className = 'mensaje mensaje-exito';
+            mensaje.textContent = '' + result.message;
+            setTimeout(() => mensaje.style.display = 'none', 3000);
+        } else {
+            mensaje.className = 'mensaje mensaje-error';
+            mensaje.textContent = 'Error: ' + result.message;
+        }
+        
+        mensaje.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    })
+    .catch(error => {
+        const mensaje = document.getElementById('mensaje-resultado-edit');
+        mensaje.style.display = 'block';
+        mensaje.className = 'mensaje mensaje-error';
+        mensaje.textContent = 'Error: ' + error.message;
+    });
+}
+
+function confirmarEliminar() {
+    if (confirm('¿Eliminar este viaje y todas sus comidas? No se puede deshacer.')) {
+        fetch('/api/eliminar-viaje', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                numero_viaje: document.getElementById('edit_numero_viaje').value,
+                centro_costo: document.getElementById('edit_centro_costo').value
+            })
+        })
+        .then(response => response.json())
+        .then(result => {
+            if (result.success) {
+                alert('Viaje eliminado');
+                cancelarEdicion();
+            } else {
+                alert('Error: ' + result.message);
+            }
+        })
+        .catch(error => alert('Error: ' + error.message));
+    }
+}
+
+function cancelarEdicion() {
+    document.getElementById('buscar_numero_viaje').value = '';
+    document.getElementById('paso2-centros').style.display = 'none';
+    document.getElementById('paso3-formulario').style.display = 'none';
+    document.getElementById('mensaje-busqueda').innerHTML = '';
+    document.getElementById('mensaje-resultado-edit').style.display = 'none';
+    document.getElementById('paso1-buscar').scrollIntoView({ behavior: 'smooth' });
+}
+
+document.getElementById('buscar_numero_viaje').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+        e.preventDefault();
+        buscarCentrosCosto();
+    }
+});
+
+// Cargar administrativos en el select2 del formulario de edición
+function cargarAdministrativosEdicion(valorActual) {
+    fetch('/api/listar-administrativos')
+    .then(response => response.json())
+    .then(result => {
+        if (result.success) {
+            const select = $('#edit_administrativo_responsable');
+            select.empty();
+            select.append('<option value="">Seleccione un administrativo...</option>');
+            result.administrativos.forEach(admin => {
+                const selected = admin === valorActual ? 'selected' : '';
+                select.append(`<option value="${admin}" ${selected}>${admin}</option>`);
+            });
+            // Inicializar Select2 después de cargar las opciones
+            select.select2({
+                placeholder: 'Buscar administrativo...',
+                allowClear: true,
+                language: {
+                    noResults: function() {
+                        return "No se encontraron resultados";
+                    },
+                    searching: function() {
+                        return "Buscando...";
+                    }
+                }
+            });
+        }
+    })
+    .catch(error => console.error('Error cargando administrativos:', error));
+}
+</script>
+{% endblock %}

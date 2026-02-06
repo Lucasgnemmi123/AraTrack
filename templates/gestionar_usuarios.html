@@ -1,0 +1,423 @@
+{% extends "layout.html" %}
+
+{% block title %}Gestión de Usuarios - AraTrack{% endblock %}
+
+{% block content %}
+<div class="w-[92%] mx-auto py-4 px-4 sm:px-6 lg:px-8">
+    <!-- Header -->
+    <div class="mb-6">
+        <h2 class="text-3xl font-bold text-gray-900 flex items-center">
+            <i class="bi bi-people text-blue-500 mr-3"></i>
+            Gestión de Usuarios
+        </h2>
+        <p class="text-gray-600 mt-2">Administrar usuarios del sistema</p>
+    </div>
+
+    <!-- Botón Nuevo Usuario -->
+    <div class="mb-6">
+        <button onclick="abrirModalNuevoUsuario()" class="px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold rounded-lg transition-all duration-200 shadow-lg flex items-center">
+            <i class="bi bi-person-plus mr-2"></i>Crear Nuevo Usuario
+        </button>
+    </div>
+
+    <!-- Lista de Usuarios -->
+    <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+        <div class="bg-gradient-to-r from-blue-500 to-blue-600 px-6 py-4">
+            <h5 class="text-lg font-semibold text-white flex items-center">
+                <i class="bi bi-list-ul mr-2"></i>Usuarios Registrados
+            </h5>
+        </div>
+        <div class="p-6">
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Usuario</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nombre Completo</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha Creación</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabla-usuarios" class="bg-white divide-y divide-gray-200">
+                        <!-- Se llenará dinámicamente -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Cambiar Contraseña -->
+<div id="modalCambiarPassword" class="modal" style="display: none;">
+    <div class="modal-content" style="max-width: 500px;">
+        <span class="close" onclick="cerrarModalCambiarPassword()">&times;</span>
+        <div class="bg-gradient-to-r from-orange-500 to-orange-600 -mx-6 -mt-6 px-6 py-4 mb-6 rounded-t-lg">
+            <h5 class="text-xl font-bold text-white flex items-center">
+                <i class="bi bi-key mr-2"></i>Cambiar Contraseña
+            </h5>
+        </div>
+        <form onsubmit="cambiarPassword(event)">
+            <input type="hidden" id="cambiar_user_id">
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                    <i class="bi bi-person text-blue-500"></i> Usuario
+                </label>
+                <input type="text" id="cambiar_username" disabled 
+                       class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-100">
+            </div>
+            <div class="mb-4">
+                <label for="nueva_password" class="block text-sm font-medium text-gray-700 mb-2">
+                    <i class="bi bi-lock text-orange-500"></i> Nueva Contraseña <span class="text-red-500">*</span>
+                </label>
+                <div class="relative">
+                    <input type="password" id="nueva_password" required minlength="4"
+                           class="w-full px-4 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                           placeholder="Ingrese la nueva contraseña">
+                    <button type="button" onclick="togglePasswordVisibility('nueva_password', 'toggle_nueva')" 
+                            class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700">
+                        <i id="toggle_nueva" class="bi bi-eye"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="mb-6">
+                <label for="confirmar_password" class="block text-sm font-medium text-gray-700 mb-2">
+                    <i class="bi bi-lock-fill text-orange-500"></i> Confirmar Contraseña <span class="text-red-500">*</span>
+                </label>
+                <div class="relative">
+                    <input type="password" id="confirmar_password" required minlength="4"
+                           class="w-full px-4 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                           placeholder="Confirme la nueva contraseña">
+                    <button type="button" onclick="togglePasswordVisibility('confirmar_password', 'toggle_confirmar')" 
+                            class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700">
+                        <i id="toggle_confirmar" class="bi bi-eye"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="flex gap-3">
+                <button type="submit" class="flex-1 px-6 py-3 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-semibold rounded-lg transition-all duration-200">
+                    <i class="bi bi-check-circle mr-2"></i>Cambiar Contraseña
+                </button>
+                <button type="button" onclick="cerrarModalCambiarPassword()" class="px-6 py-3 bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold rounded-lg transition-all duration-200">
+                    Cancelar
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- MODAL: NUEVO USUARIO -->
+<div id="modalNuevoUsuario" class="modal" style="display: none;">
+    <div class="modal-content" style="max-width: 600px;">
+        <span class="close" onclick="cerrarModalNuevoUsuario()">&times;</span>
+        <h2 class="text-2xl font-bold text-blue-600 mb-6 flex items-center">
+            <i class="bi bi-person-plus mr-2"></i>Crear Nuevo Usuario
+        </h2>
+        <form id="formNuevoUsuario" onsubmit="crearUsuario(event)">
+            <div class="space-y-4">
+                <div>
+                    <label for="nuevo_username" class="block text-sm font-medium text-gray-700 mb-1">
+                        Nombre de Usuario <span class="text-red-500">*</span>
+                    </label>
+                    <input type="text" id="nuevo_username" required 
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                           placeholder="Ej: jperez">
+                </div>
+                <div>
+                    <label for="nuevo_password" class="block text-sm font-medium text-gray-700 mb-1">
+                        Contraseña <span class="text-red-500">*</span>
+                    </label>
+                    <input type="password" id="nuevo_password" required 
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                           placeholder="Contraseña para el usuario">
+                </div>
+                <div>
+                    <label for="nuevo_nombre_completo" class="block text-sm font-medium text-gray-700 mb-1">
+                        Nombre Completo <span class="text-red-500">*</span>
+                    </label>
+                    <input type="text" id="nuevo_nombre_completo" required 
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                           placeholder="Ej: Juan Pérez López">
+                </div>
+                <div>
+                    <label for="nuevo_email" class="block text-sm font-medium text-gray-700 mb-1">
+                        Email
+                    </label>
+                    <input type="email" id="nuevo_email" 
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                           placeholder="Ej: jperez@empresa.com">
+                </div>
+            </div>
+            <div class="flex gap-4 mt-6">
+                <button type="submit" class="flex-1 px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold rounded-lg transition-all shadow-lg">
+                    <i class="bi bi-save mr-2"></i>Crear Usuario
+                </button>
+                <button type="button" onclick="cerrarModalNuevoUsuario()" class="px-6 py-3 bg-gray-500 hover:bg-gray-600 text-white rounded-lg transition-colors">
+                    Cancelar
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+.modal {
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content {
+    background-color: #fff;
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    width: 90%;
+    max-width: 500px;
+    position: relative;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.close {
+    position: absolute;
+    right: 1rem;
+    top: 1rem;
+    font-size: 28px;
+    font-weight: bold;
+    color: #666;
+    cursor: pointer;
+    line-height: 1;
+}
+
+.close:hover {
+    color: #dc3545;
+}
+</style>
+
+<script>
+function cargarUsuarios() {
+    fetch('/api/usuarios')
+        .then(response => response.json())
+        .then(result => {
+            if (result.success) {
+                const tbody = document.getElementById('tabla-usuarios');
+                tbody.innerHTML = '';
+                
+                result.usuarios.forEach(usuario => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="flex items-center">
+                                <i class="bi bi-person-circle text-blue-500 mr-2"></i>
+                                <span class="font-medium text-gray-900">${usuario.username}</span>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-gray-700">${usuario.nombre_completo}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-gray-600">${usuario.email || '-'}</td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            ${usuario.activo ? 
+                                '<span class="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">Activo</span>' : 
+                                '<span class="px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">Inactivo</span>'}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">${new Date(usuario.fecha_creacion).toLocaleDateString('es-ES')}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm">
+                            <div class="flex gap-3">
+                                <button onclick="abrirModalCambiarPassword(${usuario.id}, '${usuario.username}')" class="text-blue-600 hover:text-blue-900 font-medium" title="Cambiar contraseña">
+                                    <i class="bi bi-key"></i> Contraseña
+                                </button>
+                                ${usuario.username !== 'admin' ? 
+                                    `<button onclick="toggleEstadoUsuario(${usuario.id}, ${usuario.activo})" class="text-${usuario.activo ? 'red' : 'green'}-600 hover:text-${usuario.activo ? 'red' : 'green'}-900 font-medium">
+                                        <i class="bi bi-${usuario.activo ? 'x-circle' : 'check-circle'}"></i> ${usuario.activo ? 'Desactivar' : 'Activar'}
+                                    </button>
+                                    <button onclick="eliminarUsuario(${usuario.id}, '${usuario.username}')" class="text-red-600 hover:text-red-900 font-medium" title="Eliminar usuario">
+                                        <i class="bi bi-trash"></i> Eliminar
+                                    </button>` : 
+                                    ''}
+                            </div>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            }
+        })
+        .catch(error => {
+            console.error('Error cargando usuarios:', error);
+            alert('Error al cargar usuarios');
+        });
+}
+
+function abrirModalNuevoUsuario() {
+    document.getElementById('modalNuevoUsuario').style.display = 'flex';
+    document.getElementById('formNuevoUsuario').reset();
+}
+
+function cerrarModalNuevoUsuario() {
+    document.getElementById('modalNuevoUsuario').style.display = 'none';
+}
+
+function togglePasswordVisibility(inputId, iconId) {
+    const input = document.getElementById(inputId);
+    const icon = document.getElementById(iconId);
+    
+    if (input.type === 'password') {
+        input.type = 'text';
+        icon.classList.remove('bi-eye');
+        icon.classList.add('bi-eye-slash');
+    } else {
+        input.type = 'password';
+        icon.classList.remove('bi-eye-slash');
+        icon.classList.add('bi-eye');
+    }
+}
+
+function crearUsuario(event) {
+    event.preventDefault();
+    
+    const data = {
+        username: document.getElementById('nuevo_username').value,
+        password: document.getElementById('nuevo_password').value,
+        nombre_completo: document.getElementById('nuevo_nombre_completo').value,
+        email: document.getElementById('nuevo_email').value
+    };
+    
+    fetch('/api/crear-usuario', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(result => {
+        if (result.success) {
+            alert('Usuario creado exitosamente');
+            cerrarModalNuevoUsuario();
+            cargarUsuarios();
+        } else {
+            alert('Error: ' + result.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error al crear usuario');
+    });
+}
+
+function abrirModalCambiarPassword(userId, username) {
+    document.getElementById('cambiar_user_id').value = userId;
+    document.getElementById('cambiar_username').value = username;
+    document.getElementById('nueva_password').value = '';
+    document.getElementById('confirmar_password').value = '';
+    document.getElementById('modalCambiarPassword').style.display = 'block';
+}
+
+function cerrarModalCambiarPassword() {
+    document.getElementById('modalCambiarPassword').style.display = 'none';
+}
+
+function cambiarPassword(event) {
+    event.preventDefault();
+    
+    const userId = document.getElementById('cambiar_user_id').value;
+    const nuevaPassword = document.getElementById('nueva_password').value;
+    const confirmarPassword = document.getElementById('confirmar_password').value;
+    
+    if (nuevaPassword !== confirmarPassword) {
+        alert('Las contraseñas no coinciden');
+        return;
+    }
+    
+    if (nuevaPassword.length < 4) {
+        alert('La contraseña debe tener al menos 4 caracteres');
+        return;
+    }
+    
+    fetch('/api/cambiar-password', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ 
+            user_id: userId, 
+            nueva_password: nuevaPassword 
+        })
+    })
+    .then(response => response.json())
+    .then(result => {
+        if (result.success) {
+            alert('Contraseña cambiada exitosamente');
+            cerrarModalCambiarPassword();
+            cargarUsuarios();
+        } else {
+            alert('Error: ' + result.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error al cambiar la contraseña');
+    });
+}
+
+function eliminarUsuario(userId, username) {
+    if (!confirm(`¿Está seguro de ELIMINAR permanentemente al usuario "${username}"?\n\nEsta acción NO se puede deshacer y el usuario será borrado de la base de datos.`)) {
+        return;
+    }
+    
+    // Confirmación doble para seguridad
+    if (!confirm(`CONFIRMACIÓN FINAL: ¿Realmente desea eliminar a "${username}"?`)) {
+        return;
+    }
+    
+    fetch('/api/eliminar-usuario', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ user_id: userId })
+    })
+    .then(response => response.json())
+    .then(result => {
+        if (result.success) {
+            alert('Usuario eliminado exitosamente');
+            cargarUsuarios();
+        } else {
+            alert('Error: ' + result.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error al eliminar usuario');
+    });
+}
+
+function toggleEstadoUsuario(userId, estadoActual) {
+    const accion = estadoActual ? 'desactivar' : 'activar';
+    if (!confirm(`¿Está seguro de ${accion} este usuario?`)) return;
+    
+    fetch('/api/toggle-usuario', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ user_id: userId })
+    })
+    .then(response => response.json())
+    .then(result => {
+        if (result.success) {
+            alert('Estado actualizado correctamente');
+            cargarUsuarios();
+        } else {
+            alert('Error: ' + result.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error al actualizar estado');
+    });
+}
+
+// Cargar usuarios al inicio
+document.addEventListener('DOMContentLoaded', cargarUsuarios);
+</script>
+{% endblock %}

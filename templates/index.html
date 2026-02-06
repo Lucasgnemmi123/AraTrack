@@ -1,0 +1,79 @@
+{% extends "layout.html" %}
+
+{% block title %}Inicio - AraTrack{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto">
+    <!-- Hero Section -->
+    <div class="text-center mb-12">
+        <h1 class="text-5xl font-bold text-gray-900 mb-4">
+            Bienvenido a <span class="text-aramark-blue">AraTrack</span>
+        </h1>
+        <p class="text-xl text-gray-600">Sistema de Control de Activos Aramark</p>
+        <div class="mt-4 flex justify-center items-center space-x-2 text-gray-500">
+            <i class="bi bi-shield-check text-green-500"></i>
+            <span class="text-sm">Seguro</span>
+            <span class="mx-2">•</span>
+            <i class="bi bi-lightning-charge text-yellow-500"></i>
+            <span class="text-sm">Rápido</span>
+            <span class="mx-2">•</span>
+            <i class="bi bi-graph-up text-blue-500"></i>
+            <span class="text-sm">Eficiente</span>
+        </div>
+    </div>
+
+    <!-- Cards Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <!-- Nuevo Viaje -->
+        <div class="group bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 overflow-hidden">
+            <div class="bg-gradient-to-br from-red-500 to-red-600 p-6 text-white">
+                <div class="flex items-center justify-between">
+                    <i class="bi bi-plus-circle-fill text-5xl"></i>
+                    <span class="bg-white/20 px-3 py-1 rounded-full text-sm font-semibold">Crear</span>
+                </div>
+            </div>
+            <div class="p-6">
+                <h3 class="text-2xl font-bold text-gray-900 mb-3">Nuevo Viaje</h3>
+                <p class="text-gray-600 mb-6">Registra un nuevo viaje con control completo de activos, documentación y trazabilidad</p>
+                <a href="{{ url_for('nuevo_viaje') }}" class="block w-full text-center bg-red-500 hover:bg-red-600 text-white font-semibold py-3 rounded-lg transition-colors duration-200">
+                    <i class="bi bi-arrow-right-circle me-2"></i>Iniciar Registro
+                </a>
+            </div>
+        </div>
+
+        <!-- Editar Viaje -->
+        <div class="group bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 overflow-hidden">
+            <div class="bg-gradient-to-br from-blue-500 to-blue-600 p-6 text-white">
+                <div class="flex items-center justify-between">
+                    <i class="bi bi-pencil-square text-5xl"></i>
+                    <span class="bg-white/20 px-3 py-1 rounded-full text-sm font-semibold">Editar</span>
+                </div>
+            </div>
+            <div class="p-6">
+                <h3 class="text-2xl font-bold text-gray-900 mb-3">Editar Viaje</h3>
+                <p class="text-gray-600 mb-6">Busca y modifica información de viajes existentes en tiempo real</p>
+                <a href="{{ url_for('editar_viaje') }}" class="block w-full text-center bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 rounded-lg transition-colors duration-200">
+                    <i class="bi bi-arrow-right-circle me-2"></i>Buscar y Editar
+                </a>
+            </div>
+        </div>
+
+        <!-- Generar PDF -->
+        <div class="group bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 overflow-hidden">
+            <div class="bg-gradient-to-br from-green-500 to-green-600 p-6 text-white">
+                <div class="flex items-center justify-between">
+                    <i class="bi bi-file-pdf-fill text-5xl"></i>
+                    <span class="bg-white/20 px-3 py-1 rounded-full text-sm font-semibold">Exportar</span>
+                </div>
+            </div>
+            <div class="p-6">
+                <h3 class="text-2xl font-bold text-gray-900 mb-3">Generar PDF</h3>
+                <p class="text-gray-600 mb-6">Crea documentos PDF profesionales con toda la información del viaje</p>
+                <a href="{{ url_for('generar_pdf_page') }}" class="block w-full text-center bg-green-500 hover:bg-green-600 text-white font-semibold py-3 rounded-lg transition-colors duration-200">
+                    <i class="bi bi-arrow-right-circle me-2"></i>Generar Documento
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

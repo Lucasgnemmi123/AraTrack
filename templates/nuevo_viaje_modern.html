@@ -1,0 +1,431 @@
+{% extends "layout.html" %}
+
+{% block title %}Nuevo Viaje - Sistema de Viajes DHL{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="section-header mb-4">
+                <h2><i class="bi bi-plus-circle me-2"></i>Crear Nuevo Viaje - Planilla Control Despacho</h2>
+            </div>
+
+            <form id="formNuevoViaje">
+                <!-- INFORMACIÓN PRINCIPAL -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-dhl text-white">
+                        <h5 class="mb-0"><i class="bi bi-info-circle me-2"></i>Información Principal del Viaje</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label for="numero_viaje" class="form-label">Número de Viaje <span class="text-danger">*</span></label>
+                                <div class="input-group">
+                                    <input type="text" class="form-control" id="numero_viaje" name="numero_viaje" required>
+                                    <button type="button" onclick="cargarDatosViajeExistente(document.getElementById('numero_viaje').value)" class="btn btn-primary">
+                                        <i class="bi bi-search me-1"></i>Cargar
+                                    </button>
+                                </div>
+                                <small class="text-muted">Ingresa el número y presiona "Cargar" o Enter</small>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="centro_costo" class="form-label">Centro de Costo <span class="text-danger">*</span></label>
+                                <div class="input-group">
+                                    <select id="centro_costo" name="centro_costo" required class="form-select select2-search">
+                                        <option value="">Buscar centro de costo...</option>
+                                        {% for centro in centros_costo %}
+                                            <option value="{{ centro.codigo_costo }}" data-casino="{{ centro.casino or '' }}" data-ruta="{{ centro.ruta or '' }}">{{ centro.codigo_costo }} - {{ centro.casino }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    <button type="button" onclick="abrirModalCentroCosto()" class="btn btn-success">
+                                        <i class="bi bi-plus-lg"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="fecha" class="form-label">Fecha <span class="text-danger">*</span></label>
+                                <input type="date" class="form-control" id="fecha" name="fecha" required>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CASINO Y RUTA -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0"><i class="bi bi-building me-2"></i>Casino y Ruta</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="codigo_casino" class="form-label">Casino</label>
+                                <input type="text" class="form-control" id="codigo_casino" name="codigo_casino" readonly placeholder="Se autocompleta con centro de costo">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="ruta" class="form-label">Ruta</label>
+                                <input type="text" class="form-control" id="ruta" name="ruta" readonly placeholder="Se autocompleta con centro de costo">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- DATOS DEL CAMIÓN -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0"><i class="bi bi-truck me-2"></i>Datos del Camión</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="tipo_camion" class="form-label">Tipo de Camión</label>
+                                <input type="text" class="form-control" id="tipo_camion" name="tipo_camion" placeholder="Ej: 12 TONELADAS">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="patente_camion" class="form-label">Patente Camión <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control text-uppercase" id="patente_camion" name="patente_camion" required placeholder="Ej: ABCD12">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="patente_semi" class="form-label">Patente Semi</label>
+                                <input type="text" class="form-control" id="patente_semi" name="patente_semi">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="numero_rampa" class="form-label">N° de Rampla</label>
+                                <input type="text" class="form-control" id="numero_rampa" name="numero_rampa">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="peso_camion" class="form-label">Peso Camión</label>
+                                <input type="text" class="form-control" id="peso_camion" name="peso_camion">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="numero_camion" class="form-label">N° Camión</label>
+                                <input type="text" class="form-control" id="numero_camion" name="numero_camion">
+                            </div>
+                            <div class="col-12">
+                                <label for="termografos_gps" class="form-label">Termógrafos / GPS</label>
+                                <input type="text" class="form-control" id="termografos_gps" name="termografos_gps" placeholder="Ej: GPS, GPS">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- DATOS DEL CONDUCTOR -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0"><i class="bi bi-person me-2"></i>Datos del Conductor</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label for="chofer" class="form-label">Conductor <span class="text-danger">*</span></label>
+                                <div class="input-group">
+                                    <select id="chofer" name="chofer" required onchange="cargarDatosConductor()" class="form-select select2-search">
+                                        <option value="">Seleccionar conductor...</option>
+                                        {% for chofer in choferes %}
+                                            <option value="{{ chofer }}">{{ chofer }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    <button type="button" onclick="abrirModalChofer()" class="btn btn-success">
+                                        <i class="bi bi-plus-lg"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="celular" class="form-label">Celular</label>
+                                <input type="text" class="form-control" id="celular" name="celular" readonly placeholder="Se autocompleta">
+                            </div>
+                            <div class="col-md-4">
+                                <label for="rut" class="form-label">RUT</label>
+                                <input type="text" class="form-control" id="rut" name="rut" readonly placeholder="Se autocompleta">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- HORARIOS -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0"><i class="bi bi-clock me-2"></i>Horarios DHL</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="hora_llegada" class="form-label">Fecha y Hora Llegada DHL</label>
+                                <input type="datetime-local" class="form-control" id="hora_llegada" name="hora_llegada">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="hora_salida" class="form-label">Fecha y Hora Salida DHL</label>
+                                <input type="datetime-local" class="form-control" id="hora_salida" name="hora_salida">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ACTIVOS SALIDA -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0"><i class="bi bi-box-seam me-2"></i>Activos Salida</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="num_wencos" class="form-label">N° Wencos</label>
+                                <input type="number" class="form-control" id="num_wencos" name="num_wencos" min="0">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="bin" class="form-label">BIN</label>
+                                <input type="text" class="form-control" id="bin" name="bin">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="pallets" class="form-label">Pallets</label>
+                                <input type="number" class="form-control" id="pallets" name="pallets" min="0">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="pallets_chep" class="form-label">Pallets CHEP</label>
+                                <input type="number" class="form-control" id="pallets_chep" name="pallets_chep" min="0">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="pallets_pl_negro_grueso" class="form-label">Pallets PL Negro Grueso</label>
+                                <input type="text" class="form-control" id="pallets_pl_negro_grueso" name="pallets_pl_negro_grueso">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="pallets_pl_negro_alternativo" class="form-label">Pallets PL Negro Alternativo</label>
+                                <input type="text" class="form-control" id="pallets_pl_negro_alternativo" name="pallets_pl_negro_alternativo">
+                            </div>
+                        </div>
+
+                        <h6 class="mt-4 mb-3 text-primary">Congelado</h6>
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label for="pallets_congelado" class="form-label">Pallets Congelado</label>
+                                <input type="number" class="form-control" id="pallets_congelado" name="pallets_congelado" min="0">
+                            </div>
+                            <div class="col-md-4">
+                                <label for="wencos_congelado" class="form-label">Wencos Congelado</label>
+                                <input type="number" class="form-control" id="wencos_congelado" name="wencos_congelado" min="0">
+                            </div>
+                            <div class="col-md-4 d-flex align-items-end">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="check_congelado" name="check_congelado">
+                                    <label class="form-check-label" for="check_congelado">Congelado</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <h6 class="mt-4 mb-3 text-info">Refrigerado</h6>
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label for="pallets_refrigerado" class="form-label">Pallets Refrigerado</label>
+                                <input type="number" class="form-control" id="pallets_refrigerado" name="pallets_refrigerado" min="0">
+                            </div>
+                            <div class="col-md-4">
+                                <label for="wencos_refrigerado" class="form-label">Wencos Refrigerado</label>
+                                <input type="number" class="form-control" id="wencos_refrigerado" name="wencos_refrigerado" min="0">
+                            </div>
+                            <div class="col-md-4 d-flex align-items-end">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="check_refrigerado" name="check_refrigerado">
+                                    <label class="form-check-label" for="check_refrigerado">Refrigerado</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <h6 class="mt-4 mb-3 text-warning">Abarrote</h6>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="pallets_abarrote" class="form-label">Pallets Abarrote</label>
+                                <input type="number" class="form-control" id="pallets_abarrote" name="pallets_abarrote" min="0">
+                            </div>
+                            <div class="col-md-6 d-flex align-items-end">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="check_abarrote" name="check_abarrote">
+                                    <label class="form-check-label" for="check_abarrote">Abarrote</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <h6 class="mt-4 mb-3">Otros Checks</h6>
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="check_implementos" name="check_implementos">
+                                    <label class="form-check-label" for="check_implementos">Implementos</label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="check_aseo" name="check_aseo">
+                                    <label class="form-check-label" for="check_aseo">Aseo</label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="check_trazabilidad" name="check_trazabilidad">
+                                    <label class="form-check-label" for="check_trazabilidad">Trazabilidad</label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="check_plataforma_wtck" name="check_plataforma_wtck">
+                                    <label class="form-check-label" for="check_plataforma_wtck">Plataforma WTCK</label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="check_env_correo_wtck" name="check_env_correo_wtck">
+                                    <label class="form-check-label" for="check_env_correo_wtck">Envío Correo WTCK</label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="check_revision_planilla_despacho" name="check_revision_planilla_despacho">
+                                    <label class="form-check-label" for="check_revision_planilla_despacho">Revisión Planilla Despacho</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- GUÍAS -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0"><i class="bi bi-file-text me-2"></i>Guías</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            {% for i in range(1, 15) %}
+                            <div class="col-md-3">
+                                <label for="guia_{{ i }}" class="form-label">Guía {{ i }}</label>
+                                <input type="text" class="form-control" id="guia_{{ i }}" name="guia_{{ i }}">
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SELLOS -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0"><i class="bi bi-shield-lock me-2"></i>Sellos</h5>
+                    </div>
+                    <div class="card-body">
+                        <h6 class="mb-3 text-success">Salida</h6>
+                        <div class="row g-3 mb-4">
+                            {% for i in range(1, 6) %}
+                            <div class="col-md-{{ 4 if i <= 3 else 6 }}">
+                                <label for="sello_salida_{{ i }}p" class="form-label">{{ i }}P Salida</label>
+                                <input type="text" class="form-control" id="sello_salida_{{ i }}p" name="sello_salida_{{ i }}p">
+                            </div>
+                            {% endfor %}
+                        </div>
+
+                        <h6 class="mb-3 text-danger">Retorno</h6>
+                        <div class="row g-3">
+                            {% for i in range(1, 6) %}
+                            <div class="col-md-{{ 4 if i <= 3 else 6 }}">
+                                <label for="sello_retorno_{{ i }}p" class="form-label">{{ i }}P Retorno</label>
+                                <input type="text" class="form-control" id="sello_retorno_{{ i }}p" name="sello_retorno_{{ i }}p">
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CONTROLES Y CERTIFICACIONES -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0"><i class="bi bi-check2-square me-2"></i>Controles y Certificaciones</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <label for="numero_certificado_fumigacion" class="form-label">Número Certificado Fumigación</label>
+                                <input type="text" class="form-control" id="numero_certificado_fumigacion" name="numero_certificado_fumigacion">
+                            </div>
+                            <div class="col-12">
+                                <label for="revision_limpieza_camion_acciones" class="form-label">Revisión Limpieza Camión (C/NC - Acciones / SI CUMPLE)</label>
+                                <input type="text" class="form-control" id="revision_limpieza_camion_acciones" name="revision_limpieza_camion_acciones" placeholder="Ej: 5P">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="verificacion_estado_camion" class="form-label">Verificación Estado Camión</label>
+                                <select class="form-select" id="verificacion_estado_camion" name="verificacion_estado_camion">
+                                    <option value="">Seleccionar...</option>
+                                    <option value="Cumple">Cumple</option>
+                                    <option value="No Cumple">No Cumple</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="foto_estado_camion" class="form-label">Foto Estado Camión</label>
+                                <select class="form-select" id="foto_estado_camion" name="foto_estado_camion">
+                                    <option value="">Seleccionar...</option>
+                                    <option value="Si">Sí</option>
+                                    <option value="No">No</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- OBSERVACIONES Y RESPONSABLES -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0"><i class="bi bi-chat-left-text me-2"></i>Observaciones y Responsables</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <label for="observaciones" class="form-label">Observaciones</label>
+                                <textarea class="form-control" id="observaciones" name="observaciones" rows="3"></textarea>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="responsable_observacion" class="form-label">Responsable Observación</label>
+                                <div class="input-group">
+                                    <select id="responsable_observacion" name="responsable_observacion" class="form-select select2-search">
+                                        <option value="">Seleccionar administrativo...</option>
+                                        {% for admin in administrativos %}
+                                            <option value="{{ admin }}">{{ admin }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    <button type="button" onclick="abrirModalAdministrativo()" class="btn btn-success">
+                                        <i class="bi bi-plus-lg"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="responsable_viaje" class="form-label">Responsable Viaje</label>
+                                <input type="text" class="form-control" id="responsable_viaje" name="responsable_viaje">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- COMIDAS PREPARADAS -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="bi bi-egg-fried me-2"></i>Comidas Preparadas</h5>
+                        <button type="button" onclick="agregarComida()" class="btn btn-sm btn-success">
+                            <i class="bi bi-plus-circle me-1"></i>Agregar Comida
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <div id="contenedor-comidas"></div>
+                    </div>
+                </div>
+
+                <!-- BOTONES DE ACCIÓN -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-body">
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-dhl btn-lg">
+                                <i class="bi bi-save me-2"></i>Guardar Viaje Completo
+                            </button>
+                        </div>
+                        <div id="mensaje-resultado" class="mt-3" style="display: none;"></div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}

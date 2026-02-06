@@ -1,0 +1,109 @@
+{% extends "layout.html" %}
+
+{% block title %}Generar PDF - AraTrack{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+    <!-- Header -->
+    <div class="mb-6">
+        <h2 class="text-3xl font-bold text-gray-900 flex items-center">
+            <i class="bi bi-file-pdf text-green-500 mr-3"></i>
+            Generar PDF Completo de Viaje
+        </h2>
+    </div>
+    
+    <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6 rounded-lg">
+        <div class="flex items-start">
+            <i class="bi bi-info-circle text-blue-500 text-xl mr-3 mt-1"></i>
+            <div>
+                <p class="text-sm text-blue-800">
+                    <strong>Información:</strong> Se generará un PDF completo con una hoja por cada centro de costo del viaje seleccionado.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+        <div class="p-8">
+            <form id="formGenerarPDF">
+                <div class="mb-6">
+                    <label for="numero_viaje_pdf" class="block text-sm font-medium text-gray-700 mb-2">
+                        Número de Viaje
+                    </label>
+                    <input type="text" 
+                           class="w-full px-4 py-3 text-lg border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent" 
+                           id="numero_viaje_pdf" 
+                           name="numero_viaje" 
+                           placeholder="Ingrese el número de viaje (ej: 281728)"
+                           required>
+                </div>
+
+                <button type="submit" class="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-semibold py-4 rounded-lg transition-all duration-200 transform hover:scale-105 flex items-center justify-center text-lg shadow-lg">
+                    <i class="bi bi-file-pdf mr-2"></i>Generar PDF Completo
+                </button>
+            </form>
+
+            <div id="mensaje-resultado-pdf" class="mt-6" style="display: none;"></div>
+
+            <div id="pdf-preview" class="mt-6" style="display: none;">
+                <div class="bg-green-50 border-l-4 border-green-500 p-6 rounded-lg">
+                    <h5 class="text-xl font-bold text-green-800 mb-2 flex items-center">
+                        <i class="bi bi-check-circle mr-2"></i>PDF Generado Exitosamente
+                    </h5>
+                    <p class="text-green-700 mb-4">El PDF se ha generado correctamente.</p>
+                    <a id="enlace-descarga-pdf" href="#" class="inline-flex items-center px-6 py-3 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-lg transition-colors" download>
+                        <i class="bi bi-download mr-2"></i>Descargar PDF
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.getElementById('formGenerarPDF').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const numeroViaje = document.getElementById('numero_viaje_pdf').value;
+    
+    if (!numeroViaje) {
+        alert('Ingresa un número de viaje');
+        return;
+    }
+    
+    const mensaje = document.getElementById('mensaje-resultado-pdf');
+    mensaje.innerHTML = '<div class="alert alert-info"><i class="bi bi-hourglass-split me-2"></i>Generando PDF completo del viaje...</div>';
+    mensaje.style.display = 'block';
+    
+    // Ocultar preview anterior
+    document.getElementById('pdf-preview').style.display = 'none';
+    
+    fetch('/api/generar-pdf', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ numero_viaje: numeroViaje })
+    })
+    .then(response => response.json())
+    .then(result => {
+        if (result.success) {
+            mensaje.innerHTML = '<div class="alert alert-success"><i class="bi bi-check-circle me-2"></i>' + result.message + '</div>';
+            
+            const preview = document.getElementById('pdf-preview');
+            const enlace = document.getElementById('enlace-descarga-pdf');
+            enlace.href = `/descargar-pdf/${result.pdf_filename}`;
+            preview.style.display = 'block';
+        } else {
+            mensaje.innerHTML = '<div class="alert alert-danger"><i class="bi bi-x-circle me-2"></i>' + result.message + '</div>';
+        }
+    })
+    .catch(error => {
+        mensaje.innerHTML = '<div class="alert alert-danger"><i class="bi bi-exclamation-triangle me-2"></i>Error al generar el PDF</div>';
+        console.error('Error:', error);
+    });
+});
+</script>
+{% endblock %}

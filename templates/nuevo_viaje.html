@@ -1,0 +1,1412 @@
+{% extends "layout.html" %}
+
+{% block title %}Nuevo Viaje - AraTrack{% endblock %}
+
+{% block content %}
+<div class="w-[92%] mx-auto py-4 px-4 sm:px-6 lg:px-8">
+    <!-- Header -->
+    <div class="mb-6">
+        <h2 class="text-3xl font-bold text-gray-900 flex items-center">
+            <i class="bi bi-plus-circle text-red-500 mr-3"></i>
+            Crear Nuevo Viaje
+        </h2>
+        <p class="text-gray-600 mt-2">Planilla Control Despacho</p>
+    </div>
+
+    <form id="formNuevoViaje">
+        <!-- INFORMACIÓN PRINCIPAL -->
+        <div class="bg-white rounded-xl shadow-lg mb-2 overflow-hidden">
+            <div class="bg-gradient-to-r from-red-500 to-red-600 px-4 py-2">
+                <h5 class="text-lg font-semibold text-white flex items-center">
+                    <i class="bi bi-info-circle mr-2"></i>Información Principal del Viaje
+                </h5>
+            </div>
+            <div class="p-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div>
+                        <label for="numero_viaje" class="block text-sm font-medium text-gray-700 mb-1">
+                            Número de Viaje <span class="text-red-500">*</span>
+                        </label>
+                        <div class="flex gap-2">
+                            <input type="text" class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent" 
+                                   id="numero_viaje" name="numero_viaje" required>
+                            <button type="button" onclick="cargarDatosViajeExistente(document.getElementById('numero_viaje').value)" 
+                                    class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors flex items-center">
+                                <i class="bi bi-search mr-1"></i>Cargar
+                            </button>
+                        </div>
+                        <small class="text-gray-500 text-xs mt-1 block">Ingresa el número y presiona "Cargar" o Enter</small>
+                    </div>
+                    <div>
+                        <label for="centro_costo" class="block text-sm font-medium text-gray-700 mb-1">
+                            Centro de Costo <span class="text-red-500">*</span>
+                        </label>
+                        <div class="flex gap-2">
+                            <select id="centro_costo" name="centro_costo" required class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent select2-search">
+                                <option value="">Buscar centro de costo...</option>
+                                {% for centro in centros_costo %}
+                                    <option value="{{ centro.codigo_costo }}" data-casino="{{ centro.casino or '' }}" data-ruta="{{ centro.ruta or '' }}">{{ centro.codigo_costo }} - {{ centro.casino }}</option>
+                                {% endfor %}
+                            </select>
+                            <button type="button" onclick="abrirModalCentroCosto()" 
+                                    class="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg transition-colors">
+                                <i class="bi bi-plus-lg"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div>
+                        <label for="fecha" class="block text-sm font-medium text-gray-700 mb-1">
+                            Fecha <span class="text-red-500">*</span>
+                        </label>
+                        <input type="date" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent" 
+                               id="fecha" name="fecha" required>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CASINO Y RUTA -->
+        <div class="bg-white rounded-xl shadow-lg mb-2 overflow-hidden">
+            <div class="bg-gradient-to-r from-teal-500 to-teal-600 px-4 py-2">
+                <h5 class="text-lg font-semibold text-white flex items-center">
+                    <i class="bi bi-building mr-2"></i>Casino y Ruta
+                </h5>
+            </div>
+            <div class="p-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div>
+                        <label for="codigo_casino" class="block text-sm font-medium text-gray-700 mb-1">Casino</label>
+                        <input type="text" class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50" 
+                               id="codigo_casino" name="codigo_casino" readonly placeholder="Se autocompleta con centro de costo">
+                    </div>
+                    <div>
+                        <label for="ruta" class="block text-sm font-medium text-gray-700 mb-1">Ruta</label>
+                        <input type="text" class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50" 
+                               id="ruta" name="ruta" readonly placeholder="Se autocompleta con centro de costo">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- DATOS DEL CAMIÓN -->
+        <div class="bg-white rounded-xl shadow-lg mb-2 overflow-hidden">
+            <div class="bg-gradient-to-r from-blue-500 to-blue-600 px-4 py-2">
+                <h5 class="text-lg font-semibold text-white flex items-center">
+                    <i class="bi bi-truck mr-2"></i>Datos del Camión
+                </h5>
+            </div>
+            <div class="p-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div>
+                        <label for="tipo_camion" class="block text-sm font-medium text-gray-700 mb-1">Tipo de Camión</label>
+                        <input type="text" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+                               id="tipo_camion" name="tipo_camion" placeholder="Ej: 12 TONELADAS">
+                    </div>
+                    <div>
+                        <label for="patente_camion" class="block text-sm font-medium text-gray-700 mb-1">
+                            Patente Camión <span class="text-red-500">*</span>
+                        </label>
+                        <input type="text" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent uppercase" 
+                               id="patente_camion" name="patente_camion" required placeholder="Ej: ABCD12">
+                    </div>
+                    <div>
+                        <label for="patente_semi" class="block text-sm font-medium text-gray-700 mb-1">Patente Semi</label>
+                        <input type="text" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+                               id="patente_semi" name="patente_semi">
+                    </div>
+                    <div>
+                        <label for="numero_rampa" class="block text-sm font-medium text-gray-700 mb-1">N° de Rampla</label>
+                        <input type="text" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+                               id="numero_rampa" name="numero_rampa">
+                    </div>
+                    <div>
+                        <label for="peso_camion" class="block text-sm font-medium text-gray-700 mb-1">Peso Camión</label>
+                        <input type="text" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+                               id="peso_camion" name="peso_camion">
+                    </div>
+                    <div>
+                        <label for="numero_camion" class="block text-sm font-medium text-gray-700 mb-1">N° Camión</label>
+                        <input type="text" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+                               id="numero_camion" name="numero_camion">
+                    </div>
+                    <div class="md:col-span-2">
+                        <label for="termografos_gps" class="block text-sm font-medium text-gray-700 mb-1">Termógrafos / GPS</label>
+                        <input type="text" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+                               id="termografos_gps" name="termografos_gps" placeholder="Ej: GPS, GPS">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- DATOS DEL CONDUCTOR -->
+        <div class="bg-white rounded-xl shadow-lg mb-2 overflow-hidden">
+            <div class="bg-gradient-to-r from-cyan-500 to-cyan-600 px-4 py-2">
+                <h5 class="text-lg font-semibold text-white flex items-center">
+                    <i class="bi bi-person mr-2"></i>Datos del Conductor
+                </h5>
+            </div>
+            <div class="p-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div>
+                        <label for="chofer" class="block text-sm font-medium text-gray-700 mb-1">
+                            Conductor <span class="text-red-500">*</span>
+                        </label>
+                        <div class="flex gap-2">
+                            <select id="chofer" name="chofer" required onchange="cargarDatosConductor()" class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent select2-search">
+                                <option value="">Seleccionar conductor...</option>
+                                {% for chofer in choferes %}
+                                    <option value="{{ chofer }}">{{ chofer }}</option>
+                                {% endfor %}
+                            </select>
+                            <button type="button" onclick="abrirModalChofer()" class="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg transition-colors">
+                                <i class="bi bi-plus-lg"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div>
+                        <label for="celular" class="block text-sm font-medium text-gray-700 mb-1">Celular</label>
+                        <input type="text" class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50" 
+                               id="celular" name="celular" readonly placeholder="Se autocompleta">
+                    </div>
+                    <div>
+                        <label for="rut" class="block text-sm font-medium text-gray-700 mb-1">RUT</label>
+                        <input type="text" class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50" 
+                               id="rut" name="rut" readonly placeholder="Se autocompleta">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- HORARIOS -->
+        <div class="bg-white rounded-xl shadow-lg mb-2 overflow-hidden">
+            <div class="bg-gradient-to-r from-slate-500 to-slate-600 px-4 py-2">
+                <h5 class="text-lg font-semibold text-white flex items-center">
+                    <i class="bi bi-clock mr-2"></i>Horarios DHL
+                </h5>
+            </div>
+            <div class="p-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div>
+                        <label for="hora_llegada" class="block text-sm font-semibold text-gray-900 mb-1">⏰ Fecha y Hora Llegada DHL <span class="text-blue-600">(Click aquí)</span></label>
+                        <input type="datetime-local" class="w-full px-5 py-4 text-lg font-medium border-2 border-blue-400 bg-blue-50 rounded-lg focus:ring-4 focus:ring-blue-500 focus:border-blue-600 hover:bg-blue-100 cursor-pointer transition-all" 
+                               id="hora_llegada" name="hora_llegada">
+                    </div>
+                    <div>
+                        <label for="hora_salida" class="block text-sm font-semibold text-gray-900 mb-1">⏰ Fecha y Hora Salida DHL <span class="text-blue-600">(Click aquí)</span></label>
+                        <input type="datetime-local" class="w-full px-5 py-4 text-lg font-medium border-2 border-blue-400 bg-blue-50 rounded-lg focus:ring-4 focus:ring-blue-500 focus:border-blue-600 hover:bg-blue-100 cursor-pointer transition-all" 
+                               id="hora_salida" name="hora_salida">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ACTIVOS SALIDA -->
+        <div class="bg-white rounded-xl shadow-lg mb-2 overflow-hidden">
+            <div class="bg-gradient-to-r from-red-500 to-red-600 px-4 py-2">
+                <h5 class="text-lg font-semibold text-white flex items-center">
+                    <i class="bi bi-box-arrow-right mr-2"></i>Activos Salida
+                </h5>
+            </div>
+            <div class="p-4">
+                <!-- ACTIVOS -->
+                <h4 class="text-md font-semibold text-gray-800 mb-2 flex items-center"><i class="bi bi-box-seam mr-2 text-red-500"></i>Activos</h4>
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-3 mb-4">
+                    <div>
+                        <label for="num_wencos" class="block text-sm font-medium text-gray-700 mb-1">N° Wencos</label>
+                        <input type="number" id="num_wencos" name="num_wencos" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" min="0" max="9999">
+                    </div>
+                    <div>
+                        <label for="bin" class="block text-sm font-medium text-gray-700 mb-1">BIN</label>
+                        <input type="text" id="bin" name="bin" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" maxlength="6">
+                    </div>
+                    <div>
+                        <label for="pallets" class="block text-sm font-medium text-gray-700 mb-1">Pallets</label>
+                        <input type="number" id="pallets" name="pallets" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" min="0" max="9999">
+                    </div>
+                    <div>
+                        <label for="pallets_chep" class="block text-sm font-medium text-gray-700 mb-1">Pallets CHEP</label>
+                        <input type="number" id="pallets_chep" name="pallets_chep" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" min="0" max="9999">
+                    </div>
+                    <div>
+                        <label for="pallets_pl_negro_grueso" class="block text-sm font-medium text-gray-700 mb-1">PL Negro Grueso</label>
+                        <input type="text" id="pallets_pl_negro_grueso" name="pallets_pl_negro_grueso" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" maxlength="6">
+                    </div>
+                    <div>
+                        <label for="pallets_pl_negro_alternativo" class="block text-sm font-medium text-gray-700 mb-1">PL Negro Alt.</label>
+                        <input type="text" id="pallets_pl_negro_alternativo" name="pallets_pl_negro_alternativo" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" maxlength="6">
+                    </div>
+                </div>
+
+                <!-- PALLETS POR ÁREA -->
+                <h4 class="text-md font-semibold text-gray-800 mb-2 flex items-center"><i class="bi bi-thermometer-half mr-2 text-blue-500"></i>Pallets por Área</h4>
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-3 mb-4">
+                    <div>
+                        <label for="pallets_congelado" class="block text-sm font-medium text-gray-700 mb-1">Pallets Congelado</label>
+                        <input type="number" id="pallets_congelado" name="pallets_congelado" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" min="0" max="9999">
+                    </div>
+                    <div>
+                        <label for="wencos_congelado" class="block text-sm font-medium text-gray-700 mb-1">Wencos Congelado</label>
+                        <input type="number" id="wencos_congelado" name="wencos_congelado" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" min="0" max="9999">
+                    </div>
+                    <div>
+                        <label for="pallets_refrigerado" class="block text-sm font-medium text-gray-700 mb-1">Pallets Refrigerado</label>
+                        <input type="number" id="pallets_refrigerado" name="pallets_refrigerado" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" min="0" max="9999">
+                    </div>
+                    <div>
+                        <label for="wencos_refrigerado" class="block text-sm font-medium text-gray-700 mb-1">Wencos Refrigerado</label>
+                        <input type="number" id="wencos_refrigerado" name="wencos_refrigerado" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" min="0" max="9999">
+                    </div>
+                    <div>
+                        <label for="pallets_abarrote" class="block text-sm font-medium text-gray-700 mb-1">Pallets Abarrote</label>
+                        <input type="number" id="pallets_abarrote" name="pallets_abarrote" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" min="0" max="9999">
+                    </div>
+                </div>
+
+                <!-- VALIDACIONES -->
+                <h4 class="text-md font-semibold text-gray-800 mb-2 flex items-center"><i class="bi bi-check2-square mr-2 text-green-500"></i>Validaciones</h4>
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-3 bg-gray-50 p-3 rounded-lg">
+                    <label class="flex items-center space-x-2 text-sm text-gray-700 cursor-pointer hover:text-gray-900">
+                        <input type="checkbox" id="check_congelado" name="check_congelado" class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-2 focus:ring-blue-500"> 
+                        <span class="font-medium">Congelado</span>
+                    </label>
+                    <label class="flex items-center space-x-2 text-sm text-gray-700 cursor-pointer hover:text-gray-900">
+                        <input type="checkbox" id="check_refrigerado" name="check_refrigerado" class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-2 focus:ring-blue-500"> 
+                        <span class="font-medium">Refrigerado</span>
+                    </label>
+                    <label class="flex items-center space-x-2 text-sm text-gray-700 cursor-pointer hover:text-gray-900">
+                        <input type="checkbox" id="check_abarrote" name="check_abarrote" class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-2 focus:ring-blue-500"> 
+                        <span class="font-medium">Abarrote</span>
+                    </label>
+                    <label class="flex items-center space-x-2 text-sm text-gray-700 cursor-pointer hover:text-gray-900">
+                        <input type="checkbox" id="check_implementos" name="check_implementos" class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-2 focus:ring-blue-500"> 
+                        <span class="font-medium">Implementos</span>
+                    </label>
+                    <label class="flex items-center space-x-2 text-sm text-gray-700 cursor-pointer hover:text-gray-900">
+                        <input type="checkbox" id="check_aseo" name="check_aseo" class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-2 focus:ring-blue-500"> 
+                        <span class="font-medium">Aseo</span>
+                    </label>
+                    <label class="flex items-center space-x-2 text-sm text-gray-700 cursor-pointer hover:text-gray-900">
+                        <input type="checkbox" id="check_trazabilidad" name="check_trazabilidad" class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-2 focus:ring-blue-500"> 
+                        <span class="font-medium">Trazabilidad</span>
+                    </label>
+                    <label class="flex items-center space-x-2 text-sm text-gray-700 cursor-pointer hover:text-gray-900">
+                        <input type="checkbox" id="check_plataforma_wtck" name="check_plataforma_wtck" class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-2 focus:ring-blue-500"> 
+                        <span class="font-medium">Plataforma WTCK</span>
+                    </label>
+                    <label class="flex items-center space-x-2 text-sm text-gray-700 cursor-pointer hover:text-gray-900">
+                        <input type="checkbox" id="check_env_correo_wtck" name="check_env_correo_wtck" class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-2 focus:ring-blue-500"> 
+                        <span class="font-medium">Envío Correo WTCK</span>
+                    </label>
+                    <label class="flex items-center space-x-2 text-sm text-gray-700 cursor-pointer hover:text-gray-900">
+                        <input type="checkbox" id="check_revision_planilla_despacho" name="check_revision_planilla_despacho" class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-2 focus:ring-blue-500"> 
+                        <span class="font-medium">Revisión Planilla Despacho</span>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <!-- GUÍAS ALPES -->
+        <div class="bg-white rounded-xl shadow-lg mb-2 overflow-hidden">
+            <div class="bg-gradient-to-r from-purple-500 to-purple-600 px-4 py-2">
+                <h5 class="text-lg font-semibold text-white flex items-center">
+                    <i class="bi bi-file-text mr-2"></i>Guías
+                </h5>
+            </div>
+            <div class="p-4">
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
+            <div>
+                <label for="guia_1" class="block text-sm font-medium text-gray-700 mb-1">Guía 1</label>
+                <input type="text" id="guia_1" name="guia_1" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" maxlength="30">
+            </div>
+            <div>
+                <label for="guia_2" class="block text-sm font-medium text-gray-700 mb-1">Guía 2</label>
+                <input type="text" id="guia_2" name="guia_2" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" maxlength="30">
+            </div>
+            <div>
+                <label for="guia_3" class="block text-sm font-medium text-gray-700 mb-1">Guía 3</label>
+                <input type="text" id="guia_3" name="guia_3" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" maxlength="30">
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
+            <div>
+                <label for="guia_4" class="block text-sm font-medium text-gray-700 mb-1">Guía 4</label>
+                <input type="text" id="guia_4" name="guia_4" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" maxlength="30">
+            </div>
+            <div>
+                <label for="guia_5" class="block text-sm font-medium text-gray-700 mb-1">Guía 5</label>
+                <input type="text" id="guia_5" name="guia_5" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" maxlength="30">
+            </div>
+            <div>
+                <label for="guia_6" class="block text-sm font-medium text-gray-700 mb-1">Guía 6</label>
+                <input type="text" id="guia_6" name="guia_6" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" maxlength="30">
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
+            <div>
+                <label for="guia_7" class="block text-sm font-medium text-gray-700 mb-1">Guía 7</label>
+                <input type="text" id="guia_7" name="guia_7" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" maxlength="30">
+            </div>
+            <div>
+                <label for="guia_8" class="block text-sm font-medium text-gray-700 mb-1">Guía 8</label>
+                <input type="text" id="guia_8" name="guia_8" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" maxlength="30">
+            </div>
+            <div>
+                <label for="guia_9" class="block text-sm font-medium text-gray-700 mb-1">Guía 9</label>
+                <input type="text" id="guia_9" name="guia_9" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" maxlength="30">
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
+            <div>
+                <label for="guia_10" class="block text-sm font-medium text-gray-700 mb-1">Guía 10</label>
+                <input type="text" id="guia_10" name="guia_10" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" maxlength="30">
+            </div>
+            <div>
+                <label for="guia_11" class="block text-sm font-medium text-gray-700 mb-1">Guía 11</label>
+                <input type="text" id="guia_11" name="guia_11" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" maxlength="30">
+            </div>
+            <div>
+                <label for="guia_12" class="block text-sm font-medium text-gray-700 mb-1">Guía 12</label>
+                <input type="text" id="guia_12" name="guia_12" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" maxlength="30">
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
+            <div>
+                <label for="guia_13" class="block text-sm font-medium text-gray-700 mb-1">Guía 13</label>
+                <input type="text" id="guia_13" name="guia_13" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" maxlength="30">
+            </div>
+            <div>
+                <label for="guia_14" class="block text-sm font-medium text-gray-700 mb-1">Guía 14</label>
+                <input type="text" id="guia_14" name="guia_14" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" maxlength="30">
+            </div>
+        </div>
+            </div>
+        </div>
+
+        <!-- SELLOS -->
+        <div class="bg-white rounded-xl shadow-lg mb-2 overflow-hidden">
+            <div class="bg-gradient-to-r from-orange-500 to-orange-600 px-4 py-2">
+                <h5 class="text-lg font-semibold text-white flex items-center">
+                    <i class="bi bi-shield-check mr-2"></i>Sellos
+                </h5>
+            </div>
+            <div class="p-4">
+        
+        <h4 class="text-md font-semibold text-gray-800 mb-3 flex items-center"><i class="bi bi-caret-right-fill text-blue-500 mr-2"></i>Salida</h4>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
+            <div>
+                <label for="sello_salida_1p" class="block text-sm font-medium text-gray-700 mb-1">Sello 1P</label>
+                <input type="text" id="sello_salida_1p" name="sello_salida_1p" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" maxlength="30">
+            </div>
+            <div>
+                <label for="sello_salida_2p" class="block text-sm font-medium text-gray-700 mb-1">Sello 2P</label>
+                <input type="text" id="sello_salida_2p" name="sello_salida_2p" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" maxlength="30">
+            </div>
+            <div>
+                <label for="sello_salida_3p" class="block text-sm font-medium text-gray-700 mb-1">Sello 3P</label>
+                <input type="text" id="sello_salida_3p" name="sello_salida_3p" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" maxlength="30">
+            </div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
+            <div>
+                <label for="sello_salida_4p" class="block text-sm font-medium text-gray-700 mb-1">Sello 4P</label>
+                <input type="text" id="sello_salida_4p" name="sello_salida_4p" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" maxlength="30">
+            </div>
+            <div>
+                <label for="sello_salida_5p" class="block text-sm font-medium text-gray-700 mb-1">Sello 5P</label>
+                <input type="text" id="sello_salida_5p" name="sello_salida_5p" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" maxlength="30">
+            </div>
+        </div>
+
+        <h4 class="text-md font-semibold text-gray-800 mb-3 mt-4 flex items-center"><i class="bi bi-caret-right-fill text-blue-500 mr-2"></i>Retorno</h4>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
+            <div>
+                <label for="sello_retorno_1p" class="block text-sm font-medium text-gray-700 mb-1">Sello 1P</label>
+                <input type="text" id="sello_retorno_1p" name="sello_retorno_1p" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" maxlength="30">
+            </div>
+            <div>
+                <label for="sello_retorno_2p" class="block text-sm font-medium text-gray-700 mb-1">Sello 2P</label>
+                <input type="text" id="sello_retorno_2p" name="sello_retorno_2p" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" maxlength="30">
+            </div>
+            <div>
+                <label for="sello_retorno_3p" class="block text-sm font-medium text-gray-700 mb-1">Sello 3P</label>
+                <input type="text" id="sello_retorno_3p" name="sello_retorno_3p" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" maxlength="30">
+            </div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
+            <div>
+                <label for="sello_retorno_4p" class="block text-sm font-medium text-gray-700 mb-1">Sello 4P</label>
+                <input type="text" id="sello_retorno_4p" name="sello_retorno_4p" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" maxlength="30">
+            </div>
+            <div>
+                <label for="sello_retorno_5p" class="block text-sm font-medium text-gray-700 mb-1">Sello 5P</label>
+                <input type="text" id="sello_retorno_5p" name="sello_retorno_5p" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" maxlength="30">
+            </div>
+        </div>
+            </div>
+        </div>
+
+        <!-- CONTROLES ADICIONALES -->
+        <div class="bg-white rounded-xl shadow-lg mb-2 overflow-hidden">
+            <div class="bg-gradient-to-r from-indigo-500 to-indigo-600 px-4 py-2">
+                <h5 class="text-lg font-semibold text-white flex items-center">
+                    <i class="bi bi-clipboard-check mr-2"></i>Controles y Certificaciones
+                </h5>
+            </div>
+            <div class="p-4">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
+            <div>
+                <label for="numero_certificado_fumigacion" class="block text-sm font-medium text-gray-700 mb-1">Número Certificado Fumigación</label>
+                <input type="text" id="numero_certificado_fumigacion" name="numero_certificado_fumigacion" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" maxlength="20">
+            </div>
+            <div>
+                <label for="revision_limpieza_camion_acciones" class="block text-sm font-medium text-gray-700 mb-1">Revisión Limpieza Camión</label>
+                <input type="text" id="revision_limpieza_camion_acciones" name="revision_limpieza_camion_acciones" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Ej: 5P" maxlength="20">
+            </div>
+        </div>
+
+        <div>
+            <label for="administrativo_responsable" class="block text-sm font-medium text-gray-700 mb-1">Administrativo Responsable</label>
+            <div class="flex gap-2">
+                <select id="administrativo_responsable" name="administrativo_responsable" class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" class="select2">
+                    <option value="">Seleccione un administrativo...</option>
+                </select>
+                <button type="button" onclick="abrirModalAdministrativo()" class="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg transition-colors whitespace-nowrap">+ Nuevo</button>
+            </div>
+        </div>
+            </div>
+        </div>
+
+        <div class="my-8 border-t-2 border-gray-200"></div>
+
+        <!-- COMIDAS PREPARADAS -->
+        <div class="bg-white rounded-xl shadow-lg mb-2 overflow-hidden">
+            <div class="bg-gradient-to-r from-green-500 to-green-600 px-6 py-4 flex justify-between items-center">
+                <h5 class="text-lg font-semibold text-white flex items-center">
+                    <i class="bi bi-egg-fried mr-2"></i>Despacho Comidas Preparadas
+                </h3>
+                <button type="button" class="px-4 py-2 bg-white/20 hover:bg-white/30 text-white rounded-lg transition-colors" onclick="agregarComida()">+ Agregar Comida</button>
+            </div>
+            <div class="p-4">
+                <p class="text-gray-600 mb-4">Las comidas se asignarán automáticamente al centro de costo especificado arriba.</p>
+                <div id="comidas-container"></div>
+            </div>
+        </div>
+
+        <div class="flex gap-4 mt-8 justify-end">
+            <button type="submit" class="w-full md:w-auto px-8 py-3 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold rounded-lg transition-all duration-200 text-lg shadow-lg">Guardar Viaje Completo</button>
+            <button type="button" class="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg transition-colors" onclick="limpiarFormulario()">Limpiar</button>
+        </div>
+    </form>
+
+    <div id="mensaje-resultado" class="mensaje" style="display: none;"></div>
+</div>
+
+<!-- MODAL: NUEVO CENTRO DE COSTO -->
+<div id="modalCentroCosto" class="modal" style="display: none;">
+    <div class="modal-content" style="max-width: 600px;">
+        <span class="close" onclick="cerrarModalCentroCosto()">&times;</span>
+        <h2 style="color: #d40511; margin-bottom: 1.5rem;">🏢 Nuevo Centro de Costo</h2>
+        <form id="formCentroCosto" onsubmit="guardarCentroCosto(event)">
+            <div>
+                <label for="nuevo_codigo_costo" class="block text-sm font-medium text-gray-700 mb-1">Código Centro de Costo *</label>
+                <input type="text" id="nuevo_codigo_costo" required placeholder="Ej: 1001">
+            </div>
+            <div>
+                <label for="nuevo_casino" class="block text-sm font-medium text-gray-700 mb-1">Casino *</label>
+                <input type="text" id="nuevo_casino" required placeholder="Ej: CASINO CENTRAL">
+            </div>
+            <div>
+                <label for="nuevo_ruta" class="block text-sm font-medium text-gray-700 mb-1">Ruta</label>
+                <input type="text" id="nuevo_ruta" placeholder="Ej: Ruta Norte">
+            </div>
+            <div class="flex gap-4 mt-6">
+                <button type="submit" class="btn" style="flex: 1; background: #28a745;">Guardar</button>
+                <button type="button" onclick="cerrarModalCentroCosto()" class="btn" style="flex: 1; background: #6c757d;">Cancelar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- MODAL: NUEVO CHOFER -->
+<div id="modalChofer" class="modal" style="display: none;">
+    <div class="modal-content" style="max-width: 600px;">
+        <span class="close" onclick="cerrarModalChofer()">&times;</span>
+        <h2 style="color: #d40511; margin-bottom: 1.5rem;">Nuevo Chofer</h2>
+        <form id="formChofer" onsubmit="guardarChofer(event)">
+            <div>
+                <label for="nuevo_chofer_nombre" class="block text-sm font-medium text-gray-700 mb-1">Nombre Completo *</label>
+                <input type="text" id="nuevo_chofer_nombre" required placeholder="Ej: JUAN PEREZ LOPEZ">
+            </div>
+            <div>
+                <label for="nuevo_chofer_rut" class="block text-sm font-medium text-gray-700 mb-1">RUT *</label>
+                <input type="text" id="nuevo_chofer_rut" required placeholder="Ej: 12345678-9">
+            </div>
+            <div>
+                <label for="nuevo_chofer_celular" class="block text-sm font-medium text-gray-700 mb-1">Celular</label>
+                <input type="text" id="nuevo_chofer_celular" placeholder="Ej: +56912345678">
+            </div>
+            <div class="flex gap-4 mt-6">
+                <button type="submit" class="btn" style="flex: 1; background: #28a745;">Guardar</button>
+                <button type="button" onclick="cerrarModalChofer()" class="btn" style="flex: 1; background: #6c757d;">Cancelar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- MODAL: NUEVO ADMINISTRATIVO -->
+<div id="modalAdministrativo" class="modal" style="display: none;">
+    <div class="modal-content" style="max-width: 500px;">
+        <span class="close" onclick="cerrarModalAdministrativo()">&times;</span>
+        <h2 style="color: #d40511; margin-bottom: 1.5rem;">👔 Nuevo Administrativo</h2>
+        <form id="formAdministrativo" onsubmit="guardarAdministrativo(event)">
+            <div>
+                <label for="nuevo_administrativo_nombre" class="block text-sm font-medium text-gray-700 mb-1">Nombre Completo *</label>
+                <input type="text" id="nuevo_administrativo_nombre" required placeholder="Ej: MARIA GONZALEZ">
+            </div>
+            <div class="flex gap-4 mt-6">
+                <button type="submit" class="btn" style="flex: 1; background: #28a745;">Guardar</button>
+                <button type="button" onclick="cerrarModalAdministrativo()" class="btn" style="flex: 1; background: #6c757d;">Cancelar</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<style>
+.modal {
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content {
+    background-color: #fff;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    width: 90%;
+    max-width: 500px;
+    position: relative;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.close {
+    position: absolute;
+    right: 1rem;
+    top: 1rem;
+    font-size: 28px;
+    font-weight: bold;
+    color: #666;
+    cursor: pointer;
+    line-height: 1;
+}
+
+.close:hover {
+    color: #d40511;
+}
+</style>
+
+<script>
+let contadorComidas = 0;
+let casinosData = {{ casinos | tojson }};
+let choferesData = []; // Se cargará con datos completos
+
+// Cargar datos de viaje existente cuando se escribe el número
+document.addEventListener('DOMContentLoaded', function() {
+    // Inicializar Select2 en todos los select con clase select2-search
+    $('.select2-search').select2({
+        placeholder: 'Buscar...',
+        allowClear: true,
+        language: {
+            noResults: function() {
+                return "No se encontraron resultados";
+            },
+            searching: function() {
+                return "Buscando...";
+            }
+        }
+    });
+
+    // Manejar cambio de centro_costo para autocompletar casino y ruta
+    $('#centro_costo').on('change', function() {
+        const selectedOption = $(this).find('option:selected');
+        const casino = selectedOption.data('casino') || '';
+        const ruta = selectedOption.data('ruta') || '';
+        $('#codigo_casino').val(casino);
+        $('#ruta').val(ruta);
+    });
+
+    const numeroViajeInput = document.getElementById('numero_viaje');
+
+    // Cargar al salir del campo (blur)
+    numeroViajeInput.addEventListener('blur', function() {
+        const numeroViaje = this.value.trim();
+        if (numeroViaje) {
+            cargarDatosViajeExistente(numeroViaje);
+        }
+    });
+    
+    // Cargar al presionar Enter
+    numeroViajeInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            const numeroViaje = this.value.trim();
+            if (numeroViaje) {
+                cargarDatosViajeExistente(numeroViaje);
+            }
+        }
+    });
+
+    // Cargar datos completos de choferes AL INICIO
+    fetch('/api/obtener-choferes-completo')
+        .then(response => response.json())
+        .then(data => {
+            choferesData = data;
+            console.log('Choferes cargados:', choferesData.length);
+        })
+        .catch(error => console.error('Error cargando choferes:', error));
+});
+
+// Cargar datos de viaje existente (solo hasta Horarios DHL)
+function cargarDatosViajeExistente(numeroViaje) {
+    fetch(`/api/buscar-viaje-numero/${numeroViaje}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success && data.viaje) {
+                const viaje = data.viaje;
+                console.log('Viaje completo recibido desde el servidor:', viaje);
+                console.log('Campos específicos a verificar:', {
+                    pallets_pl_negro_grueso: viaje.pallets_pl_negro_grueso,
+                    pallets_pl_negro_alternativo: viaje.pallets_pl_negro_alternativo,
+                    check_plataforma_wtck: viaje.check_plataforma_wtck,
+                    check_env_correo_wtck: viaje.check_env_correo_wtck,
+                    check_revision_planilla_despacho: viaje.check_revision_planilla_despacho,
+                    guia_11: viaje.guia_11,
+                    guia_12: viaje.guia_12,
+                    guia_13: viaje.guia_13,
+                    guia_14: viaje.guia_14
+                });
+                
+                // Centro de costo con Select2 y autocompletar Casino/Ruta
+                if (viaje.costo_codigo) {
+                    $('#centro_costo').val(viaje.costo_codigo).trigger('change');
+                    
+                    // PRIMERO cargar los datos del viaje directamente (casino y ruta de la BD)
+                    document.getElementById('codigo_casino').value = viaje.casino || '';
+                    document.getElementById('ruta').value = viaje.ruta || '';
+                    console.log('📍 Casino/Ruta del viaje:', viaje.casino, viaje.ruta);
+                    
+                    // LUEGO intentar autocompletar desde la API (solo si están vacíos)
+                    if (!viaje.casino || !viaje.ruta) {
+                        fetch(`/api/centro-costo-detalles/${viaje.costo_codigo}`)
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success) {
+                                    console.log('📍 Casino y Ruta autocompletados desde API:', data.casino, data.ruta);
+                                    if (!viaje.casino) document.getElementById('codigo_casino').value = data.casino || '';
+                                    if (!viaje.ruta) document.getElementById('ruta').value = data.ruta || '';
+                                }
+                            })
+                            .catch(error => console.error('Error cargando casino/ruta:', error));
+                    }
+                }
+                
+                // Campos simples
+                document.getElementById('fecha').value = viaje.fecha || '';
+                document.getElementById('tipo_camion').value = viaje.tipo_camion || '';
+                document.getElementById('patente_semi').value = viaje.patente_semi || '';
+                document.getElementById('numero_rampa').value = viaje.numero_rampa || '';
+                document.getElementById('peso_camion').value = viaje.peso_camion || '';
+                document.getElementById('numero_camion').value = viaje.numero_camion || '';
+                document.getElementById('termografos_gps').value = viaje.termografos_gps || '';
+                
+                // Patente con Select2
+                if (viaje.patente_camion) {
+                    $('#patente_camion').val(viaje.patente_camion).trigger('change');
+                }
+                
+                // CONDUCTOR - PRIMERO cargar datos del viaje, LUEGO intentar autocompletar
+                if (viaje.conductor) {
+                    console.log('🚗 Cargando conductor:', viaje.conductor);
+                    // Seleccionar en el dropdown
+                    $('#chofer').val(viaje.conductor).trigger('change');
+                    
+                    // PRIMERO cargar datos del viaje directamente
+                    document.getElementById('celular').value = viaje.celular || '';
+                    document.getElementById('rut').value = viaje.rut || '';
+                    console.log('📞 Celular/RUT del viaje:', viaje.celular, viaje.rut);
+                    
+                    // LUEGO intentar autocompletar desde choferesData (solo si están vacíos)
+                    if ((!viaje.celular || !viaje.rut) && choferesData && choferesData.length > 0) {
+                        const choferData = choferesData.find(c => c.nombre === viaje.conductor);
+                        if (choferData) {
+                            console.log('📞 Autocompletando desde choferesData:', choferData.telefono, choferData.rut);
+                            if (!viaje.celular) document.getElementById('celular').value = choferData.telefono || '';
+                            if (!viaje.rut) document.getElementById('rut').value = choferData.rut || '';
+                        }
+                    }
+                }
+                
+                // HORARIOS - Formatear para datetime-local (YYYY-MM-DDTHH:mm)
+                if (viaje.fecha_hora_salida_dhl) {
+                    let salida = viaje.fecha_hora_salida_dhl;
+                    console.log('Salida ORIGINAL:', salida);
+                    
+                    // Convertir de "DD/MM/YYYY HH:mm" a "YYYY-MM-DDTHH:mm"
+                    if (salida.includes('/')) {
+                        const partes = salida.split(' ');
+                        console.log('  Partes:', partes);
+                        const fecha = partes[0].split('/'); // [DD, MM, YYYY]
+                        console.log('  Fecha array:', fecha);
+                        const hora = partes[1] || '00:00';
+                        console.log('  Hora:', hora);
+                        salida = `${fecha[2]}-${fecha[1]}-${fecha[0]}T${hora}`;
+                        console.log('  Salida CONVERTIDA:', salida);
+                    } else if (salida.includes(' ')) {
+                        salida = salida.replace(' ', 'T').substring(0, 16);
+                    }
+                    document.getElementById('hora_salida').value = salida;
+                }
+                
+                if (viaje.fecha_hora_llegada_dhl) {
+                    let llegada = viaje.fecha_hora_llegada_dhl;
+                    console.log('Llegada ORIGINAL:', llegada);
+                    
+                    // Convertir de "DD/MM/YYYY HH:mm" a "YYYY-MM-DDTHH:mm"
+                    if (llegada.includes('/')) {
+                        const partes = llegada.split(' ');
+                        const fecha = partes[0].split('/'); // [DD, MM, YYYY]
+                        const hora = partes[1] || '00:00';
+                        llegada = `${fecha[2]}-${fecha[1]}-${fecha[0]}T${hora}`;
+                        console.log('  Llegada CONVERTIDA:', llegada);
+                    } else if (llegada.includes(' ')) {
+                        llegada = llegada.replace(' ', 'T').substring(0, 16);
+                    }
+                    document.getElementById('hora_llegada').value = llegada;
+                }
+                
+                // ACTIVOS SALIDA
+                document.getElementById('num_wencos').value = viaje.num_wencos || '';
+                document.getElementById('bin').value = viaje.bin || '';
+                document.getElementById('pallets').value = viaje.pallets || '';
+                document.getElementById('pallets_chep').value = viaje.pallets_chep || '';
+                console.log('PALLETS PL NEGRO GRUESO desde BD:', viaje.pallets_pl_negro_grueso);
+                document.getElementById('pallets_pl_negro_grueso').value = viaje.pallets_pl_negro_grueso || '';
+                console.log('PALLETS PL NEGRO ALTERNATIVO desde BD:', viaje.pallets_pl_negro_alternativo);
+                document.getElementById('pallets_pl_negro_alternativo').value = viaje.pallets_pl_negro_alternativo || '';
+                
+                // Congelado
+                document.getElementById('pallets_congelado').value = viaje.pallets_congelado || '';
+                document.getElementById('wencos_congelado').value = viaje.wencos_congelado || '';
+                console.log('check_congelado:', viaje.check_congelado, 'Tipo:', typeof viaje.check_congelado);
+                document.getElementById('check_congelado').checked = (viaje.check_congelado === 'X' || viaje.check_congelado === 'x' || viaje.check_congelado === '1' || viaje.check_congelado === 1);
+                
+                // Refrigerado
+                document.getElementById('pallets_refrigerado').value = viaje.pallets_refrigerado || '';
+                document.getElementById('wencos_refrigerado').value = viaje.wencos_refrigerado || '';
+                console.log('check_refrigerado:', viaje.check_refrigerado, 'Tipo:', typeof viaje.check_refrigerado);
+                document.getElementById('check_refrigerado').checked = (viaje.check_refrigerado === 'X' || viaje.check_refrigerado === 'x' || viaje.check_refrigerado === '1' || viaje.check_refrigerado === 1);
+                
+                // Abarrote
+                document.getElementById('pallets_abarrote').value = viaje.pallets_abarrote || '';
+                console.log('check_abarrote:', viaje.check_abarrote, 'Tipo:', typeof viaje.check_abarrote, 'Es null?', viaje.check_abarrote === null);
+                document.getElementById('check_abarrote').checked = (viaje.check_abarrote === 'X' || viaje.check_abarrote === 'x' || viaje.check_abarrote === '1' || viaje.check_abarrote === 1);
+                
+                // Otros checkboxes
+                console.log('check_implementos:', viaje.check_implementos, 'Valor:', JSON.stringify(viaje.check_implementos));
+                document.getElementById('check_implementos').checked = (viaje.check_implementos === 'X' || viaje.check_implementos === 'x' || viaje.check_implementos === '1' || viaje.check_implementos === 1);
+                console.log('check_aseo:', viaje.check_aseo, 'Valor:', JSON.stringify(viaje.check_aseo));
+                document.getElementById('check_aseo').checked = (viaje.check_aseo === 'X' || viaje.check_aseo === 'x' || viaje.check_aseo === '1' || viaje.check_aseo === 1);
+                console.log('check_trazabilidad:', viaje.check_trazabilidad, 'Valor:', JSON.stringify(viaje.check_trazabilidad));
+                document.getElementById('check_trazabilidad').checked = (viaje.check_trazabilidad === 'X' || viaje.check_trazabilidad === 'x' || viaje.check_trazabilidad === '1' || viaje.check_trazabilidad === 1);
+                
+                // Checkboxes adicionales
+                console.log('check_plataforma_wtck desde BD:', viaje.check_plataforma_wtck, 'Tipo:', typeof viaje.check_plataforma_wtck);
+                document.getElementById('check_plataforma_wtck').checked = (viaje.check_plataforma_wtck === 'X' || viaje.check_plataforma_wtck === 'x' || viaje.check_plataforma_wtck === '1' || viaje.check_plataforma_wtck === 1);
+                console.log('check_env_correo_wtck desde BD:', viaje.check_env_correo_wtck, 'Tipo:', typeof viaje.check_env_correo_wtck);
+                document.getElementById('check_env_correo_wtck').checked = (viaje.check_env_correo_wtck === 'X' || viaje.check_env_correo_wtck === 'x' || viaje.check_env_correo_wtck === '1' || viaje.check_env_correo_wtck === 1);
+                console.log('check_revision_planilla_despacho desde BD:', viaje.check_revision_planilla_despacho, 'Tipo:', typeof viaje.check_revision_planilla_despacho);
+                document.getElementById('check_revision_planilla_despacho').checked = (viaje.check_revision_planilla_despacho === 'X' || viaje.check_revision_planilla_despacho === 'x' || viaje.check_revision_planilla_despacho === '1' || viaje.check_revision_planilla_despacho === 1);
+                
+                // GUÍAS (1-14)
+                console.log('Cargando guías...');
+                console.log('  Valores en objeto viaje:', {
+                    guia_11: viaje.guia_11,
+                    guia_12: viaje.guia_12,
+                    guia_13: viaje.guia_13,
+                    guia_14: viaje.guia_14
+                });
+                for (let i = 1; i <= 14; i++) {
+                    const guiaField = document.getElementById(`guia_${i}`);
+                    if (guiaField) {
+                        const valor = viaje[`guia_${i}`] || '';
+                        guiaField.value = valor;
+                        if (i >= 11 || valor) {
+                            console.log(`  ✓ Guía ${i}: "${valor}" (campo existe: ${!!guiaField})`);
+                        }
+                    } else {
+                        console.warn(`  ⚠️ Campo guia_${i} no encontrado en el HTML`);
+                    }
+                }
+                
+                // SELLOS - SALIDA
+                document.getElementById('sello_salida_1p').value = viaje.sello_salida_1p || '';
+                document.getElementById('sello_salida_2p').value = viaje.sello_salida_2p || '';
+                document.getElementById('sello_salida_3p').value = viaje.sello_salida_3p || '';
+                document.getElementById('sello_salida_4p').value = viaje.sello_salida_4p || '';
+                document.getElementById('sello_salida_5p').value = viaje.sello_salida_5p || '';
+                
+                // SELLOS - RETORNO
+                document.getElementById('sello_retorno_1p').value = viaje.sello_retorno_1p || '';
+                document.getElementById('sello_retorno_2p').value = viaje.sello_retorno_2p || '';
+                document.getElementById('sello_retorno_3p').value = viaje.sello_retorno_3p || '';
+                document.getElementById('sello_retorno_4p').value = viaje.sello_retorno_4p || '';
+                document.getElementById('sello_retorno_5p').value = viaje.sello_retorno_5p || '';
+                
+                // CONTROLES Y CERTIFICACIONES
+                document.getElementById('numero_certificado_fumigacion').value = viaje.numero_certificado_fumigacion || '';
+                document.getElementById('revision_limpieza_camion_acciones').value = viaje.revision_limpieza_camion_acciones || '';
+                $('#administrativo_responsable').val(viaje.administrativo_responsable || '').trigger('change');
+                
+                // CARGAR COMIDAS
+                if (data.comidas && data.comidas.length > 0) {
+                    console.log('Cargando comidas:', data.comidas.length);
+                    // Limpiar comidas existentes
+                    contadorComidas = 0;
+                    document.getElementById('comidas-container').innerHTML = '';
+                    
+                    // Agregar cada comida
+                    data.comidas.forEach(comida => {
+                        agregarComida();
+                        const index = contadorComidas - 1;
+                        document.getElementById(`guia_comida_${index}`).value = comida.guia_comida || '';
+                        document.getElementById(`descripcion_${index}`).value = comida.descripcion || '';
+                        document.getElementById(`kilo_${index}`).value = comida.kilo || '';
+                        document.getElementById(`bultos_${index}`).value = comida.bultos || '';
+                    });
+                }
+                
+                console.log('TODOS LOS CAMPOS CARGADOS');
+                mostrarMensaje('success', '✓ Viaje completo precargado - Todos los campos llenados');
+            } else {
+                console.log('Viaje no encontrado');
+            }
+        })
+        .catch(error => {
+            console.error('Error cargando viaje:', error);
+            mostrarMensaje('error', 'Error al cargar datos del viaje');
+        });
+}
+
+// Cargar datos del conductor (celular y RUT) con animación visual
+function cargarDatosConductor() {
+    const nombreChofer = document.getElementById('chofer').value;
+    console.log('Buscando datos para:', nombreChofer);
+    
+    if (!nombreChofer) {
+        console.log('No hay chofer seleccionado');
+        return;
+    }
+
+    if (!choferesData || choferesData.length === 0) {
+        console.warn('choferesData no está cargado aún');
+        return;
+    }
+
+    const chofer = choferesData.find(c => c.nombre === nombreChofer);
+    console.log('Chofer encontrado:', chofer);
+    
+    if (chofer) {
+        const celularInput = document.getElementById('celular');
+        const rutInput = document.getElementById('rut');
+        
+        // Establecer valores
+        celularInput.value = chofer.telefono || '';
+        rutInput.value = chofer.rut || '';
+        
+        console.log('Datos cargados - Teléfono:', chofer.telefono, 'RUT:', chofer.rut);
+        
+        // Aplicar animación de highlight
+        celularInput.classList.add('field-autocompleted');
+        rutInput.classList.add('field-autocompleted');
+        
+        // Remover animación después de 2 segundos
+        setTimeout(() => {
+            celularInput.classList.remove('field-autocompleted');
+            rutInput.classList.remove('field-autocompleted');
+        }, 2000);
+    } else {
+        console.warn('Chofer no encontrado en choferesData');
+    }
+}
+
+// Mostrar mensajes al usuario
+function mostrarMensaje(tipo, texto) {
+    const mensaje = document.getElementById('mensaje-resultado');
+    if (mensaje) {
+        mensaje.style.display = 'block';
+        mensaje.className = 'mensaje mensaje-' + (tipo === 'info' ? 'exito' : tipo);
+        mensaje.textContent = texto;
+        setTimeout(() => {
+            mensaje.style.display = 'none';
+        }, 3000);
+    }
+}
+
+// Editar casino (modal simple)
+function editarCasino() {
+    const codigoCasino = prompt('Ingrese el código del casino a editar:');
+    if (!codigoCasino) return;
+
+    const casino = casinosData.find(c => c.codigo == codigoCasino);
+    if (!casino) {
+        alert('Casino no encontrado');
+        return;
+    }
+
+    const nuevoNombre = prompt('Nombre del casino:', casino.nombre);
+    const nuevaRuta = prompt('Ruta:', casino.ruta || '');
+
+    if (nuevoNombre) {
+        fetch('/api/actualizar-casino', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                codigo: codigoCasino,
+                nombre: nuevoNombre,
+                ruta: nuevaRuta
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Casino actualizado correctamente');
+                location.reload();
+            } else {
+                alert('Error al actualizar: ' + data.message);
+            }
+        })
+        .catch(error => alert('Error: ' + error));
+    }
+}
+
+// Editar conductor
+function editarConductor() {
+    const nombreChofer = prompt('Ingrese el nombre del conductor a editar:');
+    if (!nombreChofer) return;
+
+    const chofer = choferesData.find(c => c.nombre === nombreChofer);
+    if (!chofer) {
+        alert('Conductor no encontrado');
+        return;
+    }
+
+    const nuevoCelular = prompt('Celular:', chofer.celular || '');
+    const nuevoRut = prompt('RUT:', chofer.rut || '');
+
+    fetch('/api/actualizar-conductor', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+            nombre: nombreChofer,
+            celular: nuevoCelular,
+            rut: nuevoRut
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Conductor actualizado correctamente');
+            location.reload();
+        } else {
+            alert('Error al actualizar: ' + data.message);
+        }
+    })
+    .catch(error => alert('Error: ' + error));
+}
+
+function agregarComida() {
+    // Limitar a 20 comidas máximo
+    if (contadorComidas >= 20) {
+        alert('⚠️ Máximo 20 comidas permitidas');
+        return;
+    }
+    
+    contadorComidas++;
+    
+    const container = document.getElementById('comidas-container');
+    const comidaDiv = document.createElement('div');
+    comidaDiv.id = `comida-${contadorComidas}`;
+    comidaDiv.className = 'grid grid-cols-1 md:grid-cols-6 gap-4 p-5 mb-4 bg-gradient-to-r from-green-50 to-blue-50 border-2 border-green-300 rounded-lg shadow-sm hover:shadow-md transition-shadow';
+    
+    comidaDiv.innerHTML = `
+        <div class="flex items-center justify-center">
+            <span class="text-2xl font-bold text-green-600">#${contadorComidas}</span>
+        </div>
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">N° Guía</label>
+            <input type="text" name="comida_guia_${contadorComidas}" 
+                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                   placeholder="N° Guía">
+        </div>
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Descripción <span class="text-red-500">*</span></label>
+            <input type="text" name="comida_descripcion_${contadorComidas}" required
+                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                   placeholder="Tipo de comida">
+        </div>
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Kilo</label>
+            <input type="number" name="comida_kilo_${contadorComidas}" min="0" step="0.01"
+                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                   placeholder="0.00">
+        </div>
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Bultos</label>
+            <input type="number" name="comida_bultos_${contadorComidas}" min="0"
+                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                   placeholder="0">
+        </div>
+        <div class="flex items-end">
+            <button type="button" onclick="eliminarComida(${contadorComidas})"
+                    class="w-full px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors flex items-center justify-center">
+                <i class="bi bi-trash mr-1"></i> Eliminar
+            </button>
+        </div>
+    `;
+    
+    container.appendChild(comidaDiv);
+}
+
+function eliminarComida(comidaId) {
+    const elemento = document.getElementById(`comida-${comidaId}`);
+    if (elemento) {
+        elemento.remove();
+    }
+}
+
+function limpiarFormulario() {
+    document.getElementById('formNuevoViaje').reset();
+    document.getElementById('comidas-container').innerHTML = '';
+    document.getElementById('mensaje-resultado').style.display = 'none';
+    contadorComidas = 0;
+    document.getElementById('fecha').valueAsDate = new Date();
+}
+
+document.getElementById('formNuevoViaje').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    const data = {
+        numero_viaje: formData.get('numero_viaje'),
+        centro_costo: formData.get('centro_costo'),
+        fecha: formData.get('fecha'),
+        codigo_casino: formData.get('codigo_casino'),
+        ruta: formData.get('ruta'),
+        tipo_camion: formData.get('tipo_camion'),
+        patente_camion: formData.get('patente_camion'),
+        patente_semi: formData.get('patente_semi'),
+        numero_rampa: formData.get('numero_rampa'),
+        peso_camion: formData.get('peso_camion'),
+        numero_camion: formData.get('numero_camion'),
+        termografos_gps: formData.get('termografos_gps'),
+        chofer: formData.get('chofer'),
+        celular: formData.get('celular'),
+        rut: formData.get('rut'),
+        hora_salida: formData.get('hora_salida'),
+        hora_llegada: formData.get('hora_llegada'),
+        num_wencos: formData.get('num_wencos'),
+        bin: formData.get('bin'),
+        pallets: formData.get('pallets'),
+        pallets_chep: formData.get('pallets_chep'),
+        pallets_pl_negro_grueso: formData.get('pallets_pl_negro_grueso'),
+        pallets_pl_negro_alternativo: formData.get('pallets_pl_negro_alternativo'),
+        pallets_congelado: formData.get('pallets_congelado'),
+        wencos_congelado: formData.get('wencos_congelado'),
+        check_congelado: formData.get('check_congelado') ? 'X' : '',
+        pallets_refrigerado: formData.get('pallets_refrigerado'),
+        wencos_refrigerado: formData.get('wencos_refrigerado'),
+        check_refrigerado: formData.get('check_refrigerado') ? 'X' : '',
+        pallets_abarrote: formData.get('pallets_abarrote'),
+
+        check_abarrote: formData.get('check_abarrote') ? 'X' : '',
+        check_implementos: formData.get('check_implementos') ? 'X' : '',
+        check_aseo: formData.get('check_aseo') ? 'X' : '',
+        check_trazabilidad: formData.get('check_trazabilidad') ? 'X' : '',
+        check_plataforma_wtck: formData.get('check_plataforma_wtck') ? 'X' : '',
+        check_env_correo_wtck: formData.get('check_env_correo_wtck') ? 'X' : '',
+        check_revision_planilla_despacho: formData.get('check_revision_planilla_despacho') ? 'X' : '',
+        guia_1: formData.get('guia_1'),
+        guia_2: formData.get('guia_2'),
+        guia_3: formData.get('guia_3'),
+        guia_4: formData.get('guia_4'),
+        guia_5: formData.get('guia_5'),
+        guia_6: formData.get('guia_6'),
+        guia_7: formData.get('guia_7'),
+        guia_8: formData.get('guia_8'),
+        guia_9: formData.get('guia_9'),
+        guia_10: formData.get('guia_10'),
+        guia_11: formData.get('guia_11'),
+        guia_12: formData.get('guia_12'),
+        guia_13: formData.get('guia_13'),
+        guia_14: formData.get('guia_14'),
+        sello_salida_1p: formData.get('sello_salida_1p'),
+        sello_salida_2p: formData.get('sello_salida_2p'),
+        sello_salida_3p: formData.get('sello_salida_3p'),
+        sello_salida_4p: formData.get('sello_salida_4p'),
+        sello_salida_5p: formData.get('sello_salida_5p'),
+        sello_retorno_1p: formData.get('sello_retorno_1p'),
+        sello_retorno_2p: formData.get('sello_retorno_2p'),
+        sello_retorno_3p: formData.get('sello_retorno_3p'),
+        sello_retorno_4p: formData.get('sello_retorno_4p'),
+        sello_retorno_5p: formData.get('sello_retorno_5p'),
+        numero_certificado_fumigacion: formData.get('numero_certificado_fumigacion'),
+        revision_limpieza_camion_acciones: formData.get('revision_limpieza_camion_acciones'),
+        administrativo_responsable: formData.get('administrativo_responsable'),
+        comidas: []
+    };
+    
+    // Recopilar comidas preparadas
+    for (let comidaId = 1; comidaId <= contadorComidas; comidaId++) {
+        const comidaElement = document.getElementById(`comida-${comidaId}`);
+        if (comidaElement) {
+            const descripcion = formData.get(`comida_descripcion_${comidaId}`);
+            if (descripcion) {
+                data.comidas.push({
+                    guia_comida: formData.get(`comida_guia_${comidaId}`) || '',
+                    descripcion: descripcion,
+                    kilo: parseFloat(formData.get(`comida_kilo_${comidaId}`)) || 0,
+                    bultos: parseInt(formData.get(`comida_bultos_${comidaId}`)) || 0
+                });
+            }
+        }
+    }
+    
+    // Enviar datos
+    fetch('/api/guardar-viaje', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(result => {
+        const mensaje = document.getElementById('mensaje-resultado');
+        mensaje.style.display = 'block';
+        
+        if (result.success) {
+            mensaje.className = 'mensaje mensaje-exito';
+            mensaje.textContent = '✓ ' + result.message;
+            setTimeout(() => {
+                limpiarFormulario();
+            }, 2000);
+        } else {
+            mensaje.className = 'mensaje mensaje-error';
+            mensaje.textContent = '✖ Error: ' + result.message;
+        }
+    })
+    .catch(error => {
+        const mensaje = document.getElementById('mensaje-resultado');
+        mensaje.style.display = 'block';
+        mensaje.className = 'mensaje mensaje-error';
+        mensaje.textContent = '✖ Error de conexión: ' + error.message;
+    });
+});
+
+// ======= FUNCIONES PARA MODALES DE MAESTRAS =======
+
+// CENTRO DE COSTO
+function abrirModalCentroCosto() {
+    document.getElementById('modalCentroCosto').style.display = 'flex';
+    document.getElementById('nuevo_codigo_costo').focus();
+}
+
+function cerrarModalCentroCosto() {
+    document.getElementById('modalCentroCosto').style.display = 'none';
+    document.getElementById('formCentroCosto').reset();
+}
+
+function guardarCentroCosto(event) {
+    event.preventDefault();
+    
+    const data = {
+        codigo_costo: document.getElementById('nuevo_codigo_costo').value.trim(),
+        casino: document.getElementById('nuevo_casino').value.trim(),
+        ruta: document.getElementById('nuevo_ruta').value.trim()
+    };
+    
+    fetch('/api/crear-centro-costo', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(result => {
+        if (result.success) {
+            // Agregar a la lista
+            const select = document.getElementById('centro_costo');
+            const option = new Option(`${data.codigo_costo} - ${data.casino}`, data.codigo_costo);
+            option.setAttribute('data-casino', data.casino);
+            option.setAttribute('data-ruta', data.ruta);
+            select.add(option);
+            select.value = data.codigo_costo;
+            
+            // Autocompletar campos relacionados
+            document.getElementById('codigo_casino').value = data.casino;
+            document.getElementById('ruta').value = data.ruta;
+            
+            alert('✓ Centro de Costo creado exitosamente');
+            cerrarModalCentroCosto();
+        } else {
+            alert('✖ Error: ' + result.message);
+        }
+    })
+    .catch(error => {
+        alert('✖ Error de conexión: ' + error.message);
+    });
+}
+
+// CHOFER
+function abrirModalChofer() {
+    document.getElementById('modalChofer').style.display = 'flex';
+    document.getElementById('nuevo_chofer_nombre').focus();
+}
+
+function cerrarModalChofer() {
+    document.getElementById('modalChofer').style.display = 'none';
+    document.getElementById('formChofer').reset();
+}
+
+function guardarChofer(event) {
+    event.preventDefault();
+    
+    const data = {
+        nombre: document.getElementById('nuevo_chofer_nombre').value.trim().toUpperCase(),
+        rut: document.getElementById('nuevo_chofer_rut').value.trim(),
+        celular: document.getElementById('nuevo_chofer_celular').value.trim()
+    };
+    
+    fetch('/api/crear-chofer', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(result => {
+        if (result.success) {
+            // Agregar a la lista
+            const select = document.getElementById('chofer');
+            const option = new Option(data.nombre, data.nombre);
+            select.add(option);
+            select.value = data.nombre;
+            
+            // Autocompletar campos relacionados
+            document.getElementById('celular').value = data.celular;
+            document.getElementById('rut').value = data.rut;
+            
+            alert('✓ Chofer creado exitosamente');
+            cerrarModalChofer();
+        } else {
+            alert('✖ Error: ' + result.message);
+        }
+    })
+    .catch(error => {
+        alert('✖ Error de conexión: ' + error.message);
+    });
+}
+
+// ADMINISTRATIVO
+function abrirModalAdministrativo() {
+    document.getElementById('modalAdministrativo').style.display = 'flex';
+    document.getElementById('nuevo_administrativo_nombre').focus();
+}
+
+function cerrarModalAdministrativo() {
+    document.getElementById('modalAdministrativo').style.display = 'none';
+    document.getElementById('formAdministrativo').reset();
+}
+
+function guardarAdministrativo(event) {
+    event.preventDefault();
+    
+    const nombre = document.getElementById('nuevo_administrativo_nombre').value.trim().toUpperCase();
+    
+    fetch('/api/crear-administrativo', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ nombre: nombre })
+    })
+    .then(response => response.json())
+    .then(result => {
+        if (result.success) {
+            // Actualizar el campo select2
+            $('#administrativo_responsable').append(`<option value="${nombre}" selected>${nombre}</option>`).trigger('change');
+            
+            alert('✓ Administrativo creado exitosamente');
+            cerrarModalAdministrativo();
+        } else {
+            alert('✖ Error: ' + result.message);
+        }
+    })
+    .catch(error => {
+        alert('✖ Error de conexión: ' + error.message);
+    });
+}
+
+// Cargar administrativos existentes
+function cargarAdministrativos() {
+    fetch('/api/listar-administrativos')
+    .then(response => response.json())
+    .then(result => {
+        if (result.success) {
+            const select = $('#administrativo_responsable');
+            select.empty();
+            select.append('<option value="">Seleccione un administrativo...</option>');
+            result.administrativos.forEach(admin => {
+                select.append(`<option value="${admin}">${admin}</option>`);
+            });
+            // Inicializar Select2 después de cargar las opciones
+            select.select2({
+                placeholder: 'Buscar administrativo...',
+                allowClear: true,
+                language: {
+                    noResults: function() {
+                        return "No se encontraron resultados";
+                    },
+                    searching: function() {
+                        return "Buscando...";
+                    }
+                }
+            });
+        }
+    })
+    .catch(error => console.error('Error cargando administrativos:', error));
+}
+
+// Cerrar modal al hacer click fuera
+window.onclick = function(event) {
+    if (event.target.classList.contains('modal')) {
+        event.target.style.display = 'none';
+    }
+}
+
+// Establecer fecha actual al cargar
+window.addEventListener('load', function() {
+    document.getElementById('fecha').valueAsDate = new Date();
+    cargarAdministrativos(); // Cargar lista de administrativos
+});
+</script>
+{% endblock %}

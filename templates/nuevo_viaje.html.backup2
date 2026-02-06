@@ -1,0 +1,1398 @@
+{% extends "layout.html" %}
+
+{% block title %}Nuevo Viaje - AraTrack{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+    <!-- Header -->
+    <div class="mb-6">
+        <h2 class="text-3xl font-bold text-gray-900 flex items-center">
+            <i class="bi bi-plus-circle text-red-500 mr-3"></i>
+            Crear Nuevo Viaje
+        </h2>
+        <p class="text-gray-600 mt-2">Planilla Control Despacho</p>
+    </div>
+
+    <form id="formNuevoViaje">
+        <!-- INFORMACIÓN PRINCIPAL -->
+        <div class="bg-white rounded-xl shadow-lg mb-6 overflow-hidden">
+            <div class="bg-gradient-to-r from-red-500 to-red-600 px-6 py-4">
+                <h5 class="text-lg font-semibold text-white flex items-center">
+                    <i class="bi bi-info-circle mr-2"></i>Información Principal del Viaje
+                </h5>
+            </div>
+            <div class="p-6">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4"
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <label for="numero_viaje" class="block text-sm font-medium text-gray-700 mb-2">
+                            Número de Viaje <span class="text-red-500">*</span>
+                        </label>
+                        <div class="flex gap-2">
+                            <input type="text" class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent" 
+                                   id="numero_viaje" name="numero_viaje" required>
+                            <button type="button" onclick="cargarDatosViajeExistente(document.getElementById('numero_viaje').value)" 
+                                    class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors flex items-center">
+                                <i class="bi bi-search mr-1"></i>Cargar
+                            </button>
+                        </div>
+                        <small class="text-gray-500 text-xs mt-1 block">Ingresa el número y presiona "Cargar" o Enter</small>
+                    </div>
+                    <div>
+                        <label for="centro_costo" class="block text-sm font-medium text-gray-700 mb-2">
+                            Centro de Costo <span class="text-red-500">*</span>
+                        </label>
+                        <div class="flex gap-2">
+                            <select id="centro_costo" name="centro_costo" required class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent select2-search">
+                                <option value="">Buscar centro de costo...</option>
+                                {% for centro in centros_costo %}
+                                    <option value="{{ centro.codigo_costo }}" data-casino="{{ centro.casino or '' }}" data-ruta="{{ centro.ruta or '' }}">{{ centro.codigo_costo }} - {{ centro.casino }}</option>
+                                {% endfor %}
+                            </select>
+                            <button type="button" onclick="abrirModalCentroCosto()" 
+                                    class="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg transition-colors">
+                                <i class="bi bi-plus-lg"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div>
+                        <label for="fecha" class="block text-sm font-medium text-gray-700 mb-2">
+                            Fecha <span class="text-red-500">*</span>
+                        </label>
+                        <input type="date" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent" 
+                               id="fecha" name="fecha" required>
+                    </div>
+                </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CASINO Y RUTA -->
+        <div class="bg-white rounded-xl shadow-lg mb-6 overflow-hidden">
+            <div class="bg-gradient-to-r from-gray-700 to-gray-800 px-6 py-4">
+                <h5 class="text-lg font-semibold text-white flex items-center">
+                    <i class="bi bi-building mr-2"></i>Casino y Ruta
+                </h5>
+            </div>
+            <div class="p-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label for="codigo_casino" class="block text-sm font-medium text-gray-700 mb-2">Casino</label>
+                        <input type="text" class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50" 
+                               id="codigo_casino" name="codigo_casino" readonly placeholder="Se autocompleta con centro de costo">
+                    </div>
+                    <div>
+                        <label for="ruta" class="block text-sm font-medium text-gray-700 mb-2">Ruta</label>
+                        <input type="text" class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50" 
+                               id="ruta" name="ruta" readonly placeholder="Se autocompleta con centro de costo">
+                    </div>
+                </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- DATOS DEL CAMIÓN -->
+        <div class="bg-white rounded-xl shadow-lg mb-6 overflow-hidden">
+            <div class="bg-gradient-to-r from-gray-700 to-gray-800 px-6 py-4">
+                <h5 class="text-lg font-semibold text-white flex items-center">
+                    <i class="bi bi-truck mr-2"></i>Datos del Camión
+                </h5>
+            </div>
+            <div class="p-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label for="tipo_camion" class="block text-sm font-medium text-gray-700 mb-2">Tipo de Camión</label>
+                        <input type="text" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+                               id="tipo_camion" name="tipo_camion" placeholder="Ej: 12 TONELADAS">
+                    </div>
+                    <div>
+                        <label for="patente_camion" class="block text-sm font-medium text-gray-700 mb-2">
+                            Patente Camión <span class="text-red-500">*</span>
+                        </label>
+                        <input type="text" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent uppercase" 
+                               id="patente_camion" name="patente_camion" required placeholder="Ej: ABCD12">
+                    </div>
+                    <div>
+                        <label for="patente_semi" class="block text-sm font-medium text-gray-700 mb-2">Patente Semi</label>
+                        <input type="text" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+                               id="patente_semi" name="patente_semi">
+                    </div>
+                    <div>
+                        <label for="numero_rampa" class="block text-sm font-medium text-gray-700 mb-2">N° de Rampla</label>
+                        <input type="text" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+                               id="numero_rampa" name="numero_rampa">
+                    </div>
+                    <div>
+                        <label for="peso_camion" class="block text-sm font-medium text-gray-700 mb-2">Peso Camión</label>
+                        <input type="text" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+                               id="peso_camion" name="peso_camion">
+                    </div>
+                    <div>
+                        <label for="numero_camion" class="block text-sm font-medium text-gray-700 mb-2">N° Camión</label>
+                        <input type="text" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+                               id="numero_camion" name="numero_camion">
+                    </div>
+                    <div class="md:col-span-2">
+                        <label for="termografos_gps" class="block text-sm font-medium text-gray-700 mb-2">Termógrafos / GPS</label>
+                        <input type="text" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+                               id="termografos_gps" name="termografos_gps" placeholder="Ej: GPS, GPS">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- DATOS DEL CONDUCTOR -->
+        <div class="bg-white rounded-xl shadow-lg mb-6 overflow-hidden">
+            <div class="bg-gradient-to-r from-gray-700 to-gray-800 px-6 py-4">
+                <h5 class="text-lg font-semibold text-white flex items-center">
+                    <i class="bi bi-person mr-2"></i>Datos del Conductor
+                </h5>
+            </div>
+            <div class="p-6">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <label for="chofer" class="block text-sm font-medium text-gray-700 mb-2">
+                            Conductor <span class="text-red-500">*</span>
+                        </label>
+                        <div class="flex gap-2">
+                            <select id="chofer" name="chofer" required onchange="cargarDatosConductor()" class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent select2-search">
+                                <option value="">Seleccionar conductor...</option>
+                                {% for chofer in choferes %}
+                                    <option value="{{ chofer }}">{{ chofer }}</option>
+                                {% endfor %}
+                            </select>
+                            <button type="button" onclick="abrirModalChofer()" class="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg transition-colors">
+                                <i class="bi bi-plus-lg"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div>
+                        <label for="celular" class="block text-sm font-medium text-gray-700 mb-2">Celular</label>
+                        <input type="text" class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50" 
+                               id="celular" name="celular" readonly placeholder="Se autocompleta">
+                    </div>
+                    <div>
+                        <label for="rut" class="block text-sm font-medium text-gray-700 mb-2">RUT</label>
+                        <input type="text" class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50" 
+                               id="rut" name="rut" readonly placeholder="Se autocompleta">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- HORARIOS -->
+        <div class="bg-white rounded-xl shadow-lg mb-6 overflow-hidden">
+            <div class="bg-gradient-to-r from-gray-700 to-gray-800 px-6 py-4">
+                <h5 class="text-lg font-semibold text-white flex items-center">
+                    <i class="bi bi-clock mr-2"></i>Horarios DHL
+                </h5>
+            </div>
+            <div class="p-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label for="hora_llegada" class="block text-sm font-medium text-gray-700 mb-2">Fecha y Hora Llegada DHL</label>
+                        <input type="datetime-local" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+                               id="hora_llegada" name="hora_llegada">
+                    </div>
+                    <div>
+                        <label for="hora_salida" class="block text-sm font-medium text-gray-700 mb-2">Fecha y Hora Salida DHL</label>
+                        <input type="datetime-local" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+                               id="hora_salida" name="hora_salida">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ACTIVOS SALIDA -->
+        <h3 class="text-2xl font-bold text-red-500 mb-4 flex items-center">
+            <i class="bi bi-box-arrow-right mr-2"></i>Activos Salida
+        </h3>
+        
+        <div class="form-row">
+            <div class="form-group">
+                <label for="num_wencos">N° Wencos</label>
+                <input type="number" id="num_wencos" name="num_wencos" min="0">
+            </div>
+            <div class="form-group">
+                <label for="bin">BIN</label>
+                <input type="text" id="bin" name="bin">
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="pallets">Pallets</label>
+                <input type="number" id="pallets" name="pallets" min="0">
+            </div>
+            <div class="form-group">
+                <label for="pallets_chep">Pallets CHEP</label>
+                <input type="number" id="pallets_chep" name="pallets_chep" min="0">
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="pallets_pl_negro_grueso">Pallets PL Negro Grueso</label>
+                <input type="text" id="pallets_pl_negro_grueso" name="pallets_pl_negro_grueso">
+            </div>
+            <div class="form-group">
+                <label for="pallets_pl_negro_alternativo">Pallets PL Negro Alternativo</label>
+                <input type="text" id="pallets_pl_negro_alternativo" name="pallets_pl_negro_alternativo">
+            </div>
+        </div>
+
+        <!-- DESGLOSE POR TIPO -->
+        <h4 style="margin-top: 1rem;">Congelado</h4>
+        <div class="form-row">
+            <div class="form-group">
+                <label for="pallets_congelado">Pallets Congelado</label>
+                <input type="number" id="pallets_congelado" name="pallets_congelado" min="0">
+            </div>
+            <div class="form-group">
+                <label for="wencos_congelado">Wencos Congelado</label>
+                <input type="number" id="wencos_congelado" name="wencos_congelado" min="0">
+            </div>
+            <div class="form-group">
+                <label>
+                    <input type="checkbox" id="check_congelado" name="check_congelado"> Congelado
+                </label>
+            </div>
+        </div>
+
+        <h4 style="margin-top: 1rem;">Refrigerado</h4>
+        <div class="form-row">
+            <div class="form-group">
+                <label for="pallets_refrigerado">Pallets Refrigerado</label>
+                <input type="number" id="pallets_refrigerado" name="pallets_refrigerado" min="0">
+            </div>
+            <div class="form-group">
+                <label for="wencos_refrigerado">Wencos Refrigerado</label>
+                <input type="number" id="wencos_refrigerado" name="wencos_refrigerado" min="0">
+            </div>
+            <div class="form-group">
+                <label>
+                    <input type="checkbox" id="check_refrigerado" name="check_refrigerado"> Refrigerado
+                </label>
+            </div>
+        </div>
+
+        <h4 style="margin-top: 1rem;">Abarrote</h4>
+        <div class="form-row">
+            <div class="form-group">
+                <label for="pallets_abarrote">Pallets Abarrote</label>
+                <input type="number" id="pallets_abarrote" name="pallets_abarrote" min="0">
+            </div>
+            <div class="form-group">
+                <label>
+                    <input type="checkbox" id="check_abarrote" name="check_abarrote"> Abarrote
+                </label>
+            </div>
+        </div>
+
+
+        <!-- OTROS CHECKS -->
+        <h4 style="margin-top: 1rem;">Otros</h4>
+        <div class="form-row">
+            <div class="form-group">
+                <label>
+                    <input type="checkbox" id="check_implementos" name="check_implementos"> Implementos
+                </label>
+            </div>
+            <div class="form-group">
+                <label>
+                    <input type="checkbox" id="check_aseo" name="check_aseo"> Aseo
+                </label>
+            </div>
+            <div class="form-group">
+                <label>
+                    <input type="checkbox" id="check_trazabilidad" name="check_trazabilidad"> Trazabilidad
+                </label>
+            </div>
+            <div class="form-group">
+                <label>
+                    <input type="checkbox" id="check_plataforma_wtck" name="check_plataforma_wtck"> Plataforma WTCK
+                </label>
+            </div>
+            <div class="form-group">
+                <label>
+                    <input type="checkbox" id="check_env_correo_wtck" name="check_env_correo_wtck"> Envío Correo WTCK
+                </label>
+            </div>
+            <div class="form-group">
+                <label>
+                    <input type="checkbox" id="check_revision_planilla_despacho" name="check_revision_planilla_despacho"> Revisión Planilla Despacho
+                </label>
+            </div>
+        </div>
+
+        <!-- GUÍAS ALPES -->
+        <h3 style="color: #d40511; margin-top: 1.5rem;">Guías</h3>
+        
+        <div class="form-row">
+            <div class="form-group">
+                <label for="guia_1">Guía 1</label>
+                <input type="text" id="guia_1" name="guia_1">
+            </div>
+            <div class="form-group">
+                <label for="guia_2">Guía 2</label>
+                <input type="text" id="guia_2" name="guia_2">
+            </div>
+            <div class="form-group">
+                <label for="guia_3">Guía 3</label>
+                <input type="text" id="guia_3" name="guia_3">
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="guia_4">Guía 4</label>
+                <input type="text" id="guia_4" name="guia_4">
+            </div>
+            <div class="form-group">
+                <label for="guia_5">Guía 5</label>
+                <input type="text" id="guia_5" name="guia_5">
+            </div>
+            <div class="form-group">
+                <label for="guia_6">Guía 6</label>
+                <input type="text" id="guia_6" name="guia_6">
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="guia_7">Guía 7</label>
+                <input type="text" id="guia_7" name="guia_7">
+            </div>
+            <div class="form-group">
+                <label for="guia_8">Guía 8</label>
+                <input type="text" id="guia_8" name="guia_8">
+            </div>
+            <div class="form-group">
+                <label for="guia_9">Guía 9</label>
+                <input type="text" id="guia_9" name="guia_9">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="guia_10">Guía 10</label>
+            <input type="text" id="guia_10" name="guia_10">
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="guia_11">Guía 11</label>
+                <input type="text" id="guia_11" name="guia_11">
+            </div>
+            <div class="form-group">
+                <label for="guia_12">Guía 12</label>
+                <input type="text" id="guia_12" name="guia_12">
+            </div>
+            <div class="form-group">
+                <label for="guia_13">Guía 13</label>
+                <input type="text" id="guia_13" name="guia_13">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="guia_14">Guía 14</label>
+            <input type="text" id="guia_14" name="guia_14">
+        </div>
+
+        <!-- SELLOS -->
+        <h3 style="color: #d40511; margin-top: 1.5rem;">Sellos</h3>
+        
+        <h4>Salida</h4>
+        <div class="form-row">
+            <div class="form-group">
+                <label for="sello_salida_1p">1P Salida</label>
+                <input type="text" id="sello_salida_1p" name="sello_salida_1p">
+            </div>
+            <div class="form-group">
+                <label for="sello_salida_2p">2P Salida</label>
+                <input type="text" id="sello_salida_2p" name="sello_salida_2p">
+            </div>
+            <div class="form-group">
+                <label for="sello_salida_3p">3P Salida</label>
+                <input type="text" id="sello_salida_3p" name="sello_salida_3p">
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="sello_salida_4p">4P Salida</label>
+                <input type="text" id="sello_salida_4p" name="sello_salida_4p">
+            </div>
+            <div class="form-group">
+                <label for="sello_salida_5p">5P Salida</label>
+                <input type="text" id="sello_salida_5p" name="sello_salida_5p">
+            </div>
+        </div>
+
+        <h4 style="margin-top: 1rem;">Retorno</h4>
+        <div class="form-row">
+            <div class="form-group">
+                <label for="sello_retorno_1p">1P Retorno</label>
+                <input type="text" id="sello_retorno_1p" name="sello_retorno_1p">
+            </div>
+            <div class="form-group">
+                <label for="sello_retorno_2p">2P Retorno</label>
+                <input type="text" id="sello_retorno_2p" name="sello_retorno_2p">
+            </div>
+            <div class="form-group">
+                <label for="sello_retorno_3p">3P Retorno</label>
+                <input type="text" id="sello_retorno_3p" name="sello_retorno_3p">
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="sello_retorno_4p">4P Retorno</label>
+                <input type="text" id="sello_retorno_4p" name="sello_retorno_4p">
+            </div>
+            <div class="form-group">
+                <label for="sello_retorno_5p">5P Retorno</label>
+                <input type="text" id="sello_retorno_5p" name="sello_retorno_5p">
+            </div>
+        </div>
+
+        <!-- CONTROLES ADICIONALES -->
+        <h3 style="color: #d40511; margin-top: 1.5rem;">Controles y Certificaciones</h3>
+        
+        <div class="form-group">
+            <label for="numero_certificado_fumigacion">Número Certificado Fumigación</label>
+            <input type="text" id="numero_certificado_fumigacion" name="numero_certificado_fumigacion">
+        </div>
+
+        <div class="form-group">
+            <label for="revision_limpieza_camion_acciones">Revisión Limpieza Camión (C/NC - Acciones / SI CUMPLE)</label>
+            <input type="text" id="revision_limpieza_camion_acciones" name="revision_limpieza_camion_acciones" placeholder="Ej: 5P">
+        </div>
+
+        <div class="form-group">
+            <label for="administrativo_responsable">Administrativo Responsable</label>
+            <div style="display: flex; gap: 0.5rem;">
+                <select id="administrativo_responsable" name="administrativo_responsable" style="flex: 1;" class="select2">
+                    <option value="">Seleccione un administrativo...</option>
+                </select>
+                <button type="button" onclick="abrirModalAdministrativo()" class="btn" style="padding: 0.75rem 1rem; background: #28a745; white-space: nowrap;">+ Nuevo</button>
+            </div>
+        </div>
+
+        <hr style="margin: 2rem 0; border-color: #ddd;">
+
+        <!-- COMIDAS PREPARADAS -->
+        <div class="form-section-header">
+            <h3>Despacho Comidas Preparadas</h3>
+            <button type="button" class="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg transition-colors" onclick="agregarComida()">+ Agregar Comida</button>
+        </div>
+        <p style="color: #666; margin-bottom: 1rem;">Las comidas se asignarán automáticamente al centro de costo especificado arriba.</p>
+
+        <div id="comidas-container"></div>
+
+        <div class="form-actions" style="margin-top: 2rem;">
+            <button type="submit" class="btn btn-primary">Guardar Viaje Completo</button>
+            <button type="button" class="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg transition-colors" onclick="limpiarFormulario()">Limpiar</button>
+        </div>
+    </form>
+
+    <div id="mensaje-resultado" class="mensaje" style="display: none;"></div>
+</div>
+
+<!-- MODAL: NUEVO CENTRO DE COSTO -->
+<div id="modalCentroCosto" class="modal" style="display: none;">
+    <div class="modal-content" style="max-width: 600px;">
+        <span class="close" onclick="cerrarModalCentroCosto()">&times;</span>
+        <h2 style="color: #d40511; margin-bottom: 1.5rem;">🏢 Nuevo Centro de Costo</h2>
+        <form id="formCentroCosto" onsubmit="guardarCentroCosto(event)">
+            <div class="form-group">
+                <label for="nuevo_codigo_costo">Código Centro de Costo *</label>
+                <input type="text" id="nuevo_codigo_costo" required placeholder="Ej: 1001">
+            </div>
+            <div class="form-group">
+                <label for="nuevo_casino">Casino *</label>
+                <input type="text" id="nuevo_casino" required placeholder="Ej: CASINO CENTRAL">
+            </div>
+            <div class="form-group">
+                <label for="nuevo_ruta">Ruta</label>
+                <input type="text" id="nuevo_ruta" placeholder="Ej: Ruta Norte">
+            </div>
+            <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+                <button type="submit" class="btn" style="flex: 1; background: #28a745;">Guardar</button>
+                <button type="button" onclick="cerrarModalCentroCosto()" class="btn" style="flex: 1; background: #6c757d;">Cancelar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- MODAL: NUEVO CHOFER -->
+<div id="modalChofer" class="modal" style="display: none;">
+    <div class="modal-content" style="max-width: 600px;">
+        <span class="close" onclick="cerrarModalChofer()">&times;</span>
+        <h2 style="color: #d40511; margin-bottom: 1.5rem;">Nuevo Chofer</h2>
+        <form id="formChofer" onsubmit="guardarChofer(event)">
+            <div class="form-group">
+                <label for="nuevo_chofer_nombre">Nombre Completo *</label>
+                <input type="text" id="nuevo_chofer_nombre" required placeholder="Ej: JUAN PEREZ LOPEZ">
+            </div>
+            <div class="form-group">
+                <label for="nuevo_chofer_rut">RUT *</label>
+                <input type="text" id="nuevo_chofer_rut" required placeholder="Ej: 12345678-9">
+            </div>
+            <div class="form-group">
+                <label for="nuevo_chofer_celular">Celular</label>
+                <input type="text" id="nuevo_chofer_celular" placeholder="Ej: +56912345678">
+            </div>
+            <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+                <button type="submit" class="btn" style="flex: 1; background: #28a745;">Guardar</button>
+                <button type="button" onclick="cerrarModalChofer()" class="btn" style="flex: 1; background: #6c757d;">Cancelar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- MODAL: NUEVO ADMINISTRATIVO -->
+<div id="modalAdministrativo" class="modal" style="display: none;">
+    <div class="modal-content" style="max-width: 500px;">
+        <span class="close" onclick="cerrarModalAdministrativo()">&times;</span>
+        <h2 style="color: #d40511; margin-bottom: 1.5rem;">👔 Nuevo Administrativo</h2>
+        <form id="formAdministrativo" onsubmit="guardarAdministrativo(event)">
+            <div class="form-group">
+                <label for="nuevo_administrativo_nombre">Nombre Completo *</label>
+                <input type="text" id="nuevo_administrativo_nombre" required placeholder="Ej: MARIA GONZALEZ">
+            </div>
+            <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+                <button type="submit" class="btn" style="flex: 1; background: #28a745;">Guardar</button>
+                <button type="button" onclick="cerrarModalAdministrativo()" class="btn" style="flex: 1; background: #6c757d;">Cancelar</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<style>
+.modal {
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content {
+    background-color: #fff;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    width: 90%;
+    max-width: 500px;
+    position: relative;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.close {
+    position: absolute;
+    right: 1rem;
+    top: 1rem;
+    font-size: 28px;
+    font-weight: bold;
+    color: #666;
+    cursor: pointer;
+    line-height: 1;
+}
+
+.close:hover {
+    color: #d40511;
+}
+</style>
+
+<script>
+let contadorComidas = 0;
+let casinosData = {{ casinos | tojson }};
+let choferesData = []; // Se cargará con datos completos
+
+// Cargar datos de viaje existente cuando se escribe el número
+document.addEventListener('DOMContentLoaded', function() {
+    // Inicializar Select2 en todos los select con clase select2-search
+    $('.select2-search').select2({
+        placeholder: 'Buscar...',
+        allowClear: true,
+        language: {
+            noResults: function() {
+                return "No se encontraron resultados";
+            },
+            searching: function() {
+                return "Buscando...";
+            }
+        }
+    });
+
+    // Manejar cambio de centro_costo para autocompletar casino y ruta
+    $('#centro_costo').on('change', function() {
+        const selectedOption = $(this).find('option:selected');
+        const casino = selectedOption.data('casino') || '';
+        const ruta = selectedOption.data('ruta') || '';
+        $('#codigo_casino').val(casino);
+        $('#ruta').val(ruta);
+    });
+
+    const numeroViajeInput = document.getElementById('numero_viaje');
+
+    // Cargar al salir del campo (blur)
+    numeroViajeInput.addEventListener('blur', function() {
+        const numeroViaje = this.value.trim();
+        if (numeroViaje) {
+            cargarDatosViajeExistente(numeroViaje);
+        }
+    });
+    
+    // Cargar al presionar Enter
+    numeroViajeInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            const numeroViaje = this.value.trim();
+            if (numeroViaje) {
+                cargarDatosViajeExistente(numeroViaje);
+            }
+        }
+    });
+
+    // Cargar datos completos de choferes AL INICIO
+    fetch('/api/obtener-choferes-completo')
+        .then(response => response.json())
+        .then(data => {
+            choferesData = data;
+            console.log('Choferes cargados:', choferesData.length);
+        })
+        .catch(error => console.error('Error cargando choferes:', error));
+});
+
+// Cargar datos de viaje existente (solo hasta Horarios DHL)
+function cargarDatosViajeExistente(numeroViaje) {
+    fetch(`/api/buscar-viaje-numero/${numeroViaje}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success && data.viaje) {
+                const viaje = data.viaje;
+                console.log('Viaje completo recibido desde el servidor:', viaje);
+                console.log('Campos específicos a verificar:', {
+                    pallets_pl_negro_grueso: viaje.pallets_pl_negro_grueso,
+                    pallets_pl_negro_alternativo: viaje.pallets_pl_negro_alternativo,
+                    check_plataforma_wtck: viaje.check_plataforma_wtck,
+                    check_env_correo_wtck: viaje.check_env_correo_wtck,
+                    check_revision_planilla_despacho: viaje.check_revision_planilla_despacho,
+                    guia_11: viaje.guia_11,
+                    guia_12: viaje.guia_12,
+                    guia_13: viaje.guia_13,
+                    guia_14: viaje.guia_14
+                });
+                
+                // Centro de costo con Select2 y autocompletar Casino/Ruta
+                if (viaje.costo_codigo) {
+                    $('#centro_costo').val(viaje.costo_codigo).trigger('change');
+                    
+                    // PRIMERO cargar los datos del viaje directamente (casino y ruta de la BD)
+                    document.getElementById('codigo_casino').value = viaje.casino || '';
+                    document.getElementById('ruta').value = viaje.ruta || '';
+                    console.log('📍 Casino/Ruta del viaje:', viaje.casino, viaje.ruta);
+                    
+                    // LUEGO intentar autocompletar desde la API (solo si están vacíos)
+                    if (!viaje.casino || !viaje.ruta) {
+                        fetch(`/api/centro-costo-detalles/${viaje.costo_codigo}`)
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success) {
+                                    console.log('📍 Casino y Ruta autocompletados desde API:', data.casino, data.ruta);
+                                    if (!viaje.casino) document.getElementById('codigo_casino').value = data.casino || '';
+                                    if (!viaje.ruta) document.getElementById('ruta').value = data.ruta || '';
+                                }
+                            })
+                            .catch(error => console.error('Error cargando casino/ruta:', error));
+                    }
+                }
+                
+                // Campos simples
+                document.getElementById('fecha').value = viaje.fecha || '';
+                document.getElementById('tipo_camion').value = viaje.tipo_camion || '';
+                document.getElementById('patente_semi').value = viaje.patente_semi || '';
+                document.getElementById('numero_rampa').value = viaje.numero_rampa || '';
+                document.getElementById('peso_camion').value = viaje.peso_camion || '';
+                document.getElementById('numero_camion').value = viaje.numero_camion || '';
+                document.getElementById('termografos_gps').value = viaje.termografos_gps || '';
+                
+                // Patente con Select2
+                if (viaje.patente_camion) {
+                    $('#patente_camion').val(viaje.patente_camion).trigger('change');
+                }
+                
+                // CONDUCTOR - PRIMERO cargar datos del viaje, LUEGO intentar autocompletar
+                if (viaje.conductor) {
+                    console.log('🚗 Cargando conductor:', viaje.conductor);
+                    // Seleccionar en el dropdown
+                    $('#chofer').val(viaje.conductor).trigger('change');
+                    
+                    // PRIMERO cargar datos del viaje directamente
+                    document.getElementById('celular').value = viaje.celular || '';
+                    document.getElementById('rut').value = viaje.rut || '';
+                    console.log('📞 Celular/RUT del viaje:', viaje.celular, viaje.rut);
+                    
+                    // LUEGO intentar autocompletar desde choferesData (solo si están vacíos)
+                    if ((!viaje.celular || !viaje.rut) && choferesData && choferesData.length > 0) {
+                        const choferData = choferesData.find(c => c.nombre === viaje.conductor);
+                        if (choferData) {
+                            console.log('📞 Autocompletando desde choferesData:', choferData.telefono, choferData.rut);
+                            if (!viaje.celular) document.getElementById('celular').value = choferData.telefono || '';
+                            if (!viaje.rut) document.getElementById('rut').value = choferData.rut || '';
+                        }
+                    }
+                }
+                
+                // HORARIOS - Formatear para datetime-local (YYYY-MM-DDTHH:mm)
+                if (viaje.fecha_hora_salida_dhl) {
+                    let salida = viaje.fecha_hora_salida_dhl;
+                    console.log('Salida ORIGINAL:', salida);
+                    
+                    // Convertir de "DD/MM/YYYY HH:mm" a "YYYY-MM-DDTHH:mm"
+                    if (salida.includes('/')) {
+                        const partes = salida.split(' ');
+                        console.log('  Partes:', partes);
+                        const fecha = partes[0].split('/'); // [DD, MM, YYYY]
+                        console.log('  Fecha array:', fecha);
+                        const hora = partes[1] || '00:00';
+                        console.log('  Hora:', hora);
+                        salida = `${fecha[2]}-${fecha[1]}-${fecha[0]}T${hora}`;
+                        console.log('  Salida CONVERTIDA:', salida);
+                    } else if (salida.includes(' ')) {
+                        salida = salida.replace(' ', 'T').substring(0, 16);
+                    }
+                    document.getElementById('hora_salida').value = salida;
+                }
+                
+                if (viaje.fecha_hora_llegada_dhl) {
+                    let llegada = viaje.fecha_hora_llegada_dhl;
+                    console.log('Llegada ORIGINAL:', llegada);
+                    
+                    // Convertir de "DD/MM/YYYY HH:mm" a "YYYY-MM-DDTHH:mm"
+                    if (llegada.includes('/')) {
+                        const partes = llegada.split(' ');
+                        const fecha = partes[0].split('/'); // [DD, MM, YYYY]
+                        const hora = partes[1] || '00:00';
+                        llegada = `${fecha[2]}-${fecha[1]}-${fecha[0]}T${hora}`;
+                        console.log('  Llegada CONVERTIDA:', llegada);
+                    } else if (llegada.includes(' ')) {
+                        llegada = llegada.replace(' ', 'T').substring(0, 16);
+                    }
+                    document.getElementById('hora_llegada').value = llegada;
+                }
+                
+                // ACTIVOS SALIDA
+                document.getElementById('num_wencos').value = viaje.num_wencos || '';
+                document.getElementById('bin').value = viaje.bin || '';
+                document.getElementById('pallets').value = viaje.pallets || '';
+                document.getElementById('pallets_chep').value = viaje.pallets_chep || '';
+                console.log('PALLETS PL NEGRO GRUESO desde BD:', viaje.pallets_pl_negro_grueso);
+                document.getElementById('pallets_pl_negro_grueso').value = viaje.pallets_pl_negro_grueso || '';
+                console.log('PALLETS PL NEGRO ALTERNATIVO desde BD:', viaje.pallets_pl_negro_alternativo);
+                document.getElementById('pallets_pl_negro_alternativo').value = viaje.pallets_pl_negro_alternativo || '';
+                
+                // Congelado
+                document.getElementById('pallets_congelado').value = viaje.pallets_congelado || '';
+                document.getElementById('wencos_congelado').value = viaje.wencos_congelado || '';
+                console.log('check_congelado:', viaje.check_congelado, 'Tipo:', typeof viaje.check_congelado);
+                document.getElementById('check_congelado').checked = (viaje.check_congelado === 'X' || viaje.check_congelado === 'x' || viaje.check_congelado === '1' || viaje.check_congelado === 1);
+                
+                // Refrigerado
+                document.getElementById('pallets_refrigerado').value = viaje.pallets_refrigerado || '';
+                document.getElementById('wencos_refrigerado').value = viaje.wencos_refrigerado || '';
+                console.log('check_refrigerado:', viaje.check_refrigerado, 'Tipo:', typeof viaje.check_refrigerado);
+                document.getElementById('check_refrigerado').checked = (viaje.check_refrigerado === 'X' || viaje.check_refrigerado === 'x' || viaje.check_refrigerado === '1' || viaje.check_refrigerado === 1);
+                
+                // Abarrote
+                document.getElementById('pallets_abarrote').value = viaje.pallets_abarrote || '';
+                console.log('check_abarrote:', viaje.check_abarrote, 'Tipo:', typeof viaje.check_abarrote, 'Es null?', viaje.check_abarrote === null);
+                document.getElementById('check_abarrote').checked = (viaje.check_abarrote === 'X' || viaje.check_abarrote === 'x' || viaje.check_abarrote === '1' || viaje.check_abarrote === 1);
+                
+                // Otros checkboxes
+                console.log('check_implementos:', viaje.check_implementos, 'Valor:', JSON.stringify(viaje.check_implementos));
+                document.getElementById('check_implementos').checked = (viaje.check_implementos === 'X' || viaje.check_implementos === 'x' || viaje.check_implementos === '1' || viaje.check_implementos === 1);
+                console.log('check_aseo:', viaje.check_aseo, 'Valor:', JSON.stringify(viaje.check_aseo));
+                document.getElementById('check_aseo').checked = (viaje.check_aseo === 'X' || viaje.check_aseo === 'x' || viaje.check_aseo === '1' || viaje.check_aseo === 1);
+                console.log('check_trazabilidad:', viaje.check_trazabilidad, 'Valor:', JSON.stringify(viaje.check_trazabilidad));
+                document.getElementById('check_trazabilidad').checked = (viaje.check_trazabilidad === 'X' || viaje.check_trazabilidad === 'x' || viaje.check_trazabilidad === '1' || viaje.check_trazabilidad === 1);
+                
+                // Checkboxes adicionales
+                console.log('check_plataforma_wtck desde BD:', viaje.check_plataforma_wtck, 'Tipo:', typeof viaje.check_plataforma_wtck);
+                document.getElementById('check_plataforma_wtck').checked = (viaje.check_plataforma_wtck === 'X' || viaje.check_plataforma_wtck === 'x' || viaje.check_plataforma_wtck === '1' || viaje.check_plataforma_wtck === 1);
+                console.log('check_env_correo_wtck desde BD:', viaje.check_env_correo_wtck, 'Tipo:', typeof viaje.check_env_correo_wtck);
+                document.getElementById('check_env_correo_wtck').checked = (viaje.check_env_correo_wtck === 'X' || viaje.check_env_correo_wtck === 'x' || viaje.check_env_correo_wtck === '1' || viaje.check_env_correo_wtck === 1);
+                console.log('check_revision_planilla_despacho desde BD:', viaje.check_revision_planilla_despacho, 'Tipo:', typeof viaje.check_revision_planilla_despacho);
+                document.getElementById('check_revision_planilla_despacho').checked = (viaje.check_revision_planilla_despacho === 'X' || viaje.check_revision_planilla_despacho === 'x' || viaje.check_revision_planilla_despacho === '1' || viaje.check_revision_planilla_despacho === 1);
+                
+                // GUÍAS (1-14)
+                console.log('Cargando guías...');
+                console.log('  Valores en objeto viaje:', {
+                    guia_11: viaje.guia_11,
+                    guia_12: viaje.guia_12,
+                    guia_13: viaje.guia_13,
+                    guia_14: viaje.guia_14
+                });
+                for (let i = 1; i <= 14; i++) {
+                    const guiaField = document.getElementById(`guia_${i}`);
+                    if (guiaField) {
+                        const valor = viaje[`guia_${i}`] || '';
+                        guiaField.value = valor;
+                        if (i >= 11 || valor) {
+                            console.log(`  ✓ Guía ${i}: "${valor}" (campo existe: ${!!guiaField})`);
+                        }
+                    } else {
+                        console.warn(`  ⚠️ Campo guia_${i} no encontrado en el HTML`);
+                    }
+                }
+                
+                // SELLOS - SALIDA
+                document.getElementById('sello_salida_1p').value = viaje.sello_salida_1p || '';
+                document.getElementById('sello_salida_2p').value = viaje.sello_salida_2p || '';
+                document.getElementById('sello_salida_3p').value = viaje.sello_salida_3p || '';
+                document.getElementById('sello_salida_4p').value = viaje.sello_salida_4p || '';
+                document.getElementById('sello_salida_5p').value = viaje.sello_salida_5p || '';
+                
+                // SELLOS - RETORNO
+                document.getElementById('sello_retorno_1p').value = viaje.sello_retorno_1p || '';
+                document.getElementById('sello_retorno_2p').value = viaje.sello_retorno_2p || '';
+                document.getElementById('sello_retorno_3p').value = viaje.sello_retorno_3p || '';
+                document.getElementById('sello_retorno_4p').value = viaje.sello_retorno_4p || '';
+                document.getElementById('sello_retorno_5p').value = viaje.sello_retorno_5p || '';
+                
+                // CONTROLES Y CERTIFICACIONES
+                document.getElementById('numero_certificado_fumigacion').value = viaje.numero_certificado_fumigacion || '';
+                document.getElementById('revision_limpieza_camion_acciones').value = viaje.revision_limpieza_camion_acciones || '';
+                $('#administrativo_responsable').val(viaje.administrativo_responsable || '').trigger('change');
+                
+                // CARGAR COMIDAS
+                if (data.comidas && data.comidas.length > 0) {
+                    console.log('Cargando comidas:', data.comidas.length);
+                    // Limpiar comidas existentes
+                    contadorComidas = 0;
+                    document.getElementById('comidas-container').innerHTML = '';
+                    
+                    // Agregar cada comida
+                    data.comidas.forEach(comida => {
+                        agregarComida();
+                        const index = contadorComidas - 1;
+                        document.getElementById(`guia_comida_${index}`).value = comida.guia_comida || '';
+                        document.getElementById(`descripcion_${index}`).value = comida.descripcion || '';
+                        document.getElementById(`kilo_${index}`).value = comida.kilo || '';
+                        document.getElementById(`bultos_${index}`).value = comida.bultos || '';
+                    });
+                }
+                
+                console.log('TODOS LOS CAMPOS CARGADOS');
+                mostrarMensaje('success', '✓ Viaje completo precargado - Todos los campos llenados');
+            } else {
+                console.log('Viaje no encontrado');
+            }
+        })
+        .catch(error => {
+            console.error('Error cargando viaje:', error);
+            mostrarMensaje('error', 'Error al cargar datos del viaje');
+        });
+}
+
+// Cargar datos del conductor (celular y RUT) con animación visual
+function cargarDatosConductor() {
+    const nombreChofer = document.getElementById('chofer').value;
+    console.log('Buscando datos para:', nombreChofer);
+    
+    if (!nombreChofer) {
+        console.log('No hay chofer seleccionado');
+        return;
+    }
+
+    if (!choferesData || choferesData.length === 0) {
+        console.warn('choferesData no está cargado aún');
+        return;
+    }
+
+    const chofer = choferesData.find(c => c.nombre === nombreChofer);
+    console.log('Chofer encontrado:', chofer);
+    
+    if (chofer) {
+        const celularInput = document.getElementById('celular');
+        const rutInput = document.getElementById('rut');
+        
+        // Establecer valores
+        celularInput.value = chofer.telefono || '';
+        rutInput.value = chofer.rut || '';
+        
+        console.log('Datos cargados - Teléfono:', chofer.telefono, 'RUT:', chofer.rut);
+        
+        // Aplicar animación de highlight
+        celularInput.classList.add('field-autocompleted');
+        rutInput.classList.add('field-autocompleted');
+        
+        // Remover animación después de 2 segundos
+        setTimeout(() => {
+            celularInput.classList.remove('field-autocompleted');
+            rutInput.classList.remove('field-autocompleted');
+        }, 2000);
+    } else {
+        console.warn('Chofer no encontrado en choferesData');
+    }
+}
+
+// Mostrar mensajes al usuario
+function mostrarMensaje(tipo, texto) {
+    const mensaje = document.getElementById('mensaje-resultado');
+    if (mensaje) {
+        mensaje.style.display = 'block';
+        mensaje.className = 'mensaje mensaje-' + (tipo === 'info' ? 'exito' : tipo);
+        mensaje.textContent = texto;
+        setTimeout(() => {
+            mensaje.style.display = 'none';
+        }, 3000);
+    }
+}
+
+// Editar casino (modal simple)
+function editarCasino() {
+    const codigoCasino = prompt('Ingrese el código del casino a editar:');
+    if (!codigoCasino) return;
+
+    const casino = casinosData.find(c => c.codigo == codigoCasino);
+    if (!casino) {
+        alert('Casino no encontrado');
+        return;
+    }
+
+    const nuevoNombre = prompt('Nombre del casino:', casino.nombre);
+    const nuevaRuta = prompt('Ruta:', casino.ruta || '');
+
+    if (nuevoNombre) {
+        fetch('/api/actualizar-casino', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                codigo: codigoCasino,
+                nombre: nuevoNombre,
+                ruta: nuevaRuta
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Casino actualizado correctamente');
+                location.reload();
+            } else {
+                alert('Error al actualizar: ' + data.message);
+            }
+        })
+        .catch(error => alert('Error: ' + error));
+    }
+}
+
+// Editar conductor
+function editarConductor() {
+    const nombreChofer = prompt('Ingrese el nombre del conductor a editar:');
+    if (!nombreChofer) return;
+
+    const chofer = choferesData.find(c => c.nombre === nombreChofer);
+    if (!chofer) {
+        alert('Conductor no encontrado');
+        return;
+    }
+
+    const nuevoCelular = prompt('Celular:', chofer.celular || '');
+    const nuevoRut = prompt('RUT:', chofer.rut || '');
+
+    fetch('/api/actualizar-conductor', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+            nombre: nombreChofer,
+            celular: nuevoCelular,
+            rut: nuevoRut
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Conductor actualizado correctamente');
+            location.reload();
+        } else {
+            alert('Error al actualizar: ' + data.message);
+        }
+    })
+    .catch(error => alert('Error: ' + error));
+}
+
+function agregarComida() {
+    // Limitar a 20 comidas máximo
+    if (contadorComidas >= 20) {
+        alert('⚠️ Máximo 20 comidas permitidas');
+        return;
+    }
+    
+    contadorComidas++;
+    
+    const container = document.getElementById('comidas-container');
+    const comidaDiv = document.createElement('div');
+    comidaDiv.className = 'form-row';
+    comidaDiv.id = `comida-${contadorComidas}`;
+    comidaDiv.style.background = 'white';
+    comidaDiv.style.padding = '1rem';
+    comidaDiv.style.marginTop = '0.5rem';
+    comidaDiv.style.borderRadius = '4px';
+    comidaDiv.style.border = '1px solid #ddd';
+    
+    comidaDiv.innerHTML = `
+        <div class="form-group" style="flex: 0 0 auto; width: 60px; display: flex; align-items: center; justify-content: center; font-weight: bold; color: #d40511;">
+            #${contadorComidas}
+        </div>
+        <div class="form-group">
+            <label>Guía Comida</label>
+            <input type="text" name="comida_guia_${contadorComidas}" placeholder="N° Guía">
+        </div>
+        <div class="form-group">
+            <label>Descripción *</label>
+            <input type="text" name="comida_descripcion_${contadorComidas}" required placeholder="Tipo de comida">
+        </div>
+        <div class="form-group">
+            <label>Kilo</label>
+            <input type="number" name="comida_kilo_${contadorComidas}" min="0" step="0.01" placeholder="0.00">
+        </div>
+        <div class="form-group">
+            <label>Bultos</label>
+            <input type="number" name="comida_bultos_${contadorComidas}" min="0" placeholder="0">
+        </div>
+        <div class="form-group" style="display: flex; align-items: flex-end;">
+            <button type="button" class="btn btn-danger btn-small" onclick="eliminarComida(${contadorComidas})">✖</button>
+        </div>
+    `;
+    
+    container.appendChild(comidaDiv);
+}
+
+function eliminarComida(comidaId) {
+    const elemento = document.getElementById(`comida-${comidaId}`);
+    if (elemento) {
+        elemento.remove();
+    }
+}
+
+function limpiarFormulario() {
+    document.getElementById('formNuevoViaje').reset();
+    document.getElementById('comidas-container').innerHTML = '';
+    document.getElementById('mensaje-resultado').style.display = 'none';
+    contadorComidas = 0;
+    document.getElementById('fecha').valueAsDate = new Date();
+}
+
+document.getElementById('formNuevoViaje').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    const data = {
+        numero_viaje: formData.get('numero_viaje'),
+        centro_costo: formData.get('centro_costo'),
+        fecha: formData.get('fecha'),
+        codigo_casino: formData.get('codigo_casino'),
+        ruta: formData.get('ruta'),
+        tipo_camion: formData.get('tipo_camion'),
+        patente_camion: formData.get('patente_camion'),
+        patente_semi: formData.get('patente_semi'),
+        numero_rampa: formData.get('numero_rampa'),
+        peso_camion: formData.get('peso_camion'),
+        numero_camion: formData.get('numero_camion'),
+        termografos_gps: formData.get('termografos_gps'),
+        chofer: formData.get('chofer'),
+        celular: formData.get('celular'),
+        rut: formData.get('rut'),
+        hora_salida: formData.get('hora_salida'),
+        hora_llegada: formData.get('hora_llegada'),
+        num_wencos: formData.get('num_wencos'),
+        bin: formData.get('bin'),
+        pallets: formData.get('pallets'),
+        pallets_chep: formData.get('pallets_chep'),
+        pallets_pl_negro_grueso: formData.get('pallets_pl_negro_grueso'),
+        pallets_pl_negro_alternativo: formData.get('pallets_pl_negro_alternativo'),
+        pallets_congelado: formData.get('pallets_congelado'),
+        wencos_congelado: formData.get('wencos_congelado'),
+        check_congelado: formData.get('check_congelado') ? 'X' : '',
+        pallets_refrigerado: formData.get('pallets_refrigerado'),
+        wencos_refrigerado: formData.get('wencos_refrigerado'),
+        check_refrigerado: formData.get('check_refrigerado') ? 'X' : '',
+        pallets_abarrote: formData.get('pallets_abarrote'),
+
+        check_abarrote: formData.get('check_abarrote') ? 'X' : '',
+        check_implementos: formData.get('check_implementos') ? 'X' : '',
+        check_aseo: formData.get('check_aseo') ? 'X' : '',
+        check_trazabilidad: formData.get('check_trazabilidad') ? 'X' : '',
+        check_plataforma_wtck: formData.get('check_plataforma_wtck') ? 'X' : '',
+        check_env_correo_wtck: formData.get('check_env_correo_wtck') ? 'X' : '',
+        check_revision_planilla_despacho: formData.get('check_revision_planilla_despacho') ? 'X' : '',
+        guia_1: formData.get('guia_1'),
+        guia_2: formData.get('guia_2'),
+        guia_3: formData.get('guia_3'),
+        guia_4: formData.get('guia_4'),
+        guia_5: formData.get('guia_5'),
+        guia_6: formData.get('guia_6'),
+        guia_7: formData.get('guia_7'),
+        guia_8: formData.get('guia_8'),
+        guia_9: formData.get('guia_9'),
+        guia_10: formData.get('guia_10'),
+        guia_11: formData.get('guia_11'),
+        guia_12: formData.get('guia_12'),
+        guia_13: formData.get('guia_13'),
+        guia_14: formData.get('guia_14'),
+        sello_salida_1p: formData.get('sello_salida_1p'),
+        sello_salida_2p: formData.get('sello_salida_2p'),
+        sello_salida_3p: formData.get('sello_salida_3p'),
+        sello_salida_4p: formData.get('sello_salida_4p'),
+        sello_salida_5p: formData.get('sello_salida_5p'),
+        sello_retorno_1p: formData.get('sello_retorno_1p'),
+        sello_retorno_2p: formData.get('sello_retorno_2p'),
+        sello_retorno_3p: formData.get('sello_retorno_3p'),
+        sello_retorno_4p: formData.get('sello_retorno_4p'),
+        sello_retorno_5p: formData.get('sello_retorno_5p'),
+        numero_certificado_fumigacion: formData.get('numero_certificado_fumigacion'),
+        revision_limpieza_camion_acciones: formData.get('revision_limpieza_camion_acciones'),
+        administrativo_responsable: formData.get('administrativo_responsable'),
+        comidas: []
+    };
+    
+    // Recopilar comidas preparadas
+    for (let comidaId = 1; comidaId <= contadorComidas; comidaId++) {
+        const comidaElement = document.getElementById(`comida-${comidaId}`);
+        if (comidaElement) {
+            const descripcion = formData.get(`comida_descripcion_${comidaId}`);
+            if (descripcion) {
+                data.comidas.push({
+                    guia_comida: formData.get(`comida_guia_${comidaId}`) || '',
+                    descripcion: descripcion,
+                    kilo: parseFloat(formData.get(`comida_kilo_${comidaId}`)) || 0,
+                    bultos: parseInt(formData.get(`comida_bultos_${comidaId}`)) || 0
+                });
+            }
+        }
+    }
+    
+    // Enviar datos
+    fetch('/api/guardar-viaje', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(result => {
+        const mensaje = document.getElementById('mensaje-resultado');
+        mensaje.style.display = 'block';
+        
+        if (result.success) {
+            mensaje.className = 'mensaje mensaje-exito';
+            mensaje.textContent = '✓ ' + result.message;
+            setTimeout(() => {
+                limpiarFormulario();
+            }, 2000);
+        } else {
+            mensaje.className = 'mensaje mensaje-error';
+            mensaje.textContent = '✖ Error: ' + result.message;
+        }
+    })
+    .catch(error => {
+        const mensaje = document.getElementById('mensaje-resultado');
+        mensaje.style.display = 'block';
+        mensaje.className = 'mensaje mensaje-error';
+        mensaje.textContent = '✖ Error de conexión: ' + error.message;
+    });
+});
+
+// ======= FUNCIONES PARA MODALES DE MAESTRAS =======
+
+// CENTRO DE COSTO
+function abrirModalCentroCosto() {
+    document.getElementById('modalCentroCosto').style.display = 'flex';
+    document.getElementById('nuevo_codigo_costo').focus();
+}
+
+function cerrarModalCentroCosto() {
+    document.getElementById('modalCentroCosto').style.display = 'none';
+    document.getElementById('formCentroCosto').reset();
+}
+
+function guardarCentroCosto(event) {
+    event.preventDefault();
+    
+    const data = {
+        codigo_costo: document.getElementById('nuevo_codigo_costo').value.trim(),
+        casino: document.getElementById('nuevo_casino').value.trim(),
+        ruta: document.getElementById('nuevo_ruta').value.trim()
+    };
+    
+    fetch('/api/crear-centro-costo', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(result => {
+        if (result.success) {
+            // Agregar a la lista
+            const select = document.getElementById('centro_costo');
+            const option = new Option(`${data.codigo_costo} - ${data.casino}`, data.codigo_costo);
+            option.setAttribute('data-casino', data.casino);
+            option.setAttribute('data-ruta', data.ruta);
+            select.add(option);
+            select.value = data.codigo_costo;
+            
+            // Autocompletar campos relacionados
+            document.getElementById('codigo_casino').value = data.casino;
+            document.getElementById('ruta').value = data.ruta;
+            
+            alert('✓ Centro de Costo creado exitosamente');
+            cerrarModalCentroCosto();
+        } else {
+            alert('✖ Error: ' + result.message);
+        }
+    })
+    .catch(error => {
+        alert('✖ Error de conexión: ' + error.message);
+    });
+}
+
+// CHOFER
+function abrirModalChofer() {
+    document.getElementById('modalChofer').style.display = 'flex';
+    document.getElementById('nuevo_chofer_nombre').focus();
+}
+
+function cerrarModalChofer() {
+    document.getElementById('modalChofer').style.display = 'none';
+    document.getElementById('formChofer').reset();
+}
+
+function guardarChofer(event) {
+    event.preventDefault();
+    
+    const data = {
+        nombre: document.getElementById('nuevo_chofer_nombre').value.trim().toUpperCase(),
+        rut: document.getElementById('nuevo_chofer_rut').value.trim(),
+        celular: document.getElementById('nuevo_chofer_celular').value.trim()
+    };
+    
+    fetch('/api/crear-chofer', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(result => {
+        if (result.success) {
+            // Agregar a la lista
+            const select = document.getElementById('chofer');
+            const option = new Option(data.nombre, data.nombre);
+            select.add(option);
+            select.value = data.nombre;
+            
+            // Autocompletar campos relacionados
+            document.getElementById('celular').value = data.celular;
+            document.getElementById('rut').value = data.rut;
+            
+            alert('✓ Chofer creado exitosamente');
+            cerrarModalChofer();
+        } else {
+            alert('✖ Error: ' + result.message);
+        }
+    })
+    .catch(error => {
+        alert('✖ Error de conexión: ' + error.message);
+    });
+}
+
+// ADMINISTRATIVO
+function abrirModalAdministrativo() {
+    document.getElementById('modalAdministrativo').style.display = 'flex';
+    document.getElementById('nuevo_administrativo_nombre').focus();
+}
+
+function cerrarModalAdministrativo() {
+    document.getElementById('modalAdministrativo').style.display = 'none';
+    document.getElementById('formAdministrativo').reset();
+}
+
+function guardarAdministrativo(event) {
+    event.preventDefault();
+    
+    const nombre = document.getElementById('nuevo_administrativo_nombre').value.trim().toUpperCase();
+    
+    fetch('/api/crear-administrativo', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ nombre: nombre })
+    })
+    .then(response => response.json())
+    .then(result => {
+        if (result.success) {
+            // Actualizar el campo select2
+            $('#administrativo_responsable').append(`<option value="${nombre}" selected>${nombre}</option>`).trigger('change');
+            
+            alert('✓ Administrativo creado exitosamente');
+            cerrarModalAdministrativo();
+        } else {
+            alert('✖ Error: ' + result.message);
+        }
+    })
+    .catch(error => {
+        alert('✖ Error de conexión: ' + error.message);
+    });
+}
+
+// Cargar administrativos existentes
+function cargarAdministrativos() {
+    fetch('/api/listar-administrativos')
+    .then(response => response.json())
+    .then(result => {
+        if (result.success) {
+            const select = $('#administrativo_responsable');
+            select.empty();
+            select.append('<option value="">Seleccione un administrativo...</option>');
+            result.administrativos.forEach(admin => {
+                select.append(`<option value="${admin}">${admin}</option>`);
+            });
+            // Inicializar Select2 después de cargar las opciones
+            select.select2({
+                placeholder: 'Buscar administrativo...',
+                allowClear: true,
+                language: {
+                    noResults: function() {
+                        return "No se encontraron resultados";
+                    },
+                    searching: function() {
+                        return "Buscando...";
+                    }
+                }
+            });
+        }
+    })
+    .catch(error => console.error('Error cargando administrativos:', error));
+}
+
+// Cerrar modal al hacer click fuera
+window.onclick = function(event) {
+    if (event.target.classList.contains('modal')) {
+        event.target.style.display = 'none';
+    }
+}
+
+// Establecer fecha actual al cargar
+window.addEventListener('load', function() {
+    document.getElementById('fecha').valueAsDate = new Date();
+    cargarAdministrativos(); // Cargar lista de administrativos
+});
+</script>
+{% endblock %}
