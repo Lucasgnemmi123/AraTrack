@@ -241,7 +241,7 @@ class PDFGenerator:
         content.append(Spacer(1, 1*mm))
         
         # 8. COMIDAS PREPARADAS
-        comidas_header = Table([['DESPACHO COMIDAS PREPARADAS']], colWidths=[7.5*inch])
+        comidas_header = Table([['COMIDAS PREPARADAS / IMPLEMENTOS']], colWidths=[7.5*inch])
         comidas_header.setStyle(TableStyle([
             ('BACKGROUND', (0, 0), (-1, -1), colors.HexColor('#808080')),
             ('TEXTCOLOR', (0, 0), (-1, -1), colors.white),
@@ -254,25 +254,29 @@ class PDFGenerator:
         content.append(comidas_header)
         
         # Tabla de comidas - 20 FILAS
-        comidas_data = [['GUIAS', 'DESCRIPCION', 'KILO', 'BULTOS']]
+        comidas_data = [['GUIAS', 'PROVEEDOR', 'DESCRIPCION', 'KILO', 'BULTOS']]
         
         for comida in comidas[:20]:
-            descripcion = comida.get('descripcion', '')
+            proveedor = comida.get('proveedor', '') or ''
+            if len(proveedor) > 15:
+                proveedor = proveedor[:15]
+            descripcion = comida.get('descripcion', '') or ''
             if len(descripcion) > 20:
                 descripcion = descripcion[:20]
             comidas_data.append([
-                comida.get('guia_comida', ''),
+                comida.get('guia_comida', '') or '',
+                proveedor,
                 descripcion,
-                str(comida.get('kilo', '')),
-                str(comida.get('bultos', '')),
+                str(comida.get('kilo', '') or ''),
+                str(comida.get('bultos', '') or '')
             ])
         
         while len(comidas_data) < 21:
-            comidas_data.append(['', '', '', ''])
+            comidas_data.append(['', '', '', '', ''])
         
         comidas_table = Table(
             comidas_data, 
-            colWidths=[1.5*inch, 4.75*inch, 0.625*inch, 0.625*inch],
+            colWidths=[1.2*inch, 1.6*inch, 3.5*inch, 0.6*inch, 0.6*inch],
             rowHeights=[0.18*inch] * len(comidas_data)
         )
         comidas_table.setStyle(TableStyle([

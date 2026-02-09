@@ -82,9 +82,9 @@ class MaestrasManager:
         cursor = conn.cursor()
         
         query = """
-        SELECT codigo_centro_costo, nombre_casino, ruta
+        SELECT codigo_costo, casino, ruta
         FROM maestras_casinos 
-        WHERE codigo_centro_costo = ?
+        WHERE codigo_costo = ?
         """
         
         cursor.execute(query, (codigo,))
@@ -106,9 +106,9 @@ class MaestrasManager:
         cursor = conn.cursor()
         
         query = """
-        SELECT id, codigo_centro_costo, nombre_casino, ruta 
+        SELECT id, codigo_costo, casino, ruta 
         FROM maestras_casinos 
-        ORDER BY nombre_casino ASC
+        ORDER BY casino ASC
         """
         
         cursor.execute(query)
@@ -132,14 +132,14 @@ class MaestrasManager:
         
         try:
             # Verificar si ya existe
-            cursor.execute("SELECT 1 FROM maestras_casinos WHERE codigo_centro_costo = ?", (codigo_costo,))
+            cursor.execute("SELECT 1 FROM maestras_casinos WHERE codigo_costo = ?", (codigo_costo,))
             if cursor.fetchone():
                 conn.close()
                 return False  # Ya existe
             
             # Agregar nuevo casino
             cursor.execute("""
-                INSERT INTO maestras_casinos (codigo_centro_costo, nombre_casino, ruta)
+                INSERT INTO maestras_casinos (codigo_costo, casino, ruta)
                 VALUES (?, ?, ?)
             """, (codigo_costo, casino, ruta))
             
@@ -220,9 +220,9 @@ class MaestrasManager:
         cursor = conn.cursor()
         
         cursor.execute("""
-            SELECT id, codigo_centro_costo, nombre_casino, ruta 
+            SELECT id, codigo_costo, casino, ruta 
             FROM maestras_casinos 
-            ORDER BY codigo_centro_costo ASC
+            ORDER BY codigo_costo ASC
         """)
         results = cursor.fetchall()
         
@@ -263,13 +263,13 @@ class MaestrasManager:
             cursor = conn.cursor()
             
             # Verificar si ya existe
-            cursor.execute("SELECT id FROM maestras_casinos WHERE codigo_centro_costo = ?", (codigo_costo,))
+            cursor.execute("SELECT id FROM maestras_casinos WHERE codigo_costo = ?", (codigo_costo,))
             if cursor.fetchone():
                 conn.close()
                 return False
             
             cursor.execute("""
-                INSERT INTO maestras_casinos (codigo_centro_costo, nombre_casino, ruta)
+                INSERT INTO maestras_casinos (codigo_costo, casino, ruta)
                 VALUES (?, ?, ?)
             """, (codigo_costo, casino, ruta))
             
@@ -350,7 +350,7 @@ class MaestrasManager:
         try:
             cursor.execute("""
                 UPDATE maestras_casinos 
-                SET codigo_centro_costo = ?, nombre_casino = ?, ruta = ?
+                SET codigo_costo = ?, casino = ?, ruta = ?
                 WHERE id = ?
             """, (codigo_costo, casino, ruta, casino_id))
             
@@ -401,6 +401,98 @@ class MaestrasManager:
             conn.close()
             print(f"Error al actualizar administrativo: {e}")
             return False
+    
+    # ====== MÉTODOS DE ACTUALIZACIÓN POR NOMBRE/CÓDIGO ======
+    
+    def actualizar_centro_costo_por_codigo(self, codigo_costo: str, casino: str, ruta: str = "") -> bool:
+        """Actualizar un centro de costo por su código"""
+        conn = self._get_connection()
+        cursor = conn.cursor()
+        
+        try:
+            cursor.execute("""
+                UPDATE maestras_casinos 
+                SET casino = ?, ruta = ?
+                WHERE codigo_costo = ?
+            """, (casino, ruta, codigo_costo))
+            
+            conn.commit()
+            success = cursor.rowcount > 0
+            conn.close()
+            return success
+        except Exception as e:
+            conn.close()
+            print(f"Error al actualizar centro de costo: {e}")
+            return False
+    
+    def actualizar_chofer_por_nombre(self, nombre: str, rut: str, celular: str = "") -> bool:
+        """Actualizar un chofer por su nombre"""
+        conn = self._get_connection()
+        cursor = conn.cursor()
+        
+        try:
+            cursor.execute("""
+                UPDATE maestras_choferes 
+                SET rut = ?, celular = ?
+                WHERE nombre = ?
+            """, (rut, celular, nombre))
+            
+            conn.commit()
+            success = cursor.rowcount > 0
+            conn.close()
+            return success
+        except Exception as e:
+            conn.close()
+            print(f"Error al actualizar chofer: {e}")
+            return False
+    
+    def actualizar_administrativo_por_nombre(self, nombre_original: str, nombre_nuevo: str) -> bool:
+        """Actualizar un administrativo por su nombre"""
+        conn = self._get_connection()
+        cursor = conn.cursor()
+        
+        try:
+            cursor.execute("""
+                UPDATE maestras_administrativos 
+                SET nombre = ?
+                WHERE nombre = ?
+            """, (nombre_nuevo, nombre_original))
+            
+            conn.commit()
+            success = cursor.rowcount > 0
+            conn.close()
+            return success
+        except Exception as e:
+            conn.close()
+            print(f"Error al actualizar administrativo: {e}")
+            return False
+    
+    def obtener_chofer_por_nombre(self, nombre: str) -> Optional[Dict]:
+        """Obtener datos de un chofer por su nombre"""
+        conn = self._get_connection()
+        cursor = conn.cursor()
+        
+        try:
+            cursor.execute("""
+                SELECT nombre, rut, celular
+                FROM maestras_choferes
+                WHERE nombre = ?
+            """, (nombre,))
+            
+            row = cursor.fetchone()
+            conn.close()
+            
+            if row:
+                return {
+                    'nombre': row[0],
+                    'rut': row[1],
+                    'celular': row[2]
+                }
+            return None
+        except Exception as e:
+            conn.close()
+            print(f"Error al obtener chofer: {e}")
+            return None
             
     def obtener_ultimo_viaje_por_numero(self, numero_viaje: str) -> Optional[Dict]:
         """Obtener el último registro de un número de viaje específico"""

@@ -13,6 +13,26 @@ maestras_manager = MaestrasManager()
 pdf_generator = PDFGenerator()
 auth_manager = AuthManager()
 
+# ========== HELPER FUNCTIONS ==========
+
+def cargar_query(nombre_archivo):
+    """Cargar query SQL desde archivo en carpeta queries/"""
+    try:
+        ruta_query = os.path.join(os.path.dirname(__file__), 'queries', nombre_archivo)
+        with open(ruta_query, 'r', encoding='utf-8') as f:
+            # Leer todo el contenido
+            contenido = f.read()
+            # Eliminar comentarios SQL (líneas que empiezan con --)
+            lineas = [linea for linea in contenido.split('\n') 
+                     if not linea.strip().startswith('--')]
+            # Unir y limpiar espacios extras
+            query = '\n'.join(lineas).strip()
+            return query
+    except FileNotFoundError:
+        raise FileNotFoundError(f"No se encontró el archivo de query: {nombre_archivo}")
+    except Exception as e:
+        raise Exception(f"Error al cargar query {nombre_archivo}: {str(e)}")
+
 # ========== RUTAS DE AUTENTICACIÓN ==========
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -221,7 +241,7 @@ def buscar_viaje_numero(numero_viaje):
             # Obtener comidas del viaje
             cursor.execute('''
                 SELECT id, numero_viaje, numero_centro_costo, guia_comida, 
-                       descripcion, kilo, bultos 
+                       descripcion, kilo, bultos, proveedor 
                 FROM comidas_preparadas 
                 WHERE numero_viaje = ? AND numero_centro_costo = ?
                 ORDER BY id
@@ -237,7 +257,8 @@ def buscar_viaje_numero(numero_viaje):
                     'guia_comida': row[3],
                     'descripcion': row[4],
                     'kilo': row[5],
-                    'bultos': row[6]
+                    'bultos': row[6],
+                    'proveedor': row[7]
                 })
             
             conn.close()
@@ -325,23 +346,23 @@ def guardar_viaje():
     try:
         data = request.json
         
-        # Preparar datos del viaje
+        # Preparar datos del viaje (convertir a mayúsculas donde corresponda)
         viaje_data = {
             'numero_viaje': data.get('numero_viaje'),
             'costo_codigo': data.get('centro_costo'),
             'fecha': data.get('fecha'),
-            'casino': data.get('codigo_casino', ''),
-            'ruta': data.get('ruta', ''),
+            'casino': str(data.get('codigo_casino', '')).upper(),
+            'ruta': str(data.get('ruta', '')).upper(),
             'tipo_camion': data.get('tipo_camion', ''),
-            'patente_camion': data.get('patente_camion'),
-            'patente_semi': data.get('patente_semi', ''),
+            'patente_camion': str(data.get('patente_camion', '')).upper(),
+            'patente_semi': str(data.get('patente_semi', '')).upper(),
             'numero_rampa': data.get('numero_rampa', ''),
             'peso_camion': data.get('peso_camion', ''),
             'numero_camion': data.get('numero_camion', ''),
-            'termografos_gps': data.get('termografos_gps', ''),
-            'conductor': data.get('chofer'),
+            'termografos_gps': str(data.get('termografos_gps', '')).upper(),
+            'conductor': str(data.get('chofer', '')).upper(),
             'celular': data.get('celular', ''),
-            'rut': data.get('rut', ''),
+            'rut': str(data.get('rut', '')).upper(),
             'fecha_hora_salida_dhl': data.get('hora_salida', ''),
             'fecha_hora_llegada_dhl': data.get('hora_llegada', ''),
             'num_wencos': data.get('num_wencos', ''),
@@ -365,33 +386,33 @@ def guardar_viaje():
             'check_plataforma_wtck': data.get('check_plataforma_wtck', ''),
             'check_env_correo_wtck': data.get('check_env_correo_wtck', ''),
             'check_revision_planilla_despacho': data.get('check_revision_planilla_despacho', ''),
-            'guia_1': data.get('guia_1', ''),
-            'guia_2': data.get('guia_2', ''),
-            'guia_3': data.get('guia_3', ''),
-            'guia_4': data.get('guia_4', ''),
-            'guia_5': data.get('guia_5', ''),
-            'guia_6': data.get('guia_6', ''),
-            'guia_7': data.get('guia_7', ''),
-            'guia_8': data.get('guia_8', ''),
-            'guia_9': data.get('guia_9', ''),
-            'guia_10': data.get('guia_10', ''),
-            'guia_11': data.get('guia_11', ''),
-            'guia_12': data.get('guia_12', ''),
-            'guia_13': data.get('guia_13', ''),
-            'guia_14': data.get('guia_14', ''),
-            'sello_salida_1p': data.get('sello_salida_1p', ''),
-            'sello_salida_2p': data.get('sello_salida_2p', ''),
-            'sello_salida_3p': data.get('sello_salida_3p', ''),
-            'sello_salida_4p': data.get('sello_salida_4p', ''),
-            'sello_salida_5p': data.get('sello_salida_5p', ''),
-            'sello_retorno_1p': data.get('sello_retorno_1p', ''),
-            'sello_retorno_2p': data.get('sello_retorno_2p', ''),
-            'sello_retorno_3p': data.get('sello_retorno_3p', ''),
-            'sello_retorno_4p': data.get('sello_retorno_4p', ''),
-            'sello_retorno_5p': data.get('sello_retorno_5p', ''),
-            'numero_certificado_fumigacion': data.get('numero_certificado_fumigacion', ''),
-            'revision_limpieza_camion_acciones': data.get('revision_limpieza_camion_acciones', ''),
-            'administrativo_responsable': data.get('administrativo_responsable', '')
+            'guia_1': str(data.get('guia_1', '')).upper(),
+            'guia_2': str(data.get('guia_2', '')).upper(),
+            'guia_3': str(data.get('guia_3', '')).upper(),
+            'guia_4': str(data.get('guia_4', '')).upper(),
+            'guia_5': str(data.get('guia_5', '')).upper(),
+            'guia_6': str(data.get('guia_6', '')).upper(),
+            'guia_7': str(data.get('guia_7', '')).upper(),
+            'guia_8': str(data.get('guia_8', '')).upper(),
+            'guia_9': str(data.get('guia_9', '')).upper(),
+            'guia_10': str(data.get('guia_10', '')).upper(),
+            'guia_11': str(data.get('guia_11', '')).upper(),
+            'guia_12': str(data.get('guia_12', '')).upper(),
+            'guia_13': str(data.get('guia_13', '')).upper(),
+            'guia_14': str(data.get('guia_14', '')).upper(),
+            'sello_salida_1p': str(data.get('sello_salida_1p', '')).upper(),
+            'sello_salida_2p': str(data.get('sello_salida_2p', '')).upper(),
+            'sello_salida_3p': str(data.get('sello_salida_3p', '')).upper(),
+            'sello_salida_4p': str(data.get('sello_salida_4p', '')).upper(),
+            'sello_salida_5p': str(data.get('sello_salida_5p', '')).upper(),
+            'sello_retorno_1p': str(data.get('sello_retorno_1p', '')).upper(),
+            'sello_retorno_2p': str(data.get('sello_retorno_2p', '')).upper(),
+            'sello_retorno_3p': str(data.get('sello_retorno_3p', '')).upper(),
+            'sello_retorno_4p': str(data.get('sello_retorno_4p', '')).upper(),
+            'sello_retorno_5p': str(data.get('sello_retorno_5p', '')).upper(),
+            'numero_certificado_fumigacion': str(data.get('numero_certificado_fumigacion', '')).upper(),
+            'revision_limpieza_camion_acciones': str(data.get('revision_limpieza_camion_acciones', '')).upper(),
+            'administrativo_responsable': str(data.get('administrativo_responsable', '')).upper()
         }
         
         # Insertar viaje
@@ -408,15 +429,16 @@ def guardar_viaje():
                     cursor.execute("""
                         INSERT INTO comidas_preparadas (
                             numero_viaje, numero_centro_costo, guia_comida, 
-                            descripcion, kilo, bultos
-                        ) VALUES (?, ?, ?, ?, ?, ?)
+                            descripcion, kilo, bultos, proveedor
+                        ) VALUES (?, ?, ?, ?, ?, ?, ?)
                     """, (
                         data.get('numero_viaje'),
                         data.get('centro_costo'),
-                        comida.get('guia_comida', ''),
-                        comida.get('descripcion'),
+                        str(comida.get('guia_comida', '')).upper(),
+                        str(comida.get('descripcion', '')).upper(),
                         comida.get('kilo', 0),
-                        comida.get('bultos', 0)
+                        comida.get('bultos', 0),
+                        str(comida.get('proveedor', '')).upper()
                     ))
                 
                 conn.commit()
@@ -499,18 +521,18 @@ def actualizar_viaje():
         data = request.json
         viaje_data = {
             'fecha': data.get('fecha'),
-            'casino': data.get('casino'),
-            'ruta': data.get('ruta'),
+            'casino': str(data.get('casino', '')).upper(),
+            'ruta': str(data.get('ruta', '')).upper(),
             'tipo_camion': data.get('tipo_camion'),
-            'patente_camion': data.get('patente_camion'),
-            'patente_semi': data.get('patente_semi'),
+            'patente_camion': str(data.get('patente_camion', '')).upper(),
+            'patente_semi': str(data.get('patente_semi', '')).upper(),
             'numero_rampa': data.get('numero_rampa'),
             'peso_camion': data.get('peso_camion'),
             'numero_camion': data.get('numero_camion'),
-            'termografos_gps': data.get('termografos_gps'),
-            'conductor': data.get('chofer'),
+            'termografos_gps': str(data.get('termografos_gps', '')).upper(),
+            'conductor': str(data.get('chofer', '')).upper(),
             'celular': data.get('celular'),
-            'rut': data.get('rut'),
+            'rut': str(data.get('rut', '')).upper(),
             'fecha_hora_salida_dhl': data.get('hora_salida'),
             'fecha_hora_llegada_dhl': data.get('hora_llegada'),
             'num_wencos': data.get('num_wencos'),
@@ -534,33 +556,33 @@ def actualizar_viaje():
             'check_plataforma_wtck': data.get('check_plataforma_wtck', ''),
             'check_env_correo_wtck': data.get('check_env_correo_wtck', ''),
             'check_revision_planilla_despacho': data.get('check_revision_planilla_despacho', ''),
-            'guia_1': data.get('guia_1', ''),
-            'guia_2': data.get('guia_2', ''),
-            'guia_3': data.get('guia_3', ''),
-            'guia_4': data.get('guia_4', ''),
-            'guia_5': data.get('guia_5', ''),
-            'guia_6': data.get('guia_6', ''),
-            'guia_7': data.get('guia_7', ''),
-            'guia_8': data.get('guia_8', ''),
-            'guia_9': data.get('guia_9', ''),
-            'guia_10': data.get('guia_10', ''),
-            'guia_11': data.get('guia_11', ''),
-            'guia_12': data.get('guia_12', ''),
-            'guia_13': data.get('guia_13', ''),
-            'guia_14': data.get('guia_14', ''),
-            'sello_salida_1p': data.get('sello_salida_1p', ''),
-            'sello_salida_2p': data.get('sello_salida_2p', ''),
-            'sello_salida_3p': data.get('sello_salida_3p', ''),
-            'sello_salida_4p': data.get('sello_salida_4p', ''),
-            'sello_salida_5p': data.get('sello_salida_5p', ''),
-            'sello_retorno_1p': data.get('sello_retorno_1p', ''),
-            'sello_retorno_2p': data.get('sello_retorno_2p', ''),
-            'sello_retorno_3p': data.get('sello_retorno_3p', ''),
-            'sello_retorno_4p': data.get('sello_retorno_4p', ''),
-            'sello_retorno_5p': data.get('sello_retorno_5p', ''),
-            'numero_certificado_fumigacion': data.get('numero_certificado_fumigacion', ''),
-            'revision_limpieza_camion_acciones': data.get('revision_limpieza_camion_acciones', ''),
-            'administrativo_responsable': data.get('administrativo_responsable', '')
+            'guia_1': str(data.get('guia_1', '')).upper(),
+            'guia_2': str(data.get('guia_2', '')).upper(),
+            'guia_3': str(data.get('guia_3', '')).upper(),
+            'guia_4': str(data.get('guia_4', '')).upper(),
+            'guia_5': str(data.get('guia_5', '')).upper(),
+            'guia_6': str(data.get('guia_6', '')).upper(),
+            'guia_7': str(data.get('guia_7', '')).upper(),
+            'guia_8': str(data.get('guia_8', '')).upper(),
+            'guia_9': str(data.get('guia_9', '')).upper(),
+            'guia_10': str(data.get('guia_10', '')).upper(),
+            'guia_11': str(data.get('guia_11', '')).upper(),
+            'guia_12': str(data.get('guia_12', '')).upper(),
+            'guia_13': str(data.get('guia_13', '')).upper(),
+            'guia_14': str(data.get('guia_14', '')).upper(),
+            'sello_salida_1p': str(data.get('sello_salida_1p', '')).upper(),
+            'sello_salida_2p': str(data.get('sello_salida_2p', '')).upper(),
+            'sello_salida_3p': str(data.get('sello_salida_3p', '')).upper(),
+            'sello_salida_4p': str(data.get('sello_salida_4p', '')).upper(),
+            'sello_salida_5p': str(data.get('sello_salida_5p', '')).upper(),
+            'sello_retorno_1p': str(data.get('sello_retorno_1p', '')).upper(),
+            'sello_retorno_2p': str(data.get('sello_retorno_2p', '')).upper(),
+            'sello_retorno_3p': str(data.get('sello_retorno_3p', '')).upper(),
+            'sello_retorno_4p': str(data.get('sello_retorno_4p', '')).upper(),
+            'sello_retorno_5p': str(data.get('sello_retorno_5p', '')).upper(),
+            'numero_certificado_fumigacion': str(data.get('numero_certificado_fumigacion', '')).upper(),
+            'revision_limpieza_camion_acciones': str(data.get('revision_limpieza_camion_acciones', '')).upper(),
+            'administrativo_responsable': str(data.get('administrativo_responsable', '')).upper()
         }
         
         # Actualizar viaje
@@ -578,15 +600,16 @@ def actualizar_viaje():
                 cursor.execute("""
                     INSERT INTO comidas_preparadas (
                         numero_viaje, numero_centro_costo, guia_comida, 
-                        descripcion, kilo, bultos
-                    ) VALUES (?, ?, ?, ?, ?, ?)
+                        descripcion, kilo, bultos, proveedor
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?)
                 """, (
                     data.get('numero_viaje'),
                     data.get('centro_costo'),
-                    comida.get('guia_comida', ''),
-                    comida.get('descripcion'),
+                    str(comida.get('guia_comida', '')).upper(),
+                    str(comida.get('descripcion', '')).upper(),
                     comida.get('kilo', 0),
-                    comida.get('bultos', 0)
+                    comida.get('bultos', 0),
+                    str(comida.get('proveedor', '')).upper()
                 ))
             
             conn.commit()
@@ -613,6 +636,510 @@ def eliminar_viaje():
 @login_required
 def generar_pdf_page():
     return render_template('generar_pdf.html')
+
+@app.route('/reportes')
+@login_required
+def reportes():
+    return render_template('reportes.html')
+
+@app.route('/api/descargar-reporte-casinos')
+@login_required
+def descargar_reporte_casinos():
+    """Generar y descargar reporte Excel de la maestra de casinos"""
+    try:
+        from openpyxl import Workbook
+        from openpyxl.styles import Font, PatternFill, Alignment
+        from io import BytesIO
+        from datetime import datetime
+        
+        # Cargar query desde archivo
+        query = cargar_query('reporte_maestra_casinos.sql')
+        
+        # Ejecutar consulta
+        conn = db_manager.get_connection()
+        cursor = conn.cursor()
+        cursor.execute(query)
+        casinos_data = cursor.fetchall()
+        conn.close()
+        
+        # Crear libro de Excel
+        wb = Workbook()
+        ws = wb.active
+        ws.title = "Maestra Casinos"
+        
+        # Estilos
+        header_fill = PatternFill(start_color="4472C4", end_color="4472C4", fill_type="solid")
+        header_font = Font(bold=True, color="FFFFFF", size=12)
+        header_alignment = Alignment(horizontal="center", vertical="center")
+        
+        # Encabezados
+        headers = ['CÓDIGO CENTRO COSTO', 'CASINO', 'RUTA']
+        for col_num, header in enumerate(headers, 1):
+            cell = ws.cell(row=1, column=col_num)
+            cell.value = header
+            cell.fill = header_fill
+            cell.font = header_font
+            cell.alignment = header_alignment
+        
+        # Datos
+        for row_num, casino in enumerate(casinos_data, 2):
+            ws.cell(row=row_num, column=1, value=casino[0])  # codigo_costo
+            ws.cell(row=row_num, column=2, value=casino[1])  # casino
+            ws.cell(row=row_num, column=3, value=casino[2])  # ruta
+        
+        # Ajustar anchos de columna
+        ws.column_dimensions['A'].width = 25
+        ws.column_dimensions['B'].width = 40
+        ws.column_dimensions['C'].width = 30
+        
+        # Guardar en memoria
+        output = BytesIO()
+        wb.save(output)
+        output.seek(0)
+        
+        # Nombre del archivo con fecha
+        fecha = datetime.now().strftime('%Y%m%d_%H%M%S')
+        filename = f'Maestra_Casinos_{fecha}.xlsx'
+        
+        return send_file(
+            output,
+            mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            as_attachment=True,
+            download_name=filename
+        )
+        
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+@app.route('/api/descargar-reporte-choferes')
+@login_required
+def descargar_reporte_choferes():
+    """Generar y descargar reporte Excel de la maestra de choferes"""
+    try:
+        from openpyxl import Workbook
+        from openpyxl.styles import Font, PatternFill, Alignment
+        from io import BytesIO
+        from datetime import datetime
+        
+        # Cargar query desde archivo
+        query = cargar_query('reporte_maestra_choferes.sql')
+        
+        # Ejecutar consulta
+        conn = db_manager.get_connection()
+        cursor = conn.cursor()
+        cursor.execute(query)
+        choferes_data = cursor.fetchall()
+        conn.close()
+        
+        # Crear libro de Excel
+        wb = Workbook()
+        ws = wb.active
+        ws.title = "Maestra Choferes"
+        
+        # Estilos
+        header_fill = PatternFill(start_color="70AD47", end_color="70AD47", fill_type="solid")
+        header_font = Font(bold=True, color="FFFFFF", size=12)
+        header_alignment = Alignment(horizontal="center", vertical="center")
+        
+        # Encabezados
+        headers = ['NOMBRE', 'RUT', 'CELULAR']
+        for col_num, header in enumerate(headers, 1):
+            cell = ws.cell(row=1, column=col_num)
+            cell.value = header
+            cell.fill = header_fill
+            cell.font = header_font
+            cell.alignment = header_alignment
+        
+        # Datos
+        for row_num, chofer in enumerate(choferes_data, 2):
+            ws.cell(row=row_num, column=1, value=chofer[0])  # nombre
+            ws.cell(row=row_num, column=2, value=chofer[1])  # rut
+            ws.cell(row=row_num, column=3, value=chofer[2])  # celular
+        
+        # Ajustar anchos de columna
+        ws.column_dimensions['A'].width = 40
+        ws.column_dimensions['B'].width = 20
+        ws.column_dimensions['C'].width = 20
+        
+        # Guardar en memoria
+        output = BytesIO()
+        wb.save(output)
+        output.seek(0)
+        
+        # Nombre del archivo con fecha
+        fecha = datetime.now().strftime('%Y%m%d_%H%M%S')
+        filename = f'Maestra_Choferes_{fecha}.xlsx'
+        
+        return send_file(
+            output,
+            mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            as_attachment=True,
+            download_name=filename
+        )
+        
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+@app.route('/api/descargar-reporte-comidas')
+@login_required
+def descargar_reporte_comidas():
+    """Generar y descargar reporte Excel de comidas e implementos por rango de fechas"""
+    try:
+        from openpyxl import Workbook
+        from openpyxl.styles import Font, PatternFill, Alignment
+        from io import BytesIO
+        from datetime import datetime
+        
+        # Obtener parámetros de fechas
+        fecha_inicio = request.args.get('fecha_inicio')
+        fecha_fin = request.args.get('fecha_fin')
+        
+        if not fecha_inicio or not fecha_fin:
+            return jsonify({'success': False, 'message': 'Debe proporcionar fecha de inicio y fin'}), 400
+        
+        # Cargar query desde archivo
+        query = cargar_query('reporte_comidas_implementos.sql')
+        
+        # Ejecutar consulta
+        conn = db_manager.get_connection()
+        cursor = conn.cursor()
+        cursor.execute(query, (fecha_inicio, fecha_fin))
+        comidas = cursor.fetchall()
+        conn.close()
+        
+        # Crear libro de Excel
+        wb = Workbook()
+        ws = wb.active
+        ws.title = "Comidas e Implementos"
+        
+        # Estilos
+        header_fill = PatternFill(start_color="FF6B35", end_color="FF6B35", fill_type="solid")
+        header_font = Font(bold=True, color="FFFFFF", size=12)
+        header_alignment = Alignment(horizontal="center", vertical="center")
+        
+        # Encabezados
+        headers = ['FECHA', 'NRO VIAJE', 'CASINO', 'CONDUCTOR', 'CENTRO COSTO', 
+                   'GUÍA COMIDA', 'DESCRIPCIÓN', 'KILOS', 'BULTOS', 'PROVEEDOR']
+        for col_num, header in enumerate(headers, 1):
+            cell = ws.cell(row=1, column=col_num)
+            cell.value = header
+            cell.fill = header_fill
+            cell.font = header_font
+            cell.alignment = header_alignment
+        
+        # Datos
+        for row_num, comida in enumerate(comidas, 2):
+            ws.cell(row=row_num, column=1, value=comida[0])  # fecha
+            ws.cell(row=row_num, column=2, value=comida[1])  # numero_viaje
+            ws.cell(row=row_num, column=3, value=comida[2])  # casino
+            ws.cell(row=row_num, column=4, value=comida[3])  # conductor
+            ws.cell(row=row_num, column=5, value=comida[4])  # numero_centro_costo
+            ws.cell(row=row_num, column=6, value=comida[5])  # guia_comida
+            ws.cell(row=row_num, column=7, value=comida[6])  # descripcion
+            ws.cell(row=row_num, column=8, value=comida[7])  # kilo
+            ws.cell(row=row_num, column=9, value=comida[8])  # bultos
+            ws.cell(row=row_num, column=10, value=comida[9]) # proveedor
+        
+        # Ajustar anchos de columna
+        ws.column_dimensions['A'].width = 12  # Fecha
+        ws.column_dimensions['B'].width = 15  # Nro Viaje
+        ws.column_dimensions['C'].width = 30  # Casino
+        ws.column_dimensions['D'].width = 30  # Conductor
+        ws.column_dimensions['E'].width = 15  # Centro Costo
+        ws.column_dimensions['F'].width = 15  # Guía Comida
+        ws.column_dimensions['G'].width = 40  # Descripción
+        ws.column_dimensions['H'].width = 10  # Kilos
+        ws.column_dimensions['I'].width = 10  # Bultos
+        ws.column_dimensions['J'].width = 25  # Proveedor
+        
+        # Guardar en memoria
+        output = BytesIO()
+        wb.save(output)
+        output.seek(0)
+        
+        # Nombre del archivo con fechas y timestamp
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        filename = f'Comidas_Implementos_{fecha_inicio}_al_{fecha_fin}_{timestamp}.xlsx'
+        
+        return send_file(
+            output,
+            mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            as_attachment=True,
+            download_name=filename
+        )
+        
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+@app.route('/api/descargar-reporte-viajes')
+@login_required
+def descargar_reporte_viajes():
+    """Generar y descargar reporte Excel de viajes completos por rango de fechas"""
+    try:
+        from openpyxl import Workbook
+        from openpyxl.styles import Font, PatternFill, Alignment
+        from io import BytesIO
+        from datetime import datetime
+        
+        # Obtener parámetros de fechas
+        fecha_inicio = request.args.get('fecha_inicio')
+        fecha_fin = request.args.get('fecha_fin')
+        
+        if not fecha_inicio or not fecha_fin:
+            return jsonify({'success': False, 'message': 'Debe proporcionar fecha de inicio y fin'}), 400
+        
+        # Cargar query desde archivo
+        query = cargar_query('reporte_viajes_completos.sql')
+        
+        # Ejecutar consulta
+        conn = db_manager.get_connection()
+        cursor = conn.cursor()
+        cursor.execute(query, (fecha_inicio, fecha_fin))
+        viajes_data = cursor.fetchall()
+        conn.close()
+        
+        # Crear libro de Excel
+        wb = Workbook()
+        ws = wb.active
+        ws.title = "Viajes Completos"
+        
+        # Estilos
+        header_fill = PatternFill(start_color="9B59B6", end_color="9B59B6", fill_type="solid")
+        header_font = Font(bold=True, color="FFFFFF", size=12)
+        header_alignment = Alignment(horizontal="center", vertical="center")
+        
+        # Encabezados (todos los campos de viajes)
+        headers = [
+            'NRO VIAJE', 'CASINO', 'RUTA', 'TIPO CAMIÓN', 'PATENTE CAMIÓN', 'PATENTE SEMI',
+            'NRO RAMPA', 'PESO CAMIÓN', 'CÓDIGO COSTO', 'TERMÓGRAFOS GPS', 'FECHA',
+            'LLEGADA DHL', 'SALIDA DHL', 'CONDUCTOR', 'CELULAR', 'RUT', 'NRO CAMIÓN',
+            'WENCOS', 'BIN', 'PALLETS', 'PALLETS CHEP', 'PALLETS NEGRO GRUESO',
+            'PALLETS NEGRO ALT', 'PALLETS REFRIG', 'WENCOS REFRIG', 'PALLETS CONG',
+            'WENCOS CONG', 'PALLETS ABARROTE', 'CHECK CONG', 'CHECK REFRIG', 'CHECK ABARROTE',
+            'CHECK IMPLEMENTOS', 'CHECK ASEO', 'CHECK TRAZAB', 'CHECK WTCK', 'CHECK CORREO WTCK',
+            'CHECK PLANILLA', 'SELLO SAL 1P', 'SELLO SAL 2P', 'SELLO SAL 3P', 'SELLO SAL 4P',
+            'SELLO SAL 5P', 'SELLO RET 1P', 'SELLO RET 2P', 'SELLO RET 3P', 'SELLO RET 4P',
+            'SELLO RET 5P', 'GUÍA 1', 'GUÍA 2', 'GUÍA 3', 'GUÍA 4', 'GUÍA 5', 'GUÍA 6',
+            'GUÍA 7', 'GUÍA 8', 'GUÍA 9', 'GUÍA 10', 'GUÍA 11', 'GUÍA 12', 'GUÍA 13', 'GUÍA 14',
+            'CERT FUMIGACIÓN', 'REVISIÓN LIMPIEZA', 'ADMIN RESPONSABLE'
+        ]
+        
+        for col_num, header in enumerate(headers, 1):
+            cell = ws.cell(row=1, column=col_num)
+            cell.value = header
+            cell.fill = header_fill
+            cell.font = header_font
+            cell.alignment = header_alignment
+        
+        # Datos
+        for row_num, viaje in enumerate(viajes_data, 2):
+            for col_num, valor in enumerate(viaje, 1):
+                ws.cell(row=row_num, column=col_num, value=valor)
+        
+        # Ajustar anchos de columna (generales)
+        for col in ws.columns:
+            max_length = 0
+            column = col[0].column_letter
+            for cell in col:
+                try:
+                    if len(str(cell.value)) > max_length:
+                        max_length = len(str(cell.value))
+                except:
+                    pass
+            adjusted_width = min(max_length + 2, 50)
+            ws.column_dimensions[column].width = adjusted_width
+        
+        # Guardar en memoria
+        output = BytesIO()
+        wb.save(output)
+        output.seek(0)
+        
+        # Nombre del archivo con fechas y timestamp
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        filename = f'Viajes_Completos_{fecha_inicio}_al_{fecha_fin}_{timestamp}.xlsx'
+        
+        return send_file(
+            output,
+            mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            as_attachment=True,
+            download_name=filename
+        )
+        
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+@app.route('/api/descargar-reporte-facturacion')
+@login_required
+def descargar_reporte_facturacion():
+    """Generar y descargar reporte Excel de facturación por rango de fechas"""
+    try:
+        from openpyxl import Workbook
+        from openpyxl.styles import Font, PatternFill, Alignment
+        from io import BytesIO
+        from datetime import datetime
+        
+        # Obtener parámetros de fechas
+        fecha_inicio = request.args.get('fecha_inicio')
+        fecha_fin = request.args.get('fecha_fin')
+        
+        if not fecha_inicio or not fecha_fin:
+            return jsonify({'success': False, 'message': 'Debe proporcionar fecha de inicio y fin'}), 400
+        
+        # Cargar query desde archivo
+        query = cargar_query('reporte_facturacion.sql')
+        
+        # Ejecutar consulta
+        conn = db_manager.get_connection()
+        cursor = conn.cursor()
+        cursor.execute(query, (fecha_inicio, fecha_fin))
+        facturacion_data = cursor.fetchall()
+        conn.close()
+        
+        # Crear libro de Excel
+        wb = Workbook()
+        ws = wb.active
+        ws.title = "Facturación"
+        
+        # Estilos
+        header_fill = PatternFill(start_color="16A085", end_color="16A085", fill_type="solid")
+        header_font = Font(bold=True, color="FFFFFF", size=12)
+        header_alignment = Alignment(horizontal="center", vertical="center")
+        
+        # Encabezados
+        headers = [
+            'NRO VIAJE', 'CASINO', 'CÓDIGO COSTO', 'FECHA', 'WENCOS', 'BIN',
+            'PALLETS', 'PALLETS CHEP', 'PALLETS NEGRO GRUESO', 'PALLETS NEGRO ALT',
+            'GUÍAS'
+        ]
+        
+        for col_num, header in enumerate(headers, 1):
+            cell = ws.cell(row=1, column=col_num)
+            cell.value = header
+            cell.fill = header_fill
+            cell.font = header_font
+            cell.alignment = header_alignment
+        
+        # Datos
+        for row_num, factura in enumerate(facturacion_data, 2):
+            for col_num, valor in enumerate(factura, 1):
+                ws.cell(row=row_num, column=col_num, value=valor)
+        
+        # Ajustar anchos de columna
+        ws.column_dimensions['A'].width = 15  # Nro Viaje
+        ws.column_dimensions['B'].width = 35  # Casino
+        ws.column_dimensions['C'].width = 15  # Código Costo
+        ws.column_dimensions['D'].width = 12  # Fecha
+        ws.column_dimensions['E'].width = 10  # Wencos
+        ws.column_dimensions['F'].width = 10  # Bin
+        ws.column_dimensions['G'].width = 10  # Pallets
+        ws.column_dimensions['H'].width = 15  # Pallets CHEP
+        ws.column_dimensions['I'].width = 20  # Pallets Negro Grueso
+        ws.column_dimensions['J'].width = 20  # Pallets Negro Alt
+        ws.column_dimensions['K'].width = 60  # Guías
+        
+        # Guardar en memoria
+        output = BytesIO()
+        wb.save(output)
+        output.seek(0)
+        
+        # Nombre del archivo con fechas y timestamp
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        filename = f'Facturacion_{fecha_inicio}_al_{fecha_fin}_{timestamp}.xlsx'
+        
+        return send_file(
+            output,
+            mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            as_attachment=True,
+            download_name=filename
+        )
+        
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+@app.route('/api/descargar-reporte-facturacion-diaria')
+@login_required
+def descargar_reporte_facturacion_diaria():
+    """Generar y descargar reporte Excel de control de activos diario"""
+    try:
+        from openpyxl import Workbook
+        from openpyxl.styles import Font, PatternFill, Alignment
+        from io import BytesIO
+        from datetime import datetime
+        
+        # Obtener parámetro de fecha
+        fecha = request.args.get('fecha')
+        
+        if not fecha:
+            return jsonify({'success': False, 'message': 'Debe proporcionar la fecha'}), 400
+        
+        # Cargar query desde archivo
+        query = cargar_query('reporte_control_activos_diario.sql')
+        
+        # Ejecutar consulta
+        conn = db_manager.get_connection()
+        cursor = conn.cursor()
+        cursor.execute(query, (fecha,))
+        facturacion_data = cursor.fetchall()
+        conn.close()
+        
+        # Crear libro de Excel
+        wb = Workbook()
+        ws = wb.active
+        ws.title = "Control Activos Diario"
+        
+        # Estilos
+        header_fill = PatternFill(start_color="E74C3C", end_color="E74C3C", fill_type="solid")
+        header_font = Font(bold=True, color="FFFFFF", size=12)
+        header_alignment = Alignment(horizontal="center", vertical="center")
+        
+        # Encabezados
+        headers = [
+            'NRO VIAJE', 'CASINO', 'CÓDIGO COSTO', 'FECHA', 'WENCOS', 'BIN',
+            'PALLETS', 'PALLETS CHEP', 'PALLETS NEGRO GRUESO', 'PALLETS NEGRO ALT'
+        ]
+        
+        for col_num, header in enumerate(headers, 1):
+            cell = ws.cell(row=1, column=col_num)
+            cell.value = header
+            cell.fill = header_fill
+            cell.font = header_font
+            cell.alignment = header_alignment
+        
+        # Datos
+        for row_num, factura in enumerate(facturacion_data, 2):
+            for col_num, valor in enumerate(factura, 1):
+                ws.cell(row=row_num, column=col_num, value=valor)
+        
+        # Ajustar anchos de columna
+        ws.column_dimensions['A'].width = 15  # Nro Viaje
+        ws.column_dimensions['B'].width = 35  # Casino
+        ws.column_dimensions['C'].width = 15  # Código Costo
+        ws.column_dimensions['D'].width = 12  # Fecha
+        ws.column_dimensions['E'].width = 10  # Wencos
+        ws.column_dimensions['F'].width = 10  # Bin
+        ws.column_dimensions['G'].width = 10  # Pallets
+        ws.column_dimensions['H'].width = 15  # Pallets CHEP
+        ws.column_dimensions['I'].width = 20  # Pallets Negro Grueso
+        ws.column_dimensions['J'].width = 20  # Pallets Negro Alt
+        
+        # Guardar en memoria
+        output = BytesIO()
+        wb.save(output)
+        output.seek(0)
+        
+        # Nombre del archivo con fecha y timestamp
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        filename = f'Control_Activos_Diario_{fecha}_{timestamp}.xlsx'
+        
+        return send_file(
+            output,
+            mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            as_attachment=True,
+            download_name=filename
+        )
+        
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
 
 @app.route('/api/generar-pdf', methods=['POST'])
 def generar_pdf_api():
@@ -714,6 +1241,88 @@ def listar_administrativos():
     try:
         nombres = maestras_manager.listar_administrativos_nombres()
         return jsonify({'success': True, 'administrativos': nombres})
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+# ====== RUTAS API PARA ACTUALIZAR REGISTROS EN MAESTRAS ======
+
+@app.route('/api/actualizar-centro-costo', methods=['POST'])
+def actualizar_centro_costo():
+    """Actualizar un centro de costo existente"""
+    try:
+        data = request.json
+        codigo_costo = data.get('codigo_costo', '').strip()
+        casino = data.get('casino', '').strip()
+        ruta = data.get('ruta', '').strip()
+        
+        if not codigo_costo or not casino:
+            return jsonify({'success': False, 'message': 'Código y Casino son obligatorios'}), 400
+        
+        resultado = maestras_manager.actualizar_centro_costo_por_codigo(codigo_costo, casino, ruta)
+        
+        if resultado:
+            return jsonify({'success': True, 'message': 'Centro de Costo actualizado exitosamente'})
+        else:
+            return jsonify({'success': False, 'message': 'No se encontró el centro de costo'}), 404
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+@app.route('/api/actualizar-chofer', methods=['POST'])
+def actualizar_chofer():
+    """Actualizar un chofer existente"""
+    try:
+        data = request.json
+        nombre = data.get('nombre', '').strip()
+        rut = data.get('rut', '').strip()
+        celular = data.get('celular', '').strip()
+        
+        if not nombre:
+            return jsonify({'success': False, 'message': 'Nombre es obligatorio'}), 400
+        
+        resultado = maestras_manager.actualizar_chofer_por_nombre(nombre, rut, celular)
+        
+        if resultado:
+            return jsonify({'success': True, 'message': 'Chofer actualizado exitosamente'})
+        else:
+            return jsonify({'success': False, 'message': 'No se encontró el chofer'}), 404
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+@app.route('/api/actualizar-administrativo', methods=['POST'])
+def actualizar_administrativo():
+    """Actualizar un administrativo existente"""
+    try:
+        data = request.json
+        nombre_original = data.get('nombre_original', '').strip()
+        nombre_nuevo = data.get('nombre_nuevo', '').strip().upper()
+        
+        if not nombre_original or not nombre_nuevo:
+            return jsonify({'success': False, 'message': 'Ambos nombres son obligatorios'}), 400
+        
+        resultado = maestras_manager.actualizar_administrativo_por_nombre(nombre_original, nombre_nuevo)
+        
+        if resultado:
+            return jsonify({'success': True, 'message': 'Administrativo actualizado exitosamente'})
+        else:
+            return jsonify({'success': False, 'message': 'No se encontró el administrativo'}), 404
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+@app.route('/api/obtener-chofer')
+def obtener_chofer():
+    """Obtener datos de un chofer por nombre"""
+    try:
+        nombre = request.args.get('nombre', '').strip()
+        
+        if not nombre:
+            return jsonify({'success': False, 'message': 'Nombre es obligatorio'}), 400
+        
+        chofer = maestras_manager.obtener_chofer_por_nombre(nombre)
+        
+        if chofer:
+            return jsonify({'success': True, 'chofer': chofer})
+        else:
+            return jsonify({'success': False, 'message': 'No se encontró el chofer'}), 404
     except Exception as e:
         return jsonify({'success': False, 'message': str(e)}), 500
 

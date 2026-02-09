@@ -130,6 +130,7 @@ cursor.execute('''
         descripcion TEXT,
         kilo REAL,
         bultos INTEGER,
+        proveedor TEXT,
         FOREIGN KEY (numero_viaje, numero_centro_costo) 
             REFERENCES viajes(numero_viaje, costo_codigo) ON DELETE CASCADE
     )
