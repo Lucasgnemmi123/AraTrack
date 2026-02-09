@@ -4,14 +4,23 @@ Estructura exacta según documento: viajes + comidas_preparadas
 """
 import sqlite3
 import os
+import sys
 
 class DBManager:
     def __init__(self):
-        self.db_path = os.path.join(os.path.dirname(__file__), 'viajes.db')
-        self.init_database()
+        # Si se ejecuta empaquetado, usar directorio del ejecutable
+        # Si no, usar directorio del script
+        if getattr(sys, 'frozen', False):
+            # Ejecutable empaquetado: viajes.db está junto al .exe
+            base_dir = os.path.dirname(sys.executable)
+        else:
+            # Desarrollo: viajes.db está junto a db_manager.py
+            base_dir = os.path.dirname(__file__)
+        
+        self.db_path = os.path.join(base_dir, 'viajes.db')
     
     def get_connection(self):
-        """Obtener conexión optimizada para concurrencia"""
+        """Obtener conexión a la base de datos con configuración óptima"""
         conn = sqlite3.connect(
             self.db_path,
             timeout=30.0,  # Mayor timeout para esperar en caso de bloqueo

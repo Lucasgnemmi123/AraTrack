@@ -1,12 +1,22 @@
 import sqlite3
+import sys
+import os
 from typing import List, Dict, Optional
 from datetime import datetime
 
 class MaestrasManager:
     """Clase para manejar las tablas maestras (choferes, administrativos, casinos)"""
     
-    def __init__(self, db_path: str = "viajes.db"):
-        self.db_path = db_path
+    def __init__(self, db_path: str = None):
+        if db_path is None:
+            # Si se ejecuta empaquetado, usar directorio del ejecutable
+            if getattr(sys, 'frozen', False):
+                base_dir = os.path.dirname(sys.executable)
+            else:
+                base_dir = os.path.dirname(__file__)
+            self.db_path = os.path.join(base_dir, 'viajes.db')
+        else:
+            self.db_path = db_path
     
     def _get_connection(self):
         """Obtener conexión optimizada para concurrencia"""

@@ -5,12 +5,19 @@ Gestión de usuarios con SQLite
 import sqlite3
 import hashlib
 import os
+import sys
 from functools import wraps
 from flask import session, redirect, url_for, flash
 
 class AuthManager:
     def __init__(self):
-        self.db_path = os.path.join(os.path.dirname(__file__), 'viajes.db')
+        # Si se ejecuta empaquetado, usar directorio del ejecutable
+        if getattr(sys, 'frozen', False):
+            base_dir = os.path.dirname(sys.executable)
+        else:
+            base_dir = os.path.dirname(__file__)
+        
+        self.db_path = os.path.join(base_dir, 'viajes.db')
         self.init_users_table()
         self.create_default_user()
     

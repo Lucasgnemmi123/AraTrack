@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, jsonify, send_file, redirect, url_for, flash, session
 from datetime import datetime
 import os
+import sys
 from db_manager import DBManager
 from maestras_manager import MaestrasManager
 from pdf_generator import PDFGenerator
@@ -486,7 +487,7 @@ def buscar_viaje():
         # Obtener comidas
         cursor.execute('''
             SELECT id, numero_viaje, numero_centro_costo, guia_comida, 
-                   descripcion, kilo, bultos 
+                   descripcion, kilo, bultos, proveedor 
             FROM comidas_preparadas 
             WHERE numero_viaje = ? AND numero_centro_costo = ?
             ORDER BY id
@@ -502,7 +503,8 @@ def buscar_viaje():
                 'guia_comida': row[3],
                 'descripcion': row[4],
                 'kilo': row[5],
-                'bultos': row[6]
+                'bultos': row[6],
+                'proveedor': row[7]
             })
         
         conn.close()
@@ -1166,11 +1168,23 @@ def generar_pdf_api():
         return jsonify({'success': False, 'message': str(e)}), 500
 
 @app.route('/descargar-pdf/<path:filename>')
+@login_required
 def descargar_pdf(filename):
-    filepath = os.path.join('pdfs', filename)
+    # Determinar el directorio base correcto
+    if getattr(sys, 'frozen', False):
+        # Corriendo como ejecutable empaquetado
+        base_dir = os.path.dirname(sys.executable)
+    else:
+        # Corriendo como script normal
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+    
+    filepath = os.path.join(base_dir, 'pdfs', filename)
+    
     if os.path.exists(filepath):
         return send_file(filepath, as_attachment=True)
-    return redirect(url_for('generar_pdf_page'))
+    else:
+        flash(f'El archivo PDF no existe: {filename}', 'error')
+        return redirect(url_for('generar_pdf_page'))
 
 # ====== RUTAS API PARA CREAR REGISTROS EN MAESTRAS ======
 
@@ -1327,7 +1341,17 @@ def obtener_chofer():
         return jsonify({'success': False, 'message': str(e)}), 500
 
 if __name__ == '__main__':
-    os.makedirs('pdfs', exist_ok=True)
+    # Determinar el directorio base correcto
+    if getattr(sys, 'frozen', False):
+        # Corriendo como ejecutable empaquetado
+        base_dir = os.path.dirname(sys.executable)
+    else:
+        # Corriendo como script normal
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+    
+    # Crear carpeta pdfs junto al ejecutable o script
+    pdfs_dir = os.path.join(base_dir, 'pdfs')
+    os.makedirs(pdfs_dir, exist_ok=True)
     
     import socket
     hostname = socket.gethostname()

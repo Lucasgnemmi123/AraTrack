@@ -9,12 +9,20 @@ from reportlab.lib.units import inch, mm
 from reportlab.lib import colors
 import io
 import os
+import sys
 from datetime import datetime
 from db_manager import DBManager
 
 class PDFGenerator:
     def __init__(self):
         self.db_manager = DBManager()
+        # Determinar el directorio base correcto
+        if getattr(sys, 'frozen', False):
+            # Corriendo como ejecutable empaquetado
+            self.base_dir = os.path.dirname(sys.executable)
+        else:
+            # Corriendo como script normal
+            self.base_dir = os.path.dirname(os.path.abspath(__file__))
         
     def generar_pdf_viaje(self, viaje_dict, comidas_list):
         """Generar PDF para un viaje específico (método principal usado por app_web.py)"""
@@ -38,10 +46,11 @@ class PDFGenerator:
             # Construir PDF
             doc.build(content)
             
-            # Guardar en carpeta pdfs
-            os.makedirs('pdfs', exist_ok=True)
+            # Guardar en carpeta pdfs junto al ejecutable o script
+            pdfs_dir = os.path.join(self.base_dir, 'pdfs')
+            os.makedirs(pdfs_dir, exist_ok=True)
             filename = f"viaje_{viaje_dict['numero_viaje']}_{viaje_dict['costo_codigo']}.pdf"
-            filepath = os.path.join('pdfs', filename)
+            filepath = os.path.join(pdfs_dir, filename)
             
             with open(filepath, 'wb') as f:
                 f.write(buffer.getvalue())
@@ -342,10 +351,11 @@ class PDFGenerator:
             # Construir PDF
             doc.build(content)
             
-            # Guardar
-            os.makedirs('pdfs', exist_ok=True)
+            # Guardar en carpeta pdfs junto al ejecutable o script
+            pdfs_dir = os.path.join(self.base_dir, 'pdfs')
+            os.makedirs(pdfs_dir, exist_ok=True)
             filename = f"viaje_{numero_viaje}_completo.pdf"
-            filepath = os.path.join('pdfs', filename)
+            filepath = os.path.join(pdfs_dir, filename)
             
             with open(filepath, 'wb') as f:
                 f.write(buffer.getvalue())
