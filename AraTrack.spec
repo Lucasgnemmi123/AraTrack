@@ -3,7 +3,7 @@ from PyInstaller.utils.hooks import collect_all
 
 datas = [('templates', 'templates'), ('static', 'static'), ('queries', 'queries')]
 binaries = []
-hiddenimports = ['waitress', 'openpyxl', 'openpyxl.cell._writer', 'openpyxl.styles', 'flask', 'werkzeug', 'jinja2', 'sqlite3', 'db_manager', 'maestras_manager', 'auth_manager', 'pdf_generator']
+hiddenimports = ['waitress', 'openpyxl', 'openpyxl.cell._writer', 'openpyxl.styles', 'flask', 'werkzeug', 'jinja2', 'sqlite3', 'db_manager', 'maestras_manager', 'auth_manager', 'pdf_generator', 'rendiciones_manager']
 tmp_ret = collect_all('openpyxl')
 datas += tmp_ret[0]; binaries += tmp_ret[1]; hiddenimports += tmp_ret[2]
 tmp_ret = collect_all('flask')

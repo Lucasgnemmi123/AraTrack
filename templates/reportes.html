@@ -1,0 +1,299 @@
+{% extends "layout.html" %}
+
+{% block title %}Reportes - AraTrack{% endblock %}
+
+{% block content %}
+<div class="w-[92%] mx-auto py-6">
+    <!-- Header -->
+    <div class="bg-gradient-to-r from-purple-500 to-purple-600 rounded-xl shadow-lg p-6 mb-6">
+        <div class="flex items-center space-x-3">
+            <i class="bi bi-graph-up text-white text-4xl"></i>
+            <div>
+                <h1 class="text-3xl font-bold text-white">Reportes y Consultas</h1>
+                <p class="text-purple-100 mt-1">Haz clic en los reportes para descargar en Excel</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Grid de Reportes -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        
+        <!-- Reporte Maestra Casinos -->
+        <div onclick="descargarReporteCasinos()" class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300 cursor-pointer transform hover:scale-105">
+            <div class="bg-gradient-to-br from-blue-500 to-blue-600 p-5 flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <i class="bi bi-building text-white text-3xl"></i>
+                    <h3 class="text-lg font-bold text-white">Maestra Casinos</h3>
+                </div>
+                <i class="bi bi-file-earmark-excel text-white text-4xl animate-pulse"></i>
+            </div>
+        </div>
+
+        <!-- Reporte Maestra Choferes -->
+        <div onclick="descargarReporteChoferes()" class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300 cursor-pointer transform hover:scale-105">
+            <div class="bg-gradient-to-br from-green-500 to-green-600 p-5 flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <i class="bi bi-person-badge text-white text-3xl"></i>
+                    <h3 class="text-lg font-bold text-white">Maestra Choferes</h3>
+                </div>
+                <i class="bi bi-file-earmark-excel text-white text-4xl animate-pulse"></i>
+            </div>
+        </div>
+
+        <!-- Reporte Comidas e Implementos por Rango de Fechas -->
+        <div id="cardComidas" class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300">
+            <div onclick="toggleCard('comidas')" class="bg-gradient-to-br from-orange-500 to-orange-600 p-5 flex items-center justify-between cursor-pointer">
+                <div class="flex items-center space-x-3">
+                    <i class="bi bi-basket text-white text-3xl"></i>
+                    <h3 class="text-lg font-bold text-white">Comidas e Implementos</h3>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <i id="iconComidas" class="bi bi-chevron-down text-white text-2xl transition-transform duration-300"></i>
+                    <i class="bi bi-file-earmark-excel text-white text-4xl animate-pulse"></i>
+                </div>
+            </div>
+            <div id="paramsComidas" class="p-6 hidden">
+                <p class="text-gray-600 text-sm mb-4">Selecciona el rango de fechas</p>
+                <div class="space-y-3">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Fecha Inicio</label>
+                        <input type="date" id="fechaInicioComidas" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Fecha Fin</label>
+                        <input type="date" id="fechaFinComidas" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500">
+                    </div>
+                    <button onclick="descargarReporteComidas()" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-2.5 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center space-x-2">
+                        <i class="bi bi-download"></i>
+                        <span>Descargar</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Reporte Viajes Completos por Rango de Fechas -->
+        <div id="cardViajes" class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300">
+            <div onclick="toggleCard('viajes')" class="bg-gradient-to-br from-purple-500 to-purple-600 p-5 flex items-center justify-between cursor-pointer">
+                <div class="flex items-center space-x-3">
+                    <i class="bi bi-truck text-white text-3xl"></i>
+                    <h3 class="text-lg font-bold text-white">Viajes Completos</h3>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <i id="iconViajes" class="bi bi-chevron-down text-white text-2xl transition-transform duration-300"></i>
+                    <i class="bi bi-file-earmark-excel text-white text-4xl animate-pulse"></i>
+                </div>
+            </div>
+            <div id="paramsViajes" class="p-6 hidden">
+                <p class="text-gray-600 text-sm mb-4">Selecciona el rango de fechas</p>
+                <div class="space-y-3">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Fecha Inicio</label>
+                        <input type="date" id="fechaInicioViajes" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Fecha Fin</label>
+                        <input type="date" id="fechaFinViajes" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
+                    </div>
+                    <button onclick="descargarReporteViajes()" class="w-full bg-purple-500 hover:bg-purple-600 text-white font-semibold py-2.5 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center space-x-2">
+                        <i class="bi bi-download"></i>
+                        <span>Descargar</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Reporte Facturación por Rango de Fechas -->
+        <div id="cardFacturacion" class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300">
+            <div onclick="toggleCard('facturacion')" class="bg-gradient-to-br from-teal-500 to-teal-600 p-5 flex items-center justify-between cursor-pointer">
+                <div class="flex items-center space-x-3">
+                    <i class="bi bi-receipt text-white text-3xl"></i>
+                    <h3 class="text-lg font-bold text-white">Facturación</h3>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <i id="iconFacturacion" class="bi bi-chevron-down text-white text-2xl transition-transform duration-300"></i>
+                    <i class="bi bi-file-earmark-excel text-white text-4xl animate-pulse"></i>
+                </div>
+            </div>
+            <div id="paramsFacturacion" class="p-6 hidden">
+                <p class="text-gray-600 text-sm mb-4">Selecciona el rango de fechas</p>
+                <div class="space-y-3">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Fecha Inicio</label>
+                        <input type="date" id="fechaInicioFacturacion" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Fecha Fin</label>
+                        <input type="date" id="fechaFinFacturacion" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
+                    </div>
+                    <button onclick="descargarReporteFacturacion()" class="w-full bg-teal-500 hover:bg-teal-600 text-white font-semibold py-2.5 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center space-x-2">
+                        <i class="bi bi-download"></i>
+                        <span>Descargar</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Reporte Control de Activos Diario -->
+        <div id="cardActivos" class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300">
+            <div onclick="toggleCard('activos')" class="bg-gradient-to-br from-red-500 to-red-600 p-5 flex items-center justify-between cursor-pointer">
+                <div class="flex items-center space-x-3">
+                    <i class="bi bi-clipboard-check text-white text-3xl"></i>
+                    <h3 class="text-lg font-bold text-white">Control de Activos</h3>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <i id="iconActivos" class="bi bi-chevron-down text-white text-2xl transition-transform duration-300"></i>
+                    <i class="bi bi-file-earmark-excel text-white text-4xl animate-pulse"></i>
+                </div>
+            </div>
+            <div id="paramsActivos" class="p-6 hidden">
+                <p class="text-gray-600 text-sm mb-4">Selecciona la fecha</p>
+                <div class="space-y-3">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Fecha</label>
+                        <input type="date" id="fechaActivosDiario" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500">
+                    </div>
+                    <button onclick="descargarReporteActivosDiario()" class="w-full bg-red-500 hover:bg-red-600 text-white font-semibold py-2.5 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center space-x-2">
+                        <i class="bi bi-download"></i>
+                        <span>Descargar</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Reporte Rendiciones por Rango de Fechas -->
+        <div id="cardRendiciones" class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300">
+            <div onclick="toggleCard('rendiciones')" class="bg-gradient-to-br from-indigo-500 to-indigo-600 p-5 flex items-center justify-between cursor-pointer">
+                <div class="flex items-center space-x-3">
+                    <i class="bi bi-clipboard-check text-white text-3xl"></i>
+                    <h3 class="text-lg font-bold text-white">Rendiciones de Activos</h3>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <i id="iconRendiciones" class="bi bi-chevron-down text-white text-2xl transition-transform duration-300"></i>
+                    <i class="bi bi-file-earmark-excel text-white text-4xl animate-pulse"></i>
+                </div>
+            </div>
+            <div id="paramsRendiciones" class="p-6 hidden">
+                <p class="text-gray-600 text-sm mb-4">Selecciona el rango de fechas de creación</p>
+                <div class="space-y-3">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Fecha Inicio</label>
+                        <input type="date" id="fechaInicioRendiciones" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Fecha Fin</label>
+                        <input type="date" id="fechaFinRendiciones" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    </div>
+                    <button onclick="descargarReporteRendiciones()" class="w-full bg-indigo-500 hover:bg-indigo-600 text-white font-semibold py-2.5 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center space-x-2">
+                        <i class="bi bi-download"></i>
+                        <span>Descargar</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+function toggleCard(cardName) {
+    const params = document.getElementById('params' + cardName.charAt(0).toUpperCase() + cardName.slice(1));
+    const icon = document.getElementById('icon' + cardName.charAt(0).toUpperCase() + cardName.slice(1));
+    
+    if (params.classList.contains('hidden')) {
+        params.classList.remove('hidden');
+        icon.classList.add('rotate-180');
+    } else {
+        params.classList.add('hidden');
+        icon.classList.remove('rotate-180');
+    }
+}
+
+function descargarReporteCasinos() {
+    window.location.href = '/api/descargar-reporte-casinos';
+}
+
+function descargarReporteChoferes() {
+    window.location.href = '/api/descargar-reporte-choferes';
+}
+
+function descargarReporteComidas() {
+    const fechaInicio = document.getElementById('fechaInicioComidas').value;
+    const fechaFin = document.getElementById('fechaFinComidas').value;
+    
+    if (!fechaInicio || !fechaFin) {
+        alert('Por favor selecciona ambas fechas');
+        return;
+    }
+    
+    if (fechaInicio > fechaFin) {
+        alert('La fecha de inicio no puede ser mayor que la fecha de fin');
+        return;
+    }
+    
+    window.location.href = `/api/descargar-reporte-comidas?fecha_inicio=${fechaInicio}&fecha_fin=${fechaFin}`;
+}
+
+function descargarReporteViajes() {
+    const fechaInicio = document.getElementById('fechaInicioViajes').value;
+    const fechaFin = document.getElementById('fechaFinViajes').value;
+    
+    if (!fechaInicio || !fechaFin) {
+        alert('Por favor selecciona ambas fechas');
+        return;
+    }
+    
+    if (fechaInicio > fechaFin) {
+        alert('La fecha de inicio no puede ser mayor que la fecha de fin');
+        return;
+    }
+    
+    window.location.href = `/api/descargar-reporte-viajes?fecha_inicio=${fechaInicio}&fecha_fin=${fechaFin}`;
+}
+
+function descargarReporteFacturacion() {
+    const fechaInicio = document.getElementById('fechaInicioFacturacion').value;
+    const fechaFin = document.getElementById('fechaFinFacturacion').value;
+    
+    if (!fechaInicio || !fechaFin) {
+        alert('Por favor selecciona ambas fechas');
+        return;
+    }
+    
+    if (fechaInicio > fechaFin) {
+        alert('La fecha de inicio no puede ser mayor que la fecha de fin');
+        return;
+    }
+    
+    window.location.href = `/api/descargar-reporte-facturacion?fecha_inicio=${fechaInicio}&fecha_fin=${fechaFin}`;
+}
+
+function descargarReporteActivosDiario() {
+    const fecha = document.getElementById('fechaActivosDiario').value;
+    
+    if (!fecha) {
+        alert('Por favor selecciona una fecha');
+        return;
+    }
+    
+    window.location.href = `/api/descargar-reporte-facturacion-diaria?fecha=${fecha}`;
+}
+
+function descargarReporteRendiciones() {
+    const fechaInicio = document.getElementById('fechaInicioRendiciones').value;
+    const fechaFin = document.getElementById('fechaFinRendiciones').value;
+    
+    if (!fechaInicio || !fechaFin) {
+        mostrarModalInfo('⚠ Por favor selecciona ambas fechas', 'warning');
+        return;
+    }
+    
+    if (fechaInicio > fechaFin) {
+        mostrarModalInfo('⚠ La fecha de inicio no puede ser mayor que la fecha de fin', 'warning');
+        return;
+    }
+    
+    window.location.href = `/api/descargar-reporte-rendiciones?fecha_inicio=${fechaInicio}&fecha_fin=${fechaFin}`;
+}
+</script>
+
+{% endblock %}

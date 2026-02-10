@@ -49,8 +49,12 @@
                                 {% endfor %}
                             </select>
                             <button type="button" onclick="abrirModalCentroCosto()" 
-                                    class="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg transition-colors">
+                                    class="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg transition-colors" title="Crear nuevo centro de costo">
                                 <i class="bi bi-plus-lg"></i>
+                            </button>
+                            <button type="button" onclick="editarCentroCostoSeleccionado()" 
+                                    class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors" title="Editar centro de costo seleccionado">
+                                <i class="bi bi-pencil"></i>
                             </button>
                         </div>
                     </div>
@@ -99,15 +103,22 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <div>
                         <label for="tipo_camion" class="block text-sm font-medium text-gray-700 mb-1">Tipo de Camión</label>
-                        <input type="text" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
-                               id="tipo_camion" name="tipo_camion" placeholder="Ej: 12 TONELADAS">
+                        <select id="tipo_camion" name="tipo_camion" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            <option value="">Seleccione tipo...</option>
+                            <option value="1 Toneladas">1 Toneladas</option>
+                            <option value="1.7 Toneladas">1.7 Toneladas</option>
+                            <option value="5 Toneladas">5 Toneladas</option>
+                            <option value="10 Toneladas">10 Toneladas</option>
+                            <option value="12 Toneladas">12 Toneladas</option>
+                            <option value="24 Toneladas">24 Toneladas</option>
+                        </select>
                     </div>
                     <div>
                         <label for="patente_camion" class="block text-sm font-medium text-gray-700 mb-1">
                             Patente Camión <span class="text-red-500">*</span>
                         </label>
                         <input type="text" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent uppercase" 
-                               id="patente_camion" name="patente_camion" required placeholder="Ej: ABCD12">
+                               id="patente_camion" name="patente_camion" placeholder="Ej: ABCD12">
                     </div>
                     <div>
                         <label for="patente_semi" class="block text-sm font-medium text-gray-700 mb-1">Patente Semi</label>
@@ -152,14 +163,17 @@
                             Conductor <span class="text-red-500">*</span>
                         </label>
                         <div class="flex gap-2">
-                            <select id="chofer" name="chofer" required onchange="cargarDatosConductor()" class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent select2-search">
+                            <select id="chofer" name="chofer" onchange="cargarDatosConductor()" class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent select2-search">
                                 <option value="">Seleccionar conductor...</option>
                                 {% for chofer in choferes %}
                                     <option value="{{ chofer }}">{{ chofer }}</option>
                                 {% endfor %}
                             </select>
-                            <button type="button" onclick="abrirModalChofer()" class="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg transition-colors">
+                            <button type="button" onclick="abrirModalChofer()" class="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg transition-colors" title="Crear nuevo chofer">
                                 <i class="bi bi-plus-lg"></i>
+                            </button>
+                            <button type="button" onclick="editarChoferSeleccionado()" class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors" title="Editar chofer seleccionado">
+                                <i class="bi bi-pencil"></i>
                             </button>
                         </div>
                     </div>
@@ -213,27 +227,27 @@
                 <div class="grid grid-cols-2 md:grid-cols-3 gap-3 mb-4">
                     <div>
                         <label for="num_wencos" class="block text-sm font-medium text-gray-700 mb-1">N° Wencos</label>
-                        <input type="number" id="num_wencos" name="num_wencos" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" min="0" max="9999">
+                        <input type="number" id="num_wencos" name="num_wencos" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" min="0" max="9999" step="1">
                     </div>
                     <div>
                         <label for="bin" class="block text-sm font-medium text-gray-700 mb-1">BIN</label>
-                        <input type="text" id="bin" name="bin" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" maxlength="6">
+                        <input type="text" id="bin" name="bin" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" maxlength="6" inputmode="numeric" pattern="[0-9]*">
                     </div>
                     <div>
                         <label for="pallets" class="block text-sm font-medium text-gray-700 mb-1">Pallets</label>
-                        <input type="number" id="pallets" name="pallets" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" min="0" max="9999">
+                        <input type="number" id="pallets" name="pallets" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" min="0" max="9999" step="1">
                     </div>
                     <div>
                         <label for="pallets_chep" class="block text-sm font-medium text-gray-700 mb-1">Pallets CHEP</label>
-                        <input type="number" id="pallets_chep" name="pallets_chep" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" min="0" max="9999">
+                        <input type="number" id="pallets_chep" name="pallets_chep" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" min="0" max="9999" step="1">
                     </div>
                     <div>
                         <label for="pallets_pl_negro_grueso" class="block text-sm font-medium text-gray-700 mb-1">PL Negro Grueso</label>
-                        <input type="text" id="pallets_pl_negro_grueso" name="pallets_pl_negro_grueso" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" maxlength="6">
+                        <input type="text" id="pallets_pl_negro_grueso" name="pallets_pl_negro_grueso" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" maxlength="6" inputmode="numeric" pattern="[0-9]*">
                     </div>
                     <div>
                         <label for="pallets_pl_negro_alternativo" class="block text-sm font-medium text-gray-700 mb-1">PL Negro Alt.</label>
-                        <input type="text" id="pallets_pl_negro_alternativo" name="pallets_pl_negro_alternativo" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" maxlength="6">
+                        <input type="text" id="pallets_pl_negro_alternativo" name="pallets_pl_negro_alternativo" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" maxlength="6" inputmode="numeric" pattern="[0-9]*">
                     </div>
                 </div>
 
@@ -242,23 +256,23 @@
                 <div class="grid grid-cols-2 md:grid-cols-3 gap-3 mb-4">
                     <div>
                         <label for="pallets_congelado" class="block text-sm font-medium text-gray-700 mb-1">Pallets Congelado</label>
-                        <input type="number" id="pallets_congelado" name="pallets_congelado" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" min="0" max="9999">
+                        <input type="number" id="pallets_congelado" name="pallets_congelado" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" min="0" max="9999" step="1">
                     </div>
                     <div>
                         <label for="wencos_congelado" class="block text-sm font-medium text-gray-700 mb-1">Wencos Congelado</label>
-                        <input type="number" id="wencos_congelado" name="wencos_congelado" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" min="0" max="9999">
+                        <input type="number" id="wencos_congelado" name="wencos_congelado" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" min="0" max="9999" step="1">
                     </div>
                     <div>
                         <label for="pallets_refrigerado" class="block text-sm font-medium text-gray-700 mb-1">Pallets Refrigerado</label>
-                        <input type="number" id="pallets_refrigerado" name="pallets_refrigerado" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" min="0" max="9999">
+                        <input type="number" id="pallets_refrigerado" name="pallets_refrigerado" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" min="0" max="9999" step="1">
                     </div>
                     <div>
                         <label for="wencos_refrigerado" class="block text-sm font-medium text-gray-700 mb-1">Wencos Refrigerado</label>
-                        <input type="number" id="wencos_refrigerado" name="wencos_refrigerado" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" min="0" max="9999">
+                        <input type="number" id="wencos_refrigerado" name="wencos_refrigerado" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" min="0" max="9999" step="1">
                     </div>
                     <div>
                         <label for="pallets_abarrote" class="block text-sm font-medium text-gray-700 mb-1">Pallets Abarrote</label>
-                        <input type="number" id="pallets_abarrote" name="pallets_abarrote" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" min="0" max="9999">
+                        <input type="number" id="pallets_abarrote" name="pallets_abarrote" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" min="0" max="9999" step="1">
                     </div>
                 </div>
 
@@ -316,72 +330,72 @@
         
         <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
             <div>
-                <label for="guia_1" class="block text-sm font-medium text-gray-700 mb-1">Guía 1</label>
-                <input type="text" id="guia_1" name="guia_1" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" maxlength="30">
+                <label for="guia_1" class="block text-sm font-medium text-gray-700 mb-1">Guía de activos <span class="text-blue-600">(Guía 1)</span></label>
+                <input type="text" id="guia_1" name="guia_1" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" maxlength="30" inputmode="numeric" pattern="[0-9]*">
             </div>
             <div>
                 <label for="guia_2" class="block text-sm font-medium text-gray-700 mb-1">Guía 2</label>
-                <input type="text" id="guia_2" name="guia_2" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" maxlength="30">
+                <input type="text" id="guia_2" name="guia_2" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" maxlength="30" inputmode="numeric" pattern="[0-9]*">
             </div>
             <div>
                 <label for="guia_3" class="block text-sm font-medium text-gray-700 mb-1">Guía 3</label>
-                <input type="text" id="guia_3" name="guia_3" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" maxlength="30">
+                <input type="text" id="guia_3" name="guia_3" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" maxlength="30" inputmode="numeric" pattern="[0-9]*">
             </div>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
             <div>
                 <label for="guia_4" class="block text-sm font-medium text-gray-700 mb-1">Guía 4</label>
-                <input type="text" id="guia_4" name="guia_4" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" maxlength="30">
+                <input type="text" id="guia_4" name="guia_4" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" maxlength="30" inputmode="numeric" pattern="[0-9]*">
             </div>
             <div>
                 <label for="guia_5" class="block text-sm font-medium text-gray-700 mb-1">Guía 5</label>
-                <input type="text" id="guia_5" name="guia_5" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" maxlength="30">
+                <input type="text" id="guia_5" name="guia_5" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" maxlength="30" inputmode="numeric" pattern="[0-9]*">
             </div>
             <div>
                 <label for="guia_6" class="block text-sm font-medium text-gray-700 mb-1">Guía 6</label>
-                <input type="text" id="guia_6" name="guia_6" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" maxlength="30">
+                <input type="text" id="guia_6" name="guia_6" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" maxlength="30" inputmode="numeric" pattern="[0-9]*">
             </div>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
             <div>
                 <label for="guia_7" class="block text-sm font-medium text-gray-700 mb-1">Guía 7</label>
-                <input type="text" id="guia_7" name="guia_7" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" maxlength="30">
+                <input type="text" id="guia_7" name="guia_7" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" maxlength="30" inputmode="numeric" pattern="[0-9]*">
             </div>
             <div>
                 <label for="guia_8" class="block text-sm font-medium text-gray-700 mb-1">Guía 8</label>
-                <input type="text" id="guia_8" name="guia_8" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" maxlength="30">
+                <input type="text" id="guia_8" name="guia_8" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" maxlength="30" inputmode="numeric" pattern="[0-9]*">
             </div>
             <div>
                 <label for="guia_9" class="block text-sm font-medium text-gray-700 mb-1">Guía 9</label>
-                <input type="text" id="guia_9" name="guia_9" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" maxlength="30">
+                <input type="text" id="guia_9" name="guia_9" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" maxlength="30" inputmode="numeric" pattern="[0-9]*">
             </div>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
             <div>
                 <label for="guia_10" class="block text-sm font-medium text-gray-700 mb-1">Guía 10</label>
-                <input type="text" id="guia_10" name="guia_10" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" maxlength="30">
+                <input type="text" id="guia_10" name="guia_10" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" maxlength="30" inputmode="numeric" pattern="[0-9]*">
             </div>
             <div>
                 <label for="guia_11" class="block text-sm font-medium text-gray-700 mb-1">Guía 11</label>
-                <input type="text" id="guia_11" name="guia_11" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" maxlength="30">
+                <input type="text" id="guia_11" name="guia_11" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" maxlength="30" inputmode="numeric" pattern="[0-9]*">
             </div>
             <div>
                 <label for="guia_12" class="block text-sm font-medium text-gray-700 mb-1">Guía 12</label>
-                <input type="text" id="guia_12" name="guia_12" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" maxlength="30">
+                <input type="text" id="guia_12" name="guia_12" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" maxlength="30" inputmode="numeric" pattern="[0-9]*">
             </div>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
             <div>
                 <label for="guia_13" class="block text-sm font-medium text-gray-700 mb-1">Guía 13</label>
-                <input type="text" id="guia_13" name="guia_13" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" maxlength="30">
+                <input type="text" id="guia_13" name="guia_13" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" maxlength="30" inputmode="numeric" pattern="[0-9]*">
             </div>
             <div>
                 <label for="guia_14" class="block text-sm font-medium text-gray-700 mb-1">Guía 14</label>
-                <input type="text" id="guia_14" name="guia_14" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" maxlength="30">
+                <input type="text" id="guia_14" name="guia_14" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" maxlength="30" inputmode="numeric" pattern="[0-9]*">
             </div>
         </div>
             </div>
@@ -400,25 +414,25 @@
         <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
             <div>
                 <label for="sello_salida_1p" class="block text-sm font-medium text-gray-700 mb-1">Sello 1P</label>
-                <input type="text" id="sello_salida_1p" name="sello_salida_1p" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" maxlength="30">
+                <input type="text" id="sello_salida_1p" name="sello_salida_1p" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" maxlength="30" inputmode="numeric" pattern="[0-9]*">
             </div>
             <div>
                 <label for="sello_salida_2p" class="block text-sm font-medium text-gray-700 mb-1">Sello 2P</label>
-                <input type="text" id="sello_salida_2p" name="sello_salida_2p" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" maxlength="30">
+                <input type="text" id="sello_salida_2p" name="sello_salida_2p" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" maxlength="30" inputmode="numeric" pattern="[0-9]*">
             </div>
             <div>
                 <label for="sello_salida_3p" class="block text-sm font-medium text-gray-700 mb-1">Sello 3P</label>
-                <input type="text" id="sello_salida_3p" name="sello_salida_3p" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" maxlength="30">
+                <input type="text" id="sello_salida_3p" name="sello_salida_3p" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" maxlength="30" inputmode="numeric" pattern="[0-9]*">
             </div>
         </div>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
             <div>
                 <label for="sello_salida_4p" class="block text-sm font-medium text-gray-700 mb-1">Sello 4P</label>
-                <input type="text" id="sello_salida_4p" name="sello_salida_4p" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" maxlength="30">
+                <input type="text" id="sello_salida_4p" name="sello_salida_4p" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" maxlength="30" inputmode="numeric" pattern="[0-9]*">
             </div>
             <div>
                 <label for="sello_salida_5p" class="block text-sm font-medium text-gray-700 mb-1">Sello 5P</label>
-                <input type="text" id="sello_salida_5p" name="sello_salida_5p" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" maxlength="30">
+                <input type="text" id="sello_salida_5p" name="sello_salida_5p" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" maxlength="30" inputmode="numeric" pattern="[0-9]*">
             </div>
         </div>
 
@@ -426,25 +440,25 @@
         <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
             <div>
                 <label for="sello_retorno_1p" class="block text-sm font-medium text-gray-700 mb-1">Sello 1P</label>
-                <input type="text" id="sello_retorno_1p" name="sello_retorno_1p" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" maxlength="30">
+                <input type="text" id="sello_retorno_1p" name="sello_retorno_1p" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" maxlength="30" inputmode="numeric" pattern="[0-9]*">
             </div>
             <div>
                 <label for="sello_retorno_2p" class="block text-sm font-medium text-gray-700 mb-1">Sello 2P</label>
-                <input type="text" id="sello_retorno_2p" name="sello_retorno_2p" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" maxlength="30">
+                <input type="text" id="sello_retorno_2p" name="sello_retorno_2p" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" maxlength="30" inputmode="numeric" pattern="[0-9]*">
             </div>
             <div>
                 <label for="sello_retorno_3p" class="block text-sm font-medium text-gray-700 mb-1">Sello 3P</label>
-                <input type="text" id="sello_retorno_3p" name="sello_retorno_3p" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" maxlength="30">
+                <input type="text" id="sello_retorno_3p" name="sello_retorno_3p" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" maxlength="30" inputmode="numeric" pattern="[0-9]*">
             </div>
         </div>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
             <div>
                 <label for="sello_retorno_4p" class="block text-sm font-medium text-gray-700 mb-1">Sello 4P</label>
-                <input type="text" id="sello_retorno_4p" name="sello_retorno_4p" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" maxlength="30">
+                <input type="text" id="sello_retorno_4p" name="sello_retorno_4p" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" maxlength="30" inputmode="numeric" pattern="[0-9]*">
             </div>
             <div>
                 <label for="sello_retorno_5p" class="block text-sm font-medium text-gray-700 mb-1">Sello 5P</label>
-                <input type="text" id="sello_retorno_5p" name="sello_retorno_5p" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" maxlength="30">
+                <input type="text" id="sello_retorno_5p" name="sello_retorno_5p" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" maxlength="30" inputmode="numeric" pattern="[0-9]*">
             </div>
         </div>
             </div>
@@ -465,17 +479,22 @@
             </div>
             <div>
                 <label for="revision_limpieza_camion_acciones" class="block text-sm font-medium text-gray-700 mb-1">Revisión Limpieza Camión</label>
-                <input type="text" id="revision_limpieza_camion_acciones" name="revision_limpieza_camion_acciones" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Ej: 5P" maxlength="20">
+                <input type="text" id="revision_limpieza_camion_acciones" name="revision_limpieza_camion_acciones" value="OK" readonly class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-100 cursor-not-allowed" maxlength="20">
             </div>
         </div>
 
         <div>
-            <label for="administrativo_responsable" class="block text-sm font-medium text-gray-700 mb-1">Administrativo Responsable</label>
+            <label for="administrativo_responsable" class="block text-sm font-medium text-gray-700 mb-1">Administrativo Responsable <span class="text-red-500">*</span></label>
             <div class="flex gap-2">
-                <select id="administrativo_responsable" name="administrativo_responsable" class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" class="select2">
+                <select id="administrativo_responsable" name="administrativo_responsable" required class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" class="select2">
                     <option value="">Seleccione un administrativo...</option>
                 </select>
-                <button type="button" onclick="abrirModalAdministrativo()" class="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg transition-colors whitespace-nowrap">+ Nuevo</button>
+                <button type="button" onclick="abrirModalAdministrativo()" class="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg transition-colors whitespace-nowrap" title="Crear nuevo administrativo">
+                    <i class="bi bi-plus-lg"></i>
+                </button>
+                <button type="button" onclick="editarAdministrativoSeleccionado()" class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors" title="Editar administrativo seleccionado">
+                    <i class="bi bi-pencil"></i>
+                </button>
             </div>
         </div>
             </div>
@@ -487,7 +506,7 @@
         <div class="bg-white rounded-xl shadow-lg mb-2 overflow-hidden">
             <div class="bg-gradient-to-r from-green-500 to-green-600 px-6 py-4 flex justify-between items-center">
                 <h5 class="text-lg font-semibold text-white flex items-center">
-                    <i class="bi bi-egg-fried mr-2"></i>Despacho Comidas Preparadas
+                    <i class="bi bi-egg-fried mr-2"></i>Comidas Preparadas / Implementos
                 </h3>
                 <button type="button" class="px-4 py-2 bg-white/20 hover:bg-white/30 text-white rounded-lg transition-colors" onclick="agregarComida()">+ Agregar Comida</button>
             </div>
@@ -510,23 +529,45 @@
 <div id="modalCentroCosto" class="modal" style="display: none;">
     <div class="modal-content" style="max-width: 600px;">
         <span class="close" onclick="cerrarModalCentroCosto()">&times;</span>
-        <h2 style="color: #d40511; margin-bottom: 1.5rem;">🏢 Nuevo Centro de Costo</h2>
+        <div class="bg-gradient-to-r from-red-500 to-red-600 -mx-8 -mt-8 px-6 py-4 mb-6 rounded-t-lg">
+            <h2 class="text-2xl font-bold text-white flex items-center">
+                <i class="bi bi-building mr-2"></i>Nuevo Centro de Costo
+            </h2>
+        </div>
         <form id="formCentroCosto" onsubmit="guardarCentroCosto(event)">
-            <div>
-                <label for="nuevo_codigo_costo" class="block text-sm font-medium text-gray-700 mb-1">Código Centro de Costo *</label>
-                <input type="text" id="nuevo_codigo_costo" required placeholder="Ej: 1001">
+            <div class="space-y-4">
+                <div>
+                    <label for="nuevo_codigo_costo" class="block text-sm font-medium text-gray-700 mb-1">
+                        <i class="bi bi-hash text-red-500"></i> Código Centro de Costo <span class="text-red-500">*</span>
+                    </label>
+                    <input type="text" id="nuevo_codigo_costo" 
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                           placeholder="Ej: 1001">
+                </div>
+                <div>
+                    <label for="nuevo_casino" class="block text-sm font-medium text-gray-700 mb-1">
+                        <i class="bi bi-shop text-red-500"></i> Casino <span class="text-red-500">*</span>
+                    </label>
+                    <input type="text" id="nuevo_casino" 
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                           placeholder="Ej: CASINO CENTRAL">
+                </div>
+                <div>
+                    <label for="nuevo_ruta" class="block text-sm font-medium text-gray-700 mb-1">
+                        <i class="bi bi-signpost-2 text-red-500"></i> Ruta
+                    </label>
+                    <input type="text" id="nuevo_ruta" 
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                           placeholder="Ej: Ruta Norte">
+                </div>
             </div>
-            <div>
-                <label for="nuevo_casino" class="block text-sm font-medium text-gray-700 mb-1">Casino *</label>
-                <input type="text" id="nuevo_casino" required placeholder="Ej: CASINO CENTRAL">
-            </div>
-            <div>
-                <label for="nuevo_ruta" class="block text-sm font-medium text-gray-700 mb-1">Ruta</label>
-                <input type="text" id="nuevo_ruta" placeholder="Ej: Ruta Norte">
-            </div>
-            <div class="flex gap-4 mt-6">
-                <button type="submit" class="btn" style="flex: 1; background: #28a745;">Guardar</button>
-                <button type="button" onclick="cerrarModalCentroCosto()" class="btn" style="flex: 1; background: #6c757d;">Cancelar</button>
+            <div class="flex gap-3 mt-6">
+                <button type="submit" class="flex-1 px-6 py-3 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-semibold rounded-lg transition-all duration-200 flex items-center justify-center">
+                    <i class="bi bi-check-circle mr-2"></i>Guardar
+                </button>
+                <button type="button" onclick="cerrarModalCentroCosto()" class="flex-1 px-6 py-3 bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold rounded-lg transition-all duration-200">
+                    Cancelar
+                </button>
             </div>
         </form>
     </div>
@@ -536,23 +577,45 @@
 <div id="modalChofer" class="modal" style="display: none;">
     <div class="modal-content" style="max-width: 600px;">
         <span class="close" onclick="cerrarModalChofer()">&times;</span>
-        <h2 style="color: #d40511; margin-bottom: 1.5rem;">Nuevo Chofer</h2>
+        <div class="bg-gradient-to-r from-blue-500 to-blue-600 -mx-8 -mt-8 px-6 py-4 mb-6 rounded-t-lg">
+            <h2 class="text-2xl font-bold text-white flex items-center">
+                <i class="bi bi-person-badge mr-2"></i>Nuevo Chofer
+            </h2>
+        </div>
         <form id="formChofer" onsubmit="guardarChofer(event)">
-            <div>
-                <label for="nuevo_chofer_nombre" class="block text-sm font-medium text-gray-700 mb-1">Nombre Completo *</label>
-                <input type="text" id="nuevo_chofer_nombre" required placeholder="Ej: JUAN PEREZ LOPEZ">
+            <div class="space-y-4">
+                <div>
+                    <label for="nuevo_chofer_nombre" class="block text-sm font-medium text-gray-700 mb-1">
+                        <i class="bi bi-person text-blue-500"></i> Nombre Completo <span class="text-red-500">*</span>
+                    </label>
+                    <input type="text" id="nuevo_chofer_nombre" 
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                           placeholder="Ej: JUAN PEREZ LOPEZ">
+                </div>
+                <div>
+                    <label for="nuevo_chofer_rut" class="block text-sm font-medium text-gray-700 mb-1">
+                        <i class="bi bi-card-text text-blue-500"></i> RUT <span class="text-red-500">*</span>
+                    </label>
+                    <input type="text" id="nuevo_chofer_rut" 
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                           placeholder="Ej: 12345678-9">
+                </div>
+                <div>
+                    <label for="nuevo_chofer_celular" class="block text-sm font-medium text-gray-700 mb-1">
+                        <i class="bi bi-phone text-blue-500"></i> Celular
+                    </label>
+                    <input type="text" id="nuevo_chofer_celular" 
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                           placeholder="Ej: +56912345678">
+                </div>
             </div>
-            <div>
-                <label for="nuevo_chofer_rut" class="block text-sm font-medium text-gray-700 mb-1">RUT *</label>
-                <input type="text" id="nuevo_chofer_rut" required placeholder="Ej: 12345678-9">
-            </div>
-            <div>
-                <label for="nuevo_chofer_celular" class="block text-sm font-medium text-gray-700 mb-1">Celular</label>
-                <input type="text" id="nuevo_chofer_celular" placeholder="Ej: +56912345678">
-            </div>
-            <div class="flex gap-4 mt-6">
-                <button type="submit" class="btn" style="flex: 1; background: #28a745;">Guardar</button>
-                <button type="button" onclick="cerrarModalChofer()" class="btn" style="flex: 1; background: #6c757d;">Cancelar</button>
+            <div class="flex gap-3 mt-6">
+                <button type="submit" class="flex-1 px-6 py-3 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-semibold rounded-lg transition-all duration-200 flex items-center justify-center">
+                    <i class="bi bi-check-circle mr-2"></i>Guardar
+                </button>
+                <button type="button" onclick="cerrarModalChofer()" class="flex-1 px-6 py-3 bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold rounded-lg transition-all duration-200">
+                    Cancelar
+                </button>
             </div>
         </form>
     </div>
@@ -562,23 +625,90 @@
 <div id="modalAdministrativo" class="modal" style="display: none;">
     <div class="modal-content" style="max-width: 500px;">
         <span class="close" onclick="cerrarModalAdministrativo()">&times;</span>
-        <h2 style="color: #d40511; margin-bottom: 1.5rem;">👔 Nuevo Administrativo</h2>
+        <div class="bg-gradient-to-r from-indigo-500 to-indigo-600 -mx-8 -mt-8 px-6 py-4 mb-6 rounded-t-lg">
+            <h2 class="text-2xl font-bold text-white flex items-center">
+                <i class="bi bi-person-check mr-2"></i>Nuevo Administrativo
+            </h2>
+        </div>
         <form id="formAdministrativo" onsubmit="guardarAdministrativo(event)">
-            <div>
-                <label for="nuevo_administrativo_nombre" class="block text-sm font-medium text-gray-700 mb-1">Nombre Completo *</label>
-                <input type="text" id="nuevo_administrativo_nombre" required placeholder="Ej: MARIA GONZALEZ">
+            <div class="space-y-4">
+                <div>
+                    <label for="nuevo_administrativo_nombre" class="block text-sm font-medium text-gray-700 mb-1">
+                        <i class="bi bi-person text-indigo-500"></i> Nombre Completo <span class="text-red-500">*</span>
+                    </label>
+                    <input type="text" id="nuevo_administrativo_nombre" 
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                           placeholder="Ej: MARIA GONZALEZ">
+                </div>
             </div>
-            <div class="flex gap-4 mt-6">
-                <button type="submit" class="btn" style="flex: 1; background: #28a745;">Guardar</button>
-                <button type="button" onclick="cerrarModalAdministrativo()" class="btn" style="flex: 1; background: #6c757d;">Cancelar</button>
+            <div class="flex gap-3 mt-6">
+                <button type="submit" class="flex-1 px-6 py-3 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-semibold rounded-lg transition-all duration-200 flex items-center justify-center">
+                    <i class="bi bi-check-circle mr-2"></i>Guardar
+                </button>
+                <button type="button" onclick="cerrarModalAdministrativo()" class="flex-1 px-6 py-3 bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold rounded-lg transition-all duration-200">
+                    Cancelar
+                </button>
             </div>
         </form>
+    </div>
+</div>
+
+<!-- MODALES DE CONFIRMACIÓN PERSONALIZADOS -->
+<!-- Modal de Advertencia para Activos -->
+<div id="modalAdvertenciaActivos" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full transform transition-all">
+        <div class="bg-gradient-to-r from-yellow-500 to-orange-500 px-6 py-4 rounded-t-2xl">
+            <h3 class="text-2xl font-bold text-white flex items-center">
+                <i class="bi bi-exclamation-triangle-fill mr-3 text-3xl"></i>
+                ADVERTENCIA
+            </h3>
+        </div>
+        <div class="p-6">
+            <p id="mensajeAdvertencia" class="text-gray-700 text-base leading-relaxed mb-6"></p>
+            <div class="flex gap-3">
+                <button onclick="confirmarGuardarViaje(true)" class="flex-1 px-6 py-3 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-semibold rounded-lg transition-all duration-200 flex items-center justify-center">
+                    <i class="bi bi-check-circle mr-2"></i>Sí, Continuar
+                </button>
+                <button onclick="confirmarGuardarViaje(false)" class="flex-1 px-6 py-3 bg-gradient-to-r from-gray-400 to-gray-500 hover:from-gray-500 hover:to-gray-600 text-white font-semibold rounded-lg transition-all duration-200 flex items-center justify-center">
+                    <i class="bi bi-x-circle mr-2"></i>Cancelar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Éxito -->
+<div id="modalExito" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full transform transition-all animate-bounce-in">
+        <div class="bg-gradient-to-r from-green-500 to-emerald-500 px-6 py-4 rounded-t-2xl">
+            <h3 class="text-2xl font-bold text-white flex items-center">
+                <i class="bi bi-check-circle-fill mr-3 text-3xl"></i>
+                ¡ÉXITO!
+            </h3>
+        </div>
+        <div class="p-6">
+            <p id="mensajeExito" class="text-gray-700 text-lg leading-relaxed mb-6 text-center font-semibold"></p>
+            <button onclick="cerrarModalExito()" class="w-full px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold rounded-lg transition-all duration-200 flex items-center justify-center">
+                <i class="bi bi-hand-thumbs-up mr-2"></i>Entendido
+            </button>
+        </div>
     </div>
 </div>
 {% endblock %}
 
 {% block scripts %}
 <style>
+@keyframes bounce-in {
+    0% { transform: scale(0.3); opacity: 0; }
+    50% { transform: scale(1.05); }
+    70% { transform: scale(0.9); }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+.animate-bounce-in {
+    animation: bounce-in 0.5s ease-out;
+}
+
 .modal {
     position: fixed;
     z-index: 1000;
@@ -1040,22 +1170,26 @@ function editarConductor() {
 }
 
 function agregarComida() {
+    // Contar comidas actuales en el DOM
+    const comidasActuales = document.querySelectorAll('#comidas-container > div[id^="comida-"]').length;
+    
     // Limitar a 20 comidas máximo
-    if (contadorComidas >= 20) {
+    if (comidasActuales >= 20) {
         alert('⚠️ Máximo 20 comidas permitidas');
         return;
     }
     
     contadorComidas++;
+    const numeroFila = comidasActuales + 1; // Número visual basado en comidas actuales
     
     const container = document.getElementById('comidas-container');
     const comidaDiv = document.createElement('div');
     comidaDiv.id = `comida-${contadorComidas}`;
-    comidaDiv.className = 'grid grid-cols-1 md:grid-cols-6 gap-4 p-5 mb-4 bg-gradient-to-r from-green-50 to-blue-50 border-2 border-green-300 rounded-lg shadow-sm hover:shadow-md transition-shadow';
+    comidaDiv.className = 'grid grid-cols-1 md:grid-cols-7 gap-4 p-5 mb-4 bg-gradient-to-r from-green-50 to-blue-50 border-2 border-green-300 rounded-lg shadow-sm hover:shadow-md transition-shadow';
     
     comidaDiv.innerHTML = `
         <div class="flex items-center justify-center">
-            <span class="text-2xl font-bold text-green-600">#${contadorComidas}</span>
+            <span class="comida-numero text-2xl font-bold text-green-600">#${numeroFila}</span>
         </div>
         <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">N° Guía</label>
@@ -1064,8 +1198,14 @@ function agregarComida() {
                    placeholder="N° Guía">
         </div>
         <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Proveedor</label>
+            <input type="text" name="comida_proveedor_${contadorComidas}"
+                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                   placeholder="Proveedor">
+        </div>
+        <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Descripción <span class="text-red-500">*</span></label>
-            <input type="text" name="comida_descripcion_${contadorComidas}" required
+            <input type="text" name="comida_descripcion_${contadorComidas}"
                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                    placeholder="Tipo de comida">
         </div>
@@ -1092,10 +1232,21 @@ function agregarComida() {
     container.appendChild(comidaDiv);
 }
 
+function renumerarComidas() {
+    const comidas = document.querySelectorAll('#comidas-container > div[id^="comida-"]');
+    comidas.forEach((comida, index) => {
+        const numeroSpan = comida.querySelector('.comida-numero');
+        if (numeroSpan) {
+            numeroSpan.textContent = `#${index + 1}`;
+        }
+    });
+}
+
 function eliminarComida(comidaId) {
     const elemento = document.getElementById(`comida-${comidaId}`);
     if (elemento) {
         elemento.remove();
+        renumerarComidas(); // Renumerar después de eliminar
     }
 }
 
@@ -1180,23 +1331,166 @@ document.getElementById('formNuevoViaje').addEventListener('submit', function(e)
         comidas: []
     };
     
-    // Recopilar comidas preparadas
+    // ===== VALIDACIÓN: Verificar activos y guía de activos =====
+    // SOLO verificar los campos de ACTIVOS (no los de "Pallets por Área")
+    const camposActivos = [
+        data.num_wencos,                     // N° Wencos
+        data.bin,                            // BIN
+        data.pallets,                        // Pallets
+        data.pallets_chep,                   // Pallets CHEP
+        data.pallets_pl_negro_grueso,        // PL Negro Grueso
+        data.pallets_pl_negro_alternativo    // PL Negro Alt
+    ];
+    
+    // Log para debug - ver TODOS los valores
+    console.log('🔍 VALIDACIÓN DE ACTIVOS:', {
+        'N° Wencos': data.num_wencos,
+        'BIN': data.bin,
+        'Pallets': data.pallets,
+        'Pallets CHEP': data.pallets_chep,
+        'PL Negro Grueso': data.pallets_pl_negro_grueso,
+        'PL Negro Alt': data.pallets_pl_negro_alternativo,
+        'Guía de activos': data.guia_1
+    });
+    
+    // Verificar si todos los activos están vacíos
+    const activosVacios = camposActivos.every(val => {
+        if (val === null || val === undefined || val === '') return true;
+        if (typeof val === 'string' && val.trim() === '') return true;
+        if (val === '0' || val === 0) return true;
+        return false;
+    });
+    
+    // Verificar si hay al menos un activo con valor
+    const hayActivos = !activosVacios;
+    
+    const guiaActivosVacia = !data.guia_1 || (typeof data.guia_1 === 'string' && data.guia_1.trim() === '');
+    const hayGuiaActivos = !guiaActivosVacia;
+    
+    console.log('📊 RESULTADO:', { 
+        'Hay activos': hayActivos, 
+        'Hay guía de activos': hayGuiaActivos
+    });
+    
+    // CASO 1: NO hay activos Y NO hay guía de activos
+    if (activosVacios && guiaActivosVacia) {
+        console.warn('⚠️ CASO 1: Sin activos y sin guía de activos');
+        mostrarModalAdvertencia(
+            '⚠️ No se detectaron activos ni Guía de activos\n\n' +
+            'Campos vacíos:\n' +
+            '• N° Wencos\n' +
+            '• BIN\n' +
+            '• Pallets\n' +
+            '• Pallets CHEP\n' +
+            '• PL Negro Grueso\n' +
+            '• PL Negro Alt\n' +
+            '• Guía de activos (Guía 1)\n\n' +
+            '¿Está seguro que desea crear el viaje sin esta información?',
+            data
+        );
+        return;
+    }
+    
+    // CASO 2: NO hay activos PERO SI hay guía de activos
+    if (activosVacios && hayGuiaActivos) {
+        console.warn('⚠️ CASO 2: Sin activos pero con guía de activos');
+        mostrarModalAdvertencia(
+            '⚠️ Tienes una Guía de activos registrada pero NO hay activos\n\n' +
+            'Guía de activos: ' + data.guia_1 + '\n\n' +
+            'Pero los siguientes campos están vacíos:\n' +
+            '• N° Wencos\n' +
+            '• BIN\n' +
+            '• Pallets\n' +
+            '• Pallets CHEP\n' +
+            '• PL Negro Grueso\n' +
+            '• PL Negro Alt\n\n' +
+            '¿Deseas continuar sin activos?',
+            data
+        );
+        return;
+    }
+    
+    // CASO 3: SI hay activos PERO NO hay guía de activos
+    if (hayActivos && guiaActivosVacia) {
+        console.warn('⚠️ CASO 3: Con activos pero sin guía de activos');
+        mostrarModalAdvertencia(
+            '⚠️ Tienes activos registrados pero NO hay Guía de activos\n\n' +
+            'Se detectaron activos pero falta la Guía de activos (Guía 1).\n\n' +
+            '¿Deseas continuar sin Guía de activos?',
+            data
+        );
+        return;
+    }
+    
+    // CASO 4: SI hay activos Y SI hay guía → TODO OK
+    console.log('✅ Validación pasada, hay activos Y guía');
+    
+    // Recopilar comidas preparadas antes de enviar
     for (let comidaId = 1; comidaId <= contadorComidas; comidaId++) {
         const comidaElement = document.getElementById(`comida-${comidaId}`);
         if (comidaElement) {
+            const formData = new FormData(document.getElementById('formNuevoViaje'));
             const descripcion = formData.get(`comida_descripcion_${comidaId}`);
             if (descripcion) {
                 data.comidas.push({
                     guia_comida: formData.get(`comida_guia_${comidaId}`) || '',
                     descripcion: descripcion,
                     kilo: parseFloat(formData.get(`comida_kilo_${comidaId}`)) || 0,
-                    bultos: parseInt(formData.get(`comida_bultos_${comidaId}`)) || 0
+                    bultos: parseInt(formData.get(`comida_bultos_${comidaId}`)) || 0,
+                    proveedor: formData.get(`comida_proveedor_${comidaId}`) || ''
                 });
             }
         }
     }
     
-    // Enviar datos
+    // Si llegamos aquí, podemos enviar sin confirmar
+    enviarDatosViaje(data);
+});
+
+// Variables globales para el modal
+let datosViajeEnEspera = null;
+
+function mostrarModalAdvertencia(mensaje, datos) {
+    datosViajeEnEspera = datos; // Guardar los datos
+    document.getElementById('mensajeAdvertencia').innerText = mensaje;
+    document.getElementById('modalAdvertenciaActivos').classList.remove('hidden');
+}
+
+function confirmarGuardarViaje(confirmar) {
+    document.getElementById('modalAdvertenciaActivos').classList.add('hidden');
+    
+    if (confirmar && datosViajeEnEspera) {
+        console.log('✅ Usuario confirmó, enviando datos...');
+        
+        // Recopilar comidas preparadas antes de enviar
+        datosViajeEnEspera.comidas = [];
+        for (let comidaId = 1; comidaId <= contadorComidas; comidaId++) {
+            const comidaElement = document.getElementById(`comida-${comidaId}`);
+            if (comidaElement) {
+                const formData = new FormData(document.getElementById('formNuevoViaje'));
+                const descripcion = formData.get(`comida_descripcion_${comidaId}`);
+                if (descripcion) {
+                    datosViajeEnEspera.comidas.push({
+                        guia_comida: formData.get(`comida_guia_${comidaId}`) || '',
+                        descripcion: descripcion,
+                        kilo: parseFloat(formData.get(`comida_kilo_${comidaId}`)) || 0,
+                        bultos: parseInt(formData.get(`comida_bultos_${comidaId}`)) || 0,
+                        proveedor: formData.get(`comida_proveedor_${comidaId}`) || ''
+                    });
+                }
+            }
+        }
+        
+        enviarDatosViaje(datosViajeEnEspera);
+        datosViajeEnEspera = null;
+    } else {
+        console.log('❌ Usuario canceló el envío');
+        datosViajeEnEspera = null;
+    }
+}
+
+function enviarDatosViaje(data) {
+    // Enviar datos al servidor
     fetch('/api/guardar-viaje', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
@@ -1210,6 +1504,10 @@ document.getElementById('formNuevoViaje').addEventListener('submit', function(e)
         if (result.success) {
             mensaje.className = 'mensaje mensaje-exito';
             mensaje.textContent = '✓ ' + result.message;
+            
+            // Mostrar modal personalizado de éxito
+            mostrarModalExito('✅ VIAJE CREADO EXITOSAMENTE\n\n' + result.message);
+            
             setTimeout(() => {
                 limpiarFormulario();
             }, 2000);
@@ -1224,7 +1522,16 @@ document.getElementById('formNuevoViaje').addEventListener('submit', function(e)
         mensaje.className = 'mensaje mensaje-error';
         mensaje.textContent = '✖ Error de conexión: ' + error.message;
     });
-});
+}
+
+function mostrarModalExito(mensaje) {
+    document.getElementById('mensajeExito').innerText = mensaje;
+    document.getElementById('modalExito').classList.remove('hidden');
+}
+
+function cerrarModalExito() {
+    document.getElementById('modalExito').classList.add('hidden');
+}
 
 // ======= FUNCIONES PARA MODALES DE MAESTRAS =======
 
@@ -1237,6 +1544,9 @@ function abrirModalCentroCosto() {
 function cerrarModalCentroCosto() {
     document.getElementById('modalCentroCosto').style.display = 'none';
     document.getElementById('formCentroCosto').reset();
+    // Restaurar comportamiento original del formulario
+    document.getElementById('formCentroCosto').onsubmit = guardarCentroCosto;
+    document.getElementById('nuevo_codigo_costo').readOnly = false;
 }
 
 function guardarCentroCosto(event) {
@@ -1288,6 +1598,9 @@ function abrirModalChofer() {
 function cerrarModalChofer() {
     document.getElementById('modalChofer').style.display = 'none';
     document.getElementById('formChofer').reset();
+    // Restaurar comportamiento original del formulario
+    document.getElementById('formChofer').onsubmit = guardarChofer;
+    document.getElementById('nuevo_chofer_nombre').readOnly = false;
 }
 
 function guardarChofer(event) {
@@ -1337,6 +1650,8 @@ function abrirModalAdministrativo() {
 function cerrarModalAdministrativo() {
     document.getElementById('modalAdministrativo').style.display = 'none';
     document.getElementById('formAdministrativo').reset();
+    // Restaurar comportamiento original del formulario
+    document.getElementById('formAdministrativo').onsubmit = guardarAdministrativo;
 }
 
 function guardarAdministrativo(event) {
@@ -1394,6 +1709,209 @@ function cargarAdministrativos() {
         }
     })
     .catch(error => console.error('Error cargando administrativos:', error));
+}
+
+// ======= FUNCIONES PARA EDITAR MAESTRAS =======
+
+// EDITAR CENTRO DE COSTO
+function editarCentroCostoSeleccionado() {
+    const select = document.getElementById('centro_costo');
+    const codigoCosto = select.value;
+    
+    if (!codigoCosto) {
+        alert('⚠️ Por favor, selecciona un centro de costo para editar');
+        return;
+    }
+    
+    const option = select.options[select.selectedIndex];
+    const casino = option.getAttribute('data-casino') || '';
+    const ruta = option.getAttribute('data-ruta') || '';
+    
+    // Llenar el modal con los datos actuales
+    document.getElementById('nuevo_codigo_costo').value = codigoCosto;
+    document.getElementById('nuevo_casino').value = casino;
+    document.getElementById('nuevo_ruta').value = ruta;
+    document.getElementById('nuevo_codigo_costo').readOnly = true; // No permitir cambiar el código
+    
+    // Cambiar el comportamiento del formulario para actualizar en lugar de crear
+    const form = document.getElementById('formCentroCosto');
+    form.onsubmit = function(event) {
+        event.preventDefault();
+        actualizarCentroCosto(codigoCosto);
+    };
+    
+    document.getElementById('modalCentroCosto').style.display = 'flex';
+    document.getElementById('nuevo_casino').focus();
+}
+
+function actualizarCentroCosto(codigoCosto) {
+    const data = {
+        codigo_costo: codigoCosto,
+        casino: document.getElementById('nuevo_casino').value.trim(),
+        ruta: document.getElementById('nuevo_ruta').value.trim()
+    };
+    
+    fetch('/api/actualizar-centro-costo', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(result => {
+        if (result.success) {
+            // Actualizar el select
+            const select = document.getElementById('centro_costo');
+            const option = select.options[select.selectedIndex];
+            option.text = `${data.codigo_costo} - ${data.casino}`;
+            option.setAttribute('data-casino', data.casino);
+            option.setAttribute('data-ruta', data.ruta);
+            
+            // Actualizar campos relacionados
+            document.getElementById('codigo_casino').value = data.casino;
+            document.getElementById('ruta').value = data.ruta;
+            
+            alert('✓ Centro de Costo actualizado exitosamente');
+            cerrarModalCentroCosto();
+            
+            // Restaurar el comportamiento original del formulario
+            document.getElementById('formCentroCosto').onsubmit = guardarCentroCosto;
+            document.getElementById('nuevo_codigo_costo').readOnly = false;
+        } else {
+            alert('✖ Error: ' + result.message);
+        }
+    })
+    .catch(error => {
+        alert('✖ Error de conexión: ' + error.message);
+    });
+}
+
+// EDITAR CHOFER
+function editarChoferSeleccionado() {
+    const select = document.getElementById('chofer');
+    const nombreChofer = select.value;
+    
+    if (!nombreChofer) {
+        alert('⚠️ Por favor, selecciona un chofer para editar');
+        return;
+    }
+    
+    // Obtener datos actuales del chofer
+    fetch('/api/obtener-chofer?nombre=' + encodeURIComponent(nombreChofer))
+    .then(response => response.json())
+    .then(result => {
+        if (result.success) {
+            // Llenar el modal con los datos actuales
+            document.getElementById('nuevo_chofer_nombre').value = result.chofer.nombre;
+            document.getElementById('nuevo_chofer_rut').value = result.chofer.rut || '';
+            document.getElementById('nuevo_chofer_celular').value = result.chofer.celular || '';
+            document.getElementById('nuevo_chofer_nombre').readOnly = true; // No permitir cambiar el nombre
+            
+            // Cambiar el comportamiento del formulario
+            const form = document.getElementById('formChofer');
+            form.onsubmit = function(event) {
+                event.preventDefault();
+                actualizarChofer(nombreChofer);
+            };
+            
+            document.getElementById('modalChofer').style.display = 'flex';
+            document.getElementById('nuevo_chofer_rut').focus();
+        } else {
+            alert('✖ Error: ' + result.message);
+        }
+    })
+    .catch(error => {
+        alert('✖ Error de conexión: ' + error.message);
+    });
+}
+
+function actualizarChofer(nombreOriginal) {
+    const data = {
+        nombre: nombreOriginal,
+        rut: document.getElementById('nuevo_chofer_rut').value.trim(),
+        celular: document.getElementById('nuevo_chofer_celular').value.trim()
+    };
+    
+    fetch('/api/actualizar-chofer', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(result => {
+        if (result.success) {
+            // Actualizar campos relacionados
+            document.getElementById('celular').value = data.celular;
+            document.getElementById('rut').value = data.rut;
+            
+            alert('✓ Chofer actualizado exitosamente');
+            cerrarModalChofer();
+            
+            // Restaurar el comportamiento original del formulario
+            document.getElementById('formChofer').onsubmit = guardarChofer;
+            document.getElementById('nuevo_chofer_nombre').readOnly = false;
+        } else {
+            alert('✖ Error: ' + result.message);
+        }
+    })
+    .catch(error => {
+        alert('✖ Error de conexión: ' + error.message);
+    });
+}
+
+// EDITAR ADMINISTRATIVO
+function editarAdministrativoSeleccionado() {
+    const select = document.getElementById('administrativo_responsable');
+    const nombreAdmin = select.value;
+    
+    if (!nombreAdmin) {
+        alert('⚠️ Por favor, selecciona un administrativo para editar');
+        return;
+    }
+    
+    // Llenar el modal con el nombre actual
+    document.getElementById('nuevo_administrativo_nombre').value = nombreAdmin;
+    const originalNombre = nombreAdmin;
+    
+    // Cambiar el comportamiento del formulario
+    const form = document.getElementById('formAdministrativo');
+    form.onsubmit = function(event) {
+        event.preventDefault();
+        actualizarAdministrativo(originalNombre);
+    };
+    
+    document.getElementById('modalAdministrativo').style.display = 'flex';
+    document.getElementById('nuevo_administrativo_nombre').focus();
+}
+
+function actualizarAdministrativo(nombreOriginal) {
+    const nuevoNombre = document.getElementById('nuevo_administrativo_nombre').value.trim().toUpperCase();
+    
+    fetch('/api/actualizar-administrativo', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ nombre_original: nombreOriginal, nombre_nuevo: nuevoNombre })
+    })
+    .then(response => response.json())
+    .then(result => {
+        if (result.success) {
+            // Actualizar el select
+            const select = $('#administrativo_responsable');
+            const option = select.find(`option[value="${nombreOriginal}"]`);
+            option.val(nuevoNombre).text(nuevoNombre);
+            select.val(nuevoNombre).trigger('change');
+            
+            alert('✓ Administrativo actualizado exitosamente');
+            cerrarModalAdministrativo();
+            
+            // Restaurar el comportamiento original del formulario
+            document.getElementById('formAdministrativo').onsubmit = guardarAdministrativo;
+        } else {
+            alert('✖ Error: ' + result.message);
+        }
+    })
+    .catch(error => {
+        alert('✖ Error de conexión: ' + error.message);
+    });
 }
 
 // Cerrar modal al hacer click fuera

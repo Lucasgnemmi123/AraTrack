@@ -6,6 +6,7 @@ from db_manager import DBManager
 from maestras_manager import MaestrasManager
 from pdf_generator import PDFGenerator
 from auth_manager import AuthManager, login_required
+import rendiciones_manager
 
 app = Flask(__name__)
 app.secret_key = 'aratrack-pro-2025-secure-key'
@@ -15,6 +16,15 @@ pdf_generator = PDFGenerator()
 auth_manager = AuthManager()
 
 # ========== HELPER FUNCTIONS ==========
+
+def convertir_a_cero(valor):
+    """Convertir valores vacíos, None o strings vacíos a 0 para campos numéricos"""
+    if valor is None or valor == '' or valor == 'null':
+        return 0
+    try:
+        return int(valor) if valor else 0
+    except (ValueError, TypeError):
+        return 0
 
 def cargar_query(nombre_archivo):
     """Cargar query SQL desde archivo en carpeta queries/"""
@@ -175,28 +185,40 @@ def nuevo_viaje():
     return render_template('nuevo_viaje.html', casinos=casinos, choferes=choferes, patentes=patentes, centros_costo=centros_costo)
 
 @app.route('/api/buscar-centros-costo/<numero_viaje>')
+@login_required
 def buscar_centros_costo(numero_viaje):
     """Devuelve lista de centros con su información de casino"""
-    centros_codigos = db_manager.get_centros_costo_por_viaje(numero_viaje)
-    centros_info = []
-    
-    for codigo in centros_codigos:
-        casino_data = maestras_manager.buscar_casino_por_codigo(int(codigo))
-        centros_info.append({
-            'codigo': codigo,
-            'casino': casino_data['casino'] if casino_data else 'Sin casino',
-            'ruta': casino_data['ruta'] if casino_data else ''
-        })
-    
-    return jsonify(centros_info)
+    try:
+        print(f"\n>>> Buscando centros para viaje: {numero_viaje}")
+        centros_codigos = db_manager.get_centros_costo_por_viaje(numero_viaje)
+        print(f">>> Centros encontrados: {centros_codigos}")
+        centros_info = []
+        
+        for codigo in centros_codigos:
+            casino_data = maestras_manager.buscar_casino_por_codigo(int(codigo))
+            centros_info.append({
+                'codigo': codigo,
+                'casino': casino_data['casino'] if casino_data else 'Sin casino',
+                'ruta': casino_data['ruta'] if casino_data else ''
+            })
+        
+        print(f">>> Retornando {len(centros_info)} centros")
+        return jsonify(centros_info)
+    except Exception as e:
+        print(f">>> ERROR en buscar_centros_costo: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({'error': str(e)}), 500
 
 @app.route('/api/obtener-centros-costo')
+@login_required
 def obtener_centros_costo():
     """Endpoint para obtener todos los centros de costo"""
     centros = maestras_manager.obtener_todos_centros_costo()
     return jsonify(centros)
 
 @app.route('/api/centro-costo-detalles/<int:codigo>')
+@login_required
 def centro_costo_detalles(codigo):
     """Endpoint que retorna casino y ruta para un código de centro de costo"""
     try:
@@ -213,6 +235,7 @@ def centro_costo_detalles(codigo):
         return jsonify({'success': False, 'message': str(e)}), 500
 
 @app.route('/api/obtener-choferes-completo')
+@login_required
 def obtener_choferes_completo():
     choferes = maestras_manager.obtener_todos_los_choferes()
     return jsonify(choferes)
@@ -222,6 +245,7 @@ def test_cargar():
     return render_template('test_cargar.html')
 
 @app.route('/api/buscar-viaje-numero/<numero_viaje>')
+@login_required
 def buscar_viaje_numero(numero_viaje):
     try:
         print(f"\nBUSCANDO VIAJE: {numero_viaje}")
@@ -366,19 +390,19 @@ def guardar_viaje():
             'rut': str(data.get('rut', '')).upper(),
             'fecha_hora_salida_dhl': data.get('hora_salida', ''),
             'fecha_hora_llegada_dhl': data.get('hora_llegada', ''),
-            'num_wencos': data.get('num_wencos', ''),
-            'bin': data.get('bin', ''),
-            'pallets': data.get('pallets', ''),
-            'pallets_chep': data.get('pallets_chep', ''),
-            'pallets_pl_negro_grueso': data.get('pallets_pl_negro_grueso', ''),
-            'pallets_pl_negro_alternativo': data.get('pallets_pl_negro_alternativo', ''),
-            'pallets_congelado': data.get('pallets_congelado', ''),
-            'wencos_congelado': data.get('wencos_congelado', ''),
+            'num_wencos': convertir_a_cero(data.get('num_wencos')),
+            'bin': convertir_a_cero(data.get('bin')),
+            'pallets': convertir_a_cero(data.get('pallets')),
+            'pallets_chep': convertir_a_cero(data.get('pallets_chep')),
+            'pallets_pl_negro_grueso': convertir_a_cero(data.get('pallets_pl_negro_grueso')),
+            'pallets_pl_negro_alternativo': convertir_a_cero(data.get('pallets_pl_negro_alternativo')),
+            'pallets_congelado': convertir_a_cero(data.get('pallets_congelado')),
+            'wencos_congelado': convertir_a_cero(data.get('wencos_congelado')),
             'check_congelado': data.get('check_congelado', ''),
-            'pallets_refrigerado': data.get('pallets_refrigerado', ''),
-            'wencos_refrigerado': data.get('wencos_refrigerado', ''),
+            'pallets_refrigerado': convertir_a_cero(data.get('pallets_refrigerado')),
+            'wencos_refrigerado': convertir_a_cero(data.get('wencos_refrigerado')),
             'check_refrigerado': data.get('check_refrigerado', ''),
-            'pallets_abarrote': data.get('pallets_abarrote', ''),
+            'pallets_abarrote': convertir_a_cero(data.get('pallets_abarrote')),
 
             'check_abarrote': data.get('check_abarrote', ''),
             'check_implementos': data.get('check_implementos', ''),
@@ -437,8 +461,8 @@ def guardar_viaje():
                         data.get('centro_costo'),
                         str(comida.get('guia_comida', '')).upper(),
                         str(comida.get('descripcion', '')).upper(),
-                        comida.get('kilo', 0),
-                        comida.get('bultos', 0),
+                        convertir_a_cero(comida.get('kilo')),
+                        convertir_a_cero(comida.get('bultos')),
                         str(comida.get('proveedor', '')).upper()
                     ))
                 
@@ -462,6 +486,7 @@ def editar_viaje():
     return render_template('editar_viaje.html')
 
 @app.route('/api/buscar-viaje', methods=['POST'])
+@login_required
 def buscar_viaje():
     try:
         data = request.json
@@ -537,19 +562,19 @@ def actualizar_viaje():
             'rut': str(data.get('rut', '')).upper(),
             'fecha_hora_salida_dhl': data.get('hora_salida'),
             'fecha_hora_llegada_dhl': data.get('hora_llegada'),
-            'num_wencos': data.get('num_wencos'),
-            'bin': data.get('bin'),
-            'pallets': data.get('pallets'),
-            'pallets_chep': data.get('pallets_chep'),
-            'pallets_pl_negro_grueso': data.get('pallets_pl_negro_grueso', ''),
-            'pallets_pl_negro_alternativo': data.get('pallets_pl_negro_alternativo', ''),
-            'pallets_congelado': data.get('pallets_congelado'),
-            'wencos_congelado': data.get('wencos_congelado'),
+            'num_wencos': convertir_a_cero(data.get('num_wencos')),
+            'bin': convertir_a_cero(data.get('bin')),
+            'pallets': convertir_a_cero(data.get('pallets')),
+            'pallets_chep': convertir_a_cero(data.get('pallets_chep')),
+            'pallets_pl_negro_grueso': convertir_a_cero(data.get('pallets_pl_negro_grueso')),
+            'pallets_pl_negro_alternativo': convertir_a_cero(data.get('pallets_pl_negro_alternativo')),
+            'pallets_congelado': convertir_a_cero(data.get('pallets_congelado')),
+            'wencos_congelado': convertir_a_cero(data.get('wencos_congelado')),
             'check_congelado': data.get('check_congelado', ''),
-            'pallets_refrigerado': data.get('pallets_refrigerado'),
-            'wencos_refrigerado': data.get('wencos_refrigerado'),
+            'pallets_refrigerado': convertir_a_cero(data.get('pallets_refrigerado')),
+            'wencos_refrigerado': convertir_a_cero(data.get('wencos_refrigerado')),
             'check_refrigerado': data.get('check_refrigerado', ''),
-            'pallets_abarrote': data.get('pallets_abarrote'),
+            'pallets_abarrote': convertir_a_cero(data.get('pallets_abarrote')),
 
             'check_abarrote': data.get('check_abarrote', ''),
             'check_implementos': data.get('check_implementos', ''),
@@ -609,8 +634,8 @@ def actualizar_viaje():
                     data.get('centro_costo'),
                     str(comida.get('guia_comida', '')).upper(),
                     str(comida.get('descripcion', '')).upper(),
-                    comida.get('kilo', 0),
-                    comida.get('bultos', 0),
+                    convertir_a_cero(comida.get('kilo')),
+                    convertir_a_cero(comida.get('bultos')),
                     str(comida.get('proveedor', '')).upper()
                 ))
             
@@ -1143,6 +1168,89 @@ def descargar_reporte_facturacion_diaria():
     except Exception as e:
         return jsonify({'success': False, 'message': str(e)}), 500
 
+@app.route('/api/descargar-reporte-rendiciones')
+@login_required
+def descargar_reporte_rendiciones():
+    """Generar y descargar reporte Excel de rendiciones por rango de fechas"""
+    try:
+        from openpyxl import Workbook
+        from openpyxl.styles import Font, PatternFill, Alignment
+        from io import BytesIO
+        from datetime import datetime
+        
+        # Obtener parámetros
+        fecha_inicio = request.args.get('fecha_inicio')
+        fecha_fin = request.args.get('fecha_fin')
+        
+        if not fecha_inicio or not fecha_fin:
+            return jsonify({'success': False, 'message': 'Debe proporcionar ambas fechas'}), 400
+        
+        # Obtener datos
+        rendiciones = rendiciones_manager.obtener_rendiciones_por_fecha(fecha_inicio, fecha_fin)
+        
+        # Crear libro de Excel
+        wb = Workbook()
+        ws = wb.active
+        ws.title = "Rendiciones"
+        
+        # Estilos
+        header_fill = PatternFill(start_color="6366F1", end_color="6366F1", fill_type="solid")
+        header_font = Font(bold=True, color="FFFFFF", size=12)
+        header_alignment = Alignment(horizontal="center", vertical="center")
+        
+        # Encabezados
+        headers = [
+            'N° VIAJE', 'PDT', 'RUTA',
+            'FECHA CREACIÓN', 'FECHA MODIFICACIÓN', 'ESTADO RENDICIÓN'
+        ]
+        
+        for col_num, header in enumerate(headers, 1):
+            cell = ws.cell(row=1, column=col_num)
+            cell.value = header
+            cell.fill = header_fill
+            cell.font = header_font
+            cell.alignment = header_alignment
+        
+        # Datos
+        for row_num, rendicion in enumerate(rendiciones, 2):
+            ws.cell(row=row_num, column=1, value=rendicion['nro_viaje'])
+            ws.cell(row=row_num, column=2, value=rendicion['pdt'])
+            ws.cell(row=row_num, column=3, value=rendicion['ruta'])
+            ws.cell(row=row_num, column=4, value=rendicion['fecha_creacion'])
+            ws.cell(row=row_num, column=5, value=rendicion['fecha_modificacion'])
+            ws.cell(row=row_num, column=6, value=rendicion['estado_rendicion'])
+        
+        # Ajustar anchos de columna
+        for col in ws.columns:
+            max_length = 0
+            column = col[0].column_letter
+            for cell in col:
+                try:
+                    if len(str(cell.value)) > max_length:
+                        max_length = len(str(cell.value))
+                except:
+                    pass
+            adjusted_width = (max_length + 2)
+            ws.column_dimensions[column].width = adjusted_width
+        
+        # Guardar en memoria
+        excel_file = BytesIO()
+        wb.save(excel_file)
+        excel_file.seek(0)
+        
+        # Crear respuesta
+        response = send_file(
+            excel_file,
+            mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            as_attachment=True,
+            download_name=f'Rendiciones_{fecha_inicio}_a_{fecha_fin}.xlsx'
+        )
+        
+        return response
+        
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
+
 @app.route('/api/generar-pdf', methods=['POST'])
 def generar_pdf_api():
     try:
@@ -1339,6 +1447,99 @@ def obtener_chofer():
             return jsonify({'success': False, 'message': 'No se encontró el chofer'}), 404
     except Exception as e:
         return jsonify({'success': False, 'message': str(e)}), 500
+
+# ========== RUTAS DE RENDICIONES ==========
+
+@app.route('/rendiciones')
+@login_required
+def rendiciones():
+    """Página de gestión de rendiciones de activos"""
+    return render_template('rendiciones.html')
+
+@app.route('/api/cargar-rendiciones', methods=['POST'])
+@login_required
+def cargar_rendiciones():
+    """Cargar rendiciones desde archivo Excel"""
+    try:
+        if 'archivo' not in request.files:
+            return jsonify({'success': False, 'message': 'No se recibió ningún archivo'}), 400
+        
+        archivo = request.files['archivo']
+        
+        if archivo.filename == '':
+            return jsonify({'success': False, 'message': 'No se seleccionó ningún archivo'}), 400
+        
+        # Verificar extensión
+        if not archivo.filename.lower().endswith(('.xlsx', '.xls')):
+            return jsonify({'success': False, 'message': 'Solo se permiten archivos Excel (.xlsx, .xls)'}), 400
+        
+        # Guardar temporalmente
+        temp_path = os.path.join(os.path.dirname(__file__), 'temp_rendiciones.xlsx')
+        archivo.save(temp_path)
+        
+        # Procesar
+        resultado = rendiciones_manager.cargar_rendiciones_desde_excel(temp_path)
+        
+        # Eliminar archivo temporal
+        try:
+            os.remove(temp_path)
+        except:
+            pass
+        
+        if resultado['success']:
+            mensaje = f"✓ {resultado['registros_cargados']} registros cargados"
+            if resultado['duplicados_omitidos'] > 0:
+                mensaje += f"\n⚠ {resultado['duplicados_omitidos']} duplicados omitidos"
+            if resultado['errores']:
+                mensaje += f"\n⚠ {len(resultado['errores'])} errores"
+            
+            return jsonify({
+                'success': True,
+                'message': mensaje,
+                'registros_cargados': resultado['registros_cargados'],
+                'duplicados_omitidos': resultado['duplicados_omitidos'],
+                'errores': resultado['errores']
+            })
+        else:
+            return jsonify({'success': False, 'message': resultado.get('error', 'Error desconocido')}), 500
+            
+    except Exception as e:
+        return jsonify({'success': False, 'message': f'Error: {str(e)}'}), 500
+
+@app.route('/api/obtener-rendiciones')
+@login_required
+def obtener_rendiciones_api():
+    """Obtener lista de rendiciones (filtradas)"""
+    try:
+        filtro = request.args.get('filtro', 'activas')  # 'activas' o 'todas'
+        rendiciones = rendiciones_manager.obtener_rendiciones(filtro)
+        return jsonify({'success': True, 'rendiciones': rendiciones})
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+@app.route('/api/actualizar-rendicion', methods=['POST'])
+@login_required
+def actualizar_rendicion_api():
+    """Actualizar estado de rendición"""
+    try:
+        data = request.json
+        nro_viaje = data.get('nro_viaje')
+        nuevo_estado = data.get('estado')
+        
+        if not nro_viaje or not nuevo_estado:
+            return jsonify({'success': False, 'message': 'Faltan datos requeridos'}), 400
+        
+        resultado = rendiciones_manager.actualizar_estado_rendicion(nro_viaje, nuevo_estado)
+        
+        if resultado['success']:
+            return jsonify(resultado)
+        else:
+            return jsonify(resultado), 400
+            
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+# ========== SERVIDOR ==========
 
 if __name__ == '__main__':
     # Determinar el directorio base correcto

@@ -70,6 +70,13 @@ class PDFGenerator:
             val = v.get(key, default)
             return val if val else default
         
+        # Función auxiliar para valores numéricos: no mostrar 0
+        def get_num(key, default=''):
+            val = v.get(key, default)
+            if val == 0 or val == '0' or val == '' or val is None:
+                return ''
+            return str(val)
+        
         # 1. ENCABEZADO
         encabezado = Table([
             ['PLANILLA CONTROL DESPACHO', 'VIAJE', get('numero_viaje')]
@@ -139,11 +146,11 @@ class PDFGenerator:
         
         # 4. TABLA ACTIVOS - ALINEADA CON ANCHO TOTAL 7.5 INCHES
         activos = Table([
-            ['N° WENCOS', get('num_wencos'), 'BIN', get('bin'), 'REFRIGERADO', get('pallets_refrigerado')],
-            ['PALLETS', get('pallets'), 'PALLET\nNEGRO GRUESO', get('pallets_pl_negro_grueso'), 'CONGELADO', get('pallets_congelado')],
-            ['PALLET\nCHEP', get('pallets_chep'), 'PALLET\nNEGRO ALTER.', get('pallets_pl_negro_alternativo'), 'ABARROTE', get('pallets_abarrote')],
-            ['ADMIN.\nRESPONSABLE', get('administrativo_responsable'), '', '', 'WENCOS\nCONGELADO', get('wencos_congelado')],
-            ['REVISION\nLIMPIEZA', get('revision_limpieza_camion_acciones'), '', '', 'WENCOS\nREFRIGERADO', get('wencos_refrigerado')],
+            ['N° WENCOS', get_num('num_wencos'), 'BIN', get_num('bin'), 'REFRIGERADO', get_num('pallets_refrigerado')],
+            ['PALLETS', get_num('pallets'), 'PALLET\nNEGRO GRUESO', get_num('pallets_pl_negro_grueso'), 'CONGELADO', get_num('pallets_congelado')],
+            ['PALLET\nCHEP', get_num('pallets_chep'), 'PALLET\nNEGRO ALTER.', get_num('pallets_pl_negro_alternativo'), 'ABARROTE', get_num('pallets_abarrote')],
+            ['ADMIN.\nRESPONSABLE', get('administrativo_responsable'), '', '', 'WENCOS\nCONGELADO', get_num('wencos_congelado')],
+            ['REVISION\nLIMPIEZA', get('revision_limpieza_camion_acciones'), '', '', 'WENCOS\nREFRIGERADO', get_num('wencos_refrigerado')],
         ], colWidths=[1.25*inch, 1.25*inch, 1.25*inch, 1.25*inch, 1.25*inch, 1.25*inch], rowHeights=[0.30*inch]*5)
         
         activos.setStyle(TableStyle([
@@ -272,12 +279,26 @@ class PDFGenerator:
             descripcion = comida.get('descripcion', '') or ''
             if len(descripcion) > 20:
                 descripcion = descripcion[:20]
+            
+            # Obtener kilo y bultos, no mostrar si es 0
+            kilo = comida.get('kilo', '')
+            if kilo == 0 or kilo == '0' or kilo == '' or kilo is None:
+                kilo = ''
+            else:
+                kilo = str(kilo)
+            
+            bultos = comida.get('bultos', '')
+            if bultos == 0 or bultos == '0' or bultos == '' or bultos is None:
+                bultos = ''
+            else:
+                bultos = str(bultos)
+            
             comidas_data.append([
                 comida.get('guia_comida', '') or '',
                 proveedor,
                 descripcion,
-                str(comida.get('kilo', '') or ''),
-                str(comida.get('bultos', '') or '')
+                kilo,
+                bultos
             ])
         
         while len(comidas_data) < 21:

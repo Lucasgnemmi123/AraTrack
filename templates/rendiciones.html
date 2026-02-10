@@ -1,0 +1,279 @@
+{% extends "layout.html" %}
+
+{% block title %}Rendición de Activos{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto mt-4">
+    <!-- Header -->
+    <div class="mb-4">
+        <h2 class="text-2xl font-bold text-gray-800 flex items-center gap-2">
+            <i class="bi bi-clipboard-check text-purple-600"></i>
+            Rendición de Activos
+        </h2>
+        <p class="text-gray-600 mt-2">Valida la devolución de activos de los viajes</p>
+    </div>
+
+    <!-- Sección de Carga -->
+    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+        <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+            <i class="bi bi-cloud-upload text-blue-600"></i>
+            Cargar Archivo Excel
+        </h3>
+        
+        <form id="formCargarRendiciones" class="space-y-4">
+            <div class="flex items-center gap-3">
+                <input 
+                    type="file" 
+                    id="archivoRendiciones" 
+                    name="archivo" 
+                    accept=".xlsx,.xls" 
+                    class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    required
+                >
+                <button 
+                    type="submit" 
+                    class="px-6 py-2 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-lg hover:from-purple-700 hover:to-purple-800 transition-all duration-200 font-semibold flex items-center gap-2"
+                >
+                    <i class="bi bi-upload"></i>
+                    Cargar Archivo
+                </button>
+            </div>
+        </form>
+
+        <div id="resultadoCarga" class="mt-4 hidden">
+            <!-- Se mostrará el resultado aquí -->
+        </div>
+    </div>
+
+    <!-- Botón Recargar -->
+    <div class="bg-white rounded-lg shadow-md p-4 mb-4">
+        <div class="flex items-center justify-between">
+            <div class="text-gray-700">
+                <i class="bi bi-info-circle text-purple-600"></i>
+                <span class="font-semibold">Mostrando solo registros pendientes (SIN REVISAR y NO)</span>
+            </div>
+            <button 
+                id="btnRecargar" 
+                class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors duration-200 flex items-center gap-2"
+            >
+                <i class="bi bi-arrow-clockwise"></i>
+                Recargar
+            </button>
+        </div>
+    </div>
+
+    <!-- Tabla de Rendiciones -->
+    <div class="bg-white rounded-lg shadow-md overflow-hidden">
+        <div id="loadingRendiciones" class="p-8 text-center hidden">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto"></div>
+            <p class="mt-4 text-gray-600">Cargando rendiciones...</p>
+        </div>
+
+        <div id="contenedorTabla">
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead class="bg-gradient-to-r from-purple-600 to-purple-700 text-white">
+                        <tr>
+                            <th class="px-4 py-3 text-left font-semibold">N° Viaje</th>
+                            <th class="px-4 py-3 text-left font-semibold">PDT</th>
+                            <th class="px-4 py-3 text-left font-semibold">Ruta</th>
+                            <th class="px-4 py-3 text-left font-semibold">Estado</th>
+                            <th class="px-4 py-3 text-left font-semibold">Fecha Modificación</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tablaRendiciones">
+                        <tr>
+                            <td colspan="5" class="px-4 py-8 text-center text-gray-500">
+                                <i class="bi bi-inbox text-4xl mb-2 block"></i>
+                                No hay rendiciones pendientes
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Cargar rendiciones al iniciar
+    cargarRendiciones();
+
+    // Form de carga
+    document.getElementById('formCargarRendiciones').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const archivoInput = document.getElementById('archivoRendiciones');
+        const archivo = archivoInput.files[0];
+        
+        if (!archivo) {
+            mostrarModalInfo('⚠ Por favor selecciona un archivo', 'warning');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('archivo', archivo);
+
+        // Mostrar loading
+        const btnSubmit = this.querySelector('button[type="submit"]');
+        const textoOriginal = btnSubmit.innerHTML;
+        btnSubmit.disabled = true;
+        btnSubmit.innerHTML = '<i class="bi bi-hourglass-split animate-spin"></i> Procesando...';
+
+        fetch('/api/cargar-rendiciones', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(result => {
+            btnSubmit.disabled = false;
+            btnSubmit.innerHTML = textoOriginal;
+
+            if (result.success) {
+                mostrarModalInfo(result.message, 'success');
+                archivoInput.value = '';
+                cargarRendiciones();
+            } else {
+                mostrarModalInfo('❌ ' + result.message, 'error');
+            }
+        })
+        .catch(error => {
+            btnSubmit.disabled = false;
+            btnSubmit.innerHTML = textoOriginal;
+            mostrarModalInfo('❌ Error al cargar el archivo: ' + error.message, 'error');
+        });
+    });
+
+    // Botón recargar
+    document.getElementById('btnRecargar').addEventListener('click', cargarRendiciones);
+});
+
+function cargarRendiciones() {
+    const loading = document.getElementById('loadingRendiciones');
+    const tabla = document.getElementById('tablaRendiciones');
+
+    loading.classList.remove('hidden');
+
+    fetch('/api/obtener-rendiciones?filtro=activas')
+        .then(response => response.json())
+        .then(result => {
+            loading.classList.add('hidden');
+
+            if (result.success) {
+                mostrarRendiciones(result.rendiciones);
+            } else {
+                mostrarModalInfo('❌ Error al cargar rendiciones: ' + result.message, 'error');
+            }
+        })
+        .catch(error => {
+            loading.classList.add('hidden');
+            mostrarModalInfo('❌ Error: ' + error.message, 'error');
+        });
+}
+
+function mostrarRendiciones(rendiciones) {
+    const tabla = document.getElementById('tablaRendiciones');
+
+    if (rendiciones.length === 0) {
+        tabla.innerHTML = `
+            <tr>
+                <td colspan="5" class="px-4 py-8 text-center text-gray-500">
+                    <i class="bi bi-inbox text-4xl mb-2 block"></i>
+                    No hay rendiciones pendientes
+                </td>
+            </tr>
+        `;
+        return;
+    }
+
+    tabla.innerHTML = rendiciones.map((r, index) => {
+        const colorFila = index % 2 === 0 ? 'bg-white' : 'bg-gray-50';
+        const fechaMod = r.fecha_modificacion ? new Date(r.fecha_modificacion).toLocaleString('es-CL') : '-';
+        
+        // Color del estado
+        let colorEstado = 'bg-gray-100 text-gray-800';
+        if (r.estado_rendicion === 'SI') {
+            colorEstado = 'bg-green-100 text-green-800';
+        } else if (r.estado_rendicion === 'NO') {
+            colorEstado = 'bg-red-100 text-red-800';
+        } else if (r.estado_rendicion === 'SIN REVISAR') {
+            colorEstado = 'bg-yellow-100 text-yellow-800';
+        }
+
+        return `
+            <tr class="${colorFila} hover:bg-purple-50 transition-colors duration-150">
+                <td class="px-4 py-3 font-semibold text-gray-900">${r.nro_viaje}</td>
+                <td class="px-4 py-3 text-gray-700">${r.pdt || '-'}</td>
+                <td class="px-4 py-3 text-gray-700">${r.ruta || '-'}</td>
+                <td class="px-4 py-3">
+                    <select 
+                        class="select-estado px-3 py-1 rounded-full text-sm font-semibold ${colorEstado} border-none focus:outline-none focus:ring-2 focus:ring-purple-500 cursor-pointer"
+                        data-nro-viaje="${r.nro_viaje}"
+                        onchange="confirmarCambioEstado(${r.nro_viaje}, this.value, this)"
+                    >
+                        <option value="SIN REVISAR" ${r.estado_rendicion === 'SIN REVISAR' ? 'selected' : ''}>SIN REVISAR</option>
+                        <option value="SI" ${r.estado_rendicion === 'SI' ? 'selected' : ''}>SI</option>
+                        <option value="NO" ${r.estado_rendicion === 'NO' ? 'selected' : ''}>NO</option>
+                    </select>
+                </td>
+                <td class="px-4 py-3 text-gray-600 text-sm">${fechaMod}</td>
+            </tr>
+        `;
+    }).join('');
+}
+
+function confirmarCambioEstado(nroViaje, nuevoEstado, selectElement) {
+    // Si el cambio es a "SI", mostrar confirmación
+    if (nuevoEstado === 'SI') {
+        mostrarModalConfirm(
+            `¿Seguro que el viaje ${nroViaje} realizó la rendición?\n\nUna vez confirmado, el registro desaparecerá de esta lista.`,
+            function(confirmado) {
+                if (confirmado) {
+                    actualizarEstado(nroViaje, nuevoEstado);
+                } else {
+                    // Revertir el select al valor anterior
+                    cargarRendiciones();
+                }
+            }
+        );
+    } else {
+        // Para NO y SIN REVISAR, actualizar sin confirmación
+        actualizarEstado(nroViaje, nuevoEstado);
+    }
+}
+
+function actualizarEstado(nroViaje, nuevoEstado) {
+    fetch('/api/actualizar-rendicion', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            nro_viaje: nroViaje,
+            estado: nuevoEstado
+        })
+    })
+    .then(response => response.json())
+    .then(result => {
+        if (result.success) {
+            mostrarModalInfo(`✓ Estado actualizado a: ${nuevoEstado}`, 'success');
+            
+            // Si se cambió a "SI", recargar inmediatamente para que desaparezca
+            if (nuevoEstado === 'SI') {
+                setTimeout(() => {
+                    cargarRendiciones();
+                }, 1000);
+            }
+        } else {
+            mostrarModalInfo('❌ ' + result.message, 'error');
+            cargarRendiciones(); // Recargar para revertir el cambio visual
+        }
+    })
+    .catch(error => {
+        mostrarModalInfo('❌ Error: ' + error.message, 'error');
+        cargarRendiciones();
+    });
+}
+</script>
+{% endblock %}

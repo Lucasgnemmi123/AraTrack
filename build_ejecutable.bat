@@ -4,15 +4,20 @@ echo   CONSTRUYENDO EJECUTABLE PORTABLE ARATRACK
 echo ============================================
 echo.
 
-REM Activar entorno virtual si existe, sino usar Python del sistema
-if exist ".venv\Scripts\activate.bat" (
-    call .venv\Scripts\activate.bat
-) else (
-    echo No se encontro entorno virtual, usando Python del sistema
+REM Usar Python del entorno virtual directamente
+set PYTHON=.venv\Scripts\python.exe
+set PIP=.venv\Scripts\pip.exe
+
+REM Verificar que existe el entorno virtual
+if not exist "%PYTHON%" (
+    echo ERROR: No se encontro el entorno virtual en .venv
+    pause
+    exit /b 1
 )
 
 REM Instalar PyInstaller si no esta
-pip install pyinstaller
+echo Verificando PyInstaller...
+%PIP% install pyinstaller >nul 2>&1
 
 REM Limpiar builds anteriores
 if exist "build" rmdir /s /q build
@@ -23,7 +28,7 @@ REM Crear ejecutable (carpeta con todos los archivos visibles)
 echo.
 echo Generando aplicacion portable (archivos visibles)...
 echo.
-pyinstaller --noconfirm ^
+%PYTHON% -m PyInstaller --noconfirm ^
     --console ^
     --name "AraTrack" ^
     --add-data "templates;templates" ^
@@ -41,6 +46,7 @@ pyinstaller --noconfirm ^
     --hidden-import=maestras_manager ^
     --hidden-import=auth_manager ^
     --hidden-import=pdf_generator ^
+    --hidden-import=rendiciones_manager ^
     --collect-all openpyxl ^
     --collect-all flask ^
     launcher.py
@@ -58,6 +64,7 @@ copy db_manager.py AraTrack_Portable\_internal\
 copy maestras_manager.py AraTrack_Portable\_internal\
 copy auth_manager.py AraTrack_Portable\_internal\
 copy pdf_generator.py AraTrack_Portable\_internal\
+copy rendiciones_manager.py AraTrack_Portable\_internal\
 copy app_web.py AraTrack_Portable\_internal\
 
 REM Copiar base de datos al mismo nivel que el ejecutable
