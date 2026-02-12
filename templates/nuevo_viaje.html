@@ -398,6 +398,40 @@
                 <label for="guia_14" class="block text-sm font-medium text-gray-700 mb-1">Guía 14</label>
                 <input type="text" id="guia_14" name="guia_14" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" maxlength="30" inputmode="numeric" pattern="[0-9]*">
             </div>
+            <div>
+                <label for="guia_15" class="block text-sm font-medium text-gray-700 mb-1">Guía 15</label>
+                <input type="text" id="guia_15" name="guia_15" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" maxlength="30" inputmode="numeric" pattern="[0-9]*">
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
+            <div>
+                <label for="guia_16" class="block text-sm font-medium text-gray-700 mb-1">Guía 16</label>
+                <input type="text" id="guia_16" name="guia_16" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" maxlength="30" inputmode="numeric" pattern="[0-9]*">
+            </div>
+            <div>
+                <label for="guia_17" class="block text-sm font-medium text-gray-700 mb-1">Guía 17</label>
+                <input type="text" id="guia_17" name="guia_17" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" maxlength="30" inputmode="numeric" pattern="[0-9]*">
+            </div>
+            <div>
+                <label for="guia_18" class="block text-sm font-medium text-gray-700 mb-1">Guía 18</label>
+                <input type="text" id="guia_18" name="guia_18" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" maxlength="30" inputmode="numeric" pattern="[0-9]*">
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
+            <div>
+                <label for="guia_19" class="block text-sm font-medium text-gray-700 mb-1">Guía 19</label>
+                <input type="text" id="guia_19" name="guia_19" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" maxlength="30" inputmode="numeric" pattern="[0-9]*">
+            </div>
+            <div>
+                <label for="guia_20" class="block text-sm font-medium text-gray-700 mb-1">Guía 20</label>
+                <input type="text" id="guia_20" name="guia_20" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" maxlength="30" inputmode="numeric" pattern="[0-9]*">
+            </div>
+            <div>
+                <label for="guia_21" class="block text-sm font-medium text-gray-700 mb-1">Guía 21</label>
+                <input type="text" id="guia_21" name="guia_21" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" maxlength="30" inputmode="numeric" pattern="[0-9]*">
+            </div>
         </div>
             </div>
         </div>
@@ -829,7 +863,14 @@ function cargarDatosViajeExistente(numeroViaje) {
                     guia_11: viaje.guia_11,
                     guia_12: viaje.guia_12,
                     guia_13: viaje.guia_13,
-                    guia_14: viaje.guia_14
+                    guia_14: viaje.guia_14,
+                    guia_15: viaje.guia_15,
+                    guia_16: viaje.guia_16,
+                    guia_17: viaje.guia_17,
+                    guia_18: viaje.guia_18,
+                    guia_19: viaje.guia_19,
+                    guia_20: viaje.guia_20,
+                    guia_21: viaje.guia_21
                 });
                 
                 // Centro de costo con Select2 y autocompletar Casino/Ruta
@@ -973,15 +1014,22 @@ function cargarDatosViajeExistente(numeroViaje) {
                 console.log('check_revision_planilla_despacho desde BD:', viaje.check_revision_planilla_despacho, 'Tipo:', typeof viaje.check_revision_planilla_despacho);
                 document.getElementById('check_revision_planilla_despacho').checked = (viaje.check_revision_planilla_despacho === 'X' || viaje.check_revision_planilla_despacho === 'x' || viaje.check_revision_planilla_despacho === '1' || viaje.check_revision_planilla_despacho === 1);
                 
-                // GUÍAS (1-14)
+                // GUÍAS (1-21)
                 console.log('Cargando guías...');
                 console.log('  Valores en objeto viaje:', {
                     guia_11: viaje.guia_11,
                     guia_12: viaje.guia_12,
                     guia_13: viaje.guia_13,
-                    guia_14: viaje.guia_14
+                    guia_14: viaje.guia_14,
+                    guia_15: viaje.guia_15,
+                    guia_16: viaje.guia_16,
+                    guia_17: viaje.guia_17,
+                    guia_18: viaje.guia_18,
+                    guia_19: viaje.guia_19,
+                    guia_20: viaje.guia_20,
+                    guia_21: viaje.guia_21
                 });
-                for (let i = 1; i <= 14; i++) {
+                for (let i = 1; i <= 21; i++) {
                     const guiaField = document.getElementById(`guia_${i}`);
                     if (guiaField) {
                         const valor = viaje[`guia_${i}`] || '';
@@ -1316,6 +1364,13 @@ document.getElementById('formNuevoViaje').addEventListener('submit', function(e)
         guia_12: formData.get('guia_12'),
         guia_13: formData.get('guia_13'),
         guia_14: formData.get('guia_14'),
+        guia_15: formData.get('guia_15'),
+        guia_16: formData.get('guia_16'),
+        guia_17: formData.get('guia_17'),
+        guia_18: formData.get('guia_18'),
+        guia_19: formData.get('guia_19'),
+        guia_20: formData.get('guia_20'),
+        guia_21: formData.get('guia_21'),
         sello_salida_1p: formData.get('sello_salida_1p'),
         sello_salida_2p: formData.get('sello_salida_2p'),
         sello_salida_3p: formData.get('sello_salida_3p'),

@@ -244,6 +244,7 @@ class PDFGenerator:
         guias = Table([
             [get('guia_1'), get('guia_2'), get('guia_3'), get('guia_4'), get('guia_5'), get('guia_6'), get('guia_7')],
             [get('guia_8'), get('guia_9'), get('guia_10'), get('guia_11'), get('guia_12'), get('guia_13'), get('guia_14')],
+            [get('guia_15'), get('guia_16'), get('guia_17'), get('guia_18'), get('guia_19'), get('guia_20'), get('guia_21')],
         ], colWidths=[1.07*inch] * 7)
         
         guias.setStyle(TableStyle([

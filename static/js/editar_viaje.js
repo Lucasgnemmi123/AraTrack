@@ -369,24 +369,24 @@ function llenarFormulario(viaje, comidas) {
                 </h5>
             </div>
             <div class="p-4">
-                <div class="grid grid-cols-1 md:grid-cols-5 gap-3 mb-3">
-                    ${[1,2,3,4,5].map(i => `
+                <div class="grid grid-cols-1 md:grid-cols-7 gap-3 mb-3">
+                    ${[1,2,3,4,5,6,7].map(i => `
                         <div>
                             <label for="edit_guia_${i}" class="block text-sm font-medium text-gray-700 mb-1">${i === 1 ? 'Guía de activos (Guía 1)' : `Guía ${i}`}</label>
                             <input type="text" id="edit_guia_${i}" value="${viaje[`guia_${i}`] || ''}" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent">
                         </div>
                     `).join('')}
                 </div>
-                <div class="grid grid-cols-1 md:grid-cols-5 gap-3 mb-3">
-                    ${[6,7,8,9,10].map(i => `
+                <div class="grid grid-cols-1 md:grid-cols-7 gap-3 mb-3">
+                    ${[8,9,10,11,12,13,14].map(i => `
                         <div>
                             <label for="edit_guia_${i}" class="block text-sm font-medium text-gray-700 mb-1">Guía ${i}</label>
                             <input type="text" id="edit_guia_${i}" value="${viaje[`guia_${i}`] || ''}" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent">
                         </div>
                     `).join('')}
                 </div>
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
-                    ${[11,12,13,14].map(i => `
+                <div class="grid grid-cols-1 md:grid-cols-7 gap-3">
+                    ${[15,16,17,18,19,20,21].map(i => `
                         <div>
                             <label for="edit_guia_${i}" class="block text-sm font-medium text-gray-700 mb-1">Guía ${i}</label>
                             <input type="text" id="edit_guia_${i}" value="${viaje[`guia_${i}`] || ''}" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent">
@@ -646,7 +646,7 @@ function actualizarViaje(e) {
         comidas: []
     };
     
-    for (let i = 1; i <= 14; i++) {
+    for (let i = 1; i <= 21; i++) {
         data[`guia_${i}`] = document.getElementById(`edit_guia_${i}`).value;
     }
     

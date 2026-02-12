@@ -65,6 +65,13 @@ SELECT
     guia_12,
     guia_13,
     guia_14,
+    guia_15,
+    guia_16,
+    guia_17,
+    guia_18,
+    guia_19,
+    guia_20,
+    guia_21,
     numero_certificado_fumigacion,
     revision_limpieza_camion_acciones,
     administrativo_responsable

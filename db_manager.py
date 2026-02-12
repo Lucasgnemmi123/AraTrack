@@ -80,6 +80,7 @@ class DBManager:
                 'sello_retorno_1p', 'sello_retorno_2p', 'sello_retorno_3p', 'sello_retorno_4p', 
                 'sello_retorno_5p', 'guia_1', 'guia_2', 'guia_3', 'guia_4', 'guia_5', 'guia_6', 
                 'guia_7', 'guia_8', 'guia_9', 'guia_10', 'guia_11', 'guia_12', 'guia_13', 'guia_14',
+                'guia_15', 'guia_16', 'guia_17', 'guia_18', 'guia_19', 'guia_20', 'guia_21',
                 'numero_certificado_fumigacion', 'revision_limpieza_camion_acciones', 
                 'administrativo_responsable'
             ]
@@ -137,6 +138,7 @@ class DBManager:
                     'sello_retorno_1p', 'sello_retorno_2p', 'sello_retorno_3p', 'sello_retorno_4p', 
                     'sello_retorno_5p', 'guia_1', 'guia_2', 'guia_3', 'guia_4', 'guia_5', 'guia_6', 
                     'guia_7', 'guia_8', 'guia_9', 'guia_10', 'guia_11', 'guia_12', 'guia_13', 'guia_14',
+                    'guia_15', 'guia_16', 'guia_17', 'guia_18', 'guia_19', 'guia_20', 'guia_21',
                     'numero_certificado_fumigacion', 'revision_limpieza_camion_acciones', 
                     'administrativo_responsable'
                 ]
@@ -617,7 +619,8 @@ class DBManager:
                 'sello_salida_2p', 'sello_salida_3p', 'sello_salida_4p', 'sello_salida_5p', 
                 'sello_retorno_1p', 'sello_retorno_2p', 'sello_retorno_3p', 'sello_retorno_4p', 
                 'sello_retorno_5p', 'guia_1', 'guia_2', 'guia_3', 'guia_4', 'guia_5', 'guia_6', 
-                'guia_7', 'guia_8', 'guia_9', 'guia_10', 
+                'guia_7', 'guia_8', 'guia_9', 'guia_10', 'guia_11', 'guia_12', 'guia_13', 'guia_14',
+                'guia_15', 'guia_16', 'guia_17', 'guia_18', 'guia_19', 'guia_20', 'guia_21',
                 'numero_certificado_fumigacion', 'revision_limpieza_camion_acciones', 
                 'administrativo_responsable'
             ]
