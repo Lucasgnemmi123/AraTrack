@@ -295,90 +295,67 @@ function llenarFormulario(viaje, comidas) {
                     </div>
                 </div>
 
-                <h6 class="text-md font-semibold text-gray-700 mb-2 mt-4">Congelado</h6>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
+                <h6 class="text-md font-semibold text-gray-800 mb-2 mt-4 flex items-center"><i class="bi bi-thermometer-half mr-2 text-blue-500"></i>Pallets por Área</h6>
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
                     <div>
                         <label for="edit_pallets_congelado" class="block text-sm font-medium text-gray-700 mb-1">Pallets Congelado</label>
-                        <input type="number" id="edit_pallets_congelado" value="${viaje.pallets_congelado || 0}" min="0" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                        <input type="number" id="edit_pallets_congelado" value="${viaje.pallets_congelado || 0}" min="0" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
                     </div>
                     <div>
                         <label for="edit_wencos_congelado" class="block text-sm font-medium text-gray-700 mb-1">Wencos Congelado</label>
-                        <input type="number" id="edit_wencos_congelado" value="${viaje.wencos_congelado || 0}" min="0" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                        <input type="number" id="edit_wencos_congelado" value="${viaje.wencos_congelado || 0}" min="0" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
                     </div>
-                    <div class="flex items-center pt-6">
-                        <label class="flex items-center">
-                            <input type="checkbox" id="edit_check_congelado" ${(viaje.check_congelado === 'X' || viaje.check_congelado === 'x' || viaje.check_congelado === '1' || viaje.check_congelado === 1) ? 'checked' : ''} class="rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
-                            <span class="ml-2 text-sm text-gray-700">Congelado</span>
-                        </label>
-                    </div>
-                </div>
-
-                <h6 class="text-md font-semibold text-gray-700 mb-2 mt-4">Refrigerado</h6>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
                     <div>
                         <label for="edit_pallets_refrigerado" class="block text-sm font-medium text-gray-700 mb-1">Pallets Refrigerado</label>
-                        <input type="number" id="edit_pallets_refrigerado" value="${viaje.pallets_refrigerado || 0}" min="0" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                        <input type="number" id="edit_pallets_refrigerado" value="${viaje.pallets_refrigerado || 0}" min="0" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
                     </div>
                     <div>
                         <label for="edit_wencos_refrigerado" class="block text-sm font-medium text-gray-700 mb-1">Wencos Refrigerado</label>
-                        <input type="number" id="edit_wencos_refrigerado" value="${viaje.wencos_refrigerado || 0}" min="0" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                        <input type="number" id="edit_wencos_refrigerado" value="${viaje.wencos_refrigerado || 0}" min="0" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
                     </div>
-                    <div class="flex items-center pt-6">
-                        <label class="flex items-center">
-                            <input type="checkbox" id="edit_check_refrigerado" ${(viaje.check_refrigerado === 'X' || viaje.check_refrigerado === 'x' || viaje.check_refrigerado === '1' || viaje.check_refrigerado === 1) ? 'checked' : ''} class="rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
-                            <span class="ml-2 text-sm text-gray-700">Refrigerado</span>
-                        </label>
-                    </div>
-                </div>
-
-                <h6 class="text-md font-semibold text-gray-700 mb-2 mt-4">Abarrote</h6>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <div>
                         <label for="edit_pallets_abarrote" class="block text-sm font-medium text-gray-700 mb-1">Pallets Abarrote</label>
-                        <input type="number" id="edit_pallets_abarrote" value="${viaje.pallets_abarrote || 0}" min="0" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
-                    </div>
-                    <div class="flex items-center pt-6">
-                        <label class="flex items-center">
-                            <input type="checkbox" id="edit_check_abarrote" ${(viaje.check_abarrote === 'X' || viaje.check_abarrote === 'x' || viaje.check_abarrote === '1' || viaje.check_abarrote === 1) ? 'checked' : ''} class="rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
-                            <span class="ml-2 text-sm text-gray-700">Abarrote</span>
-                        </label>
+                        <input type="number" id="edit_pallets_abarrote" value="${viaje.pallets_abarrote || 0}" min="0" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
                     </div>
                 </div>
-            </div>
-        </div>
 
-        <!-- VERIFICACIONES -->
-        <div class="bg-white rounded-xl shadow-lg mb-2 overflow-hidden">
-            <div class="bg-gradient-to-r from-green-500 to-green-600 px-4 py-2">
-                <h5 class="text-lg font-semibold text-white flex items-center">
-                    <i class="bi bi-check-circle mr-2"></i>Verificaciones
-                </h5>
-            </div>
-            <div class="p-4">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-                    <label class="flex items-center">
-                        <input type="checkbox" id="edit_check_implementos" ${(viaje.check_implementos === 'X' || viaje.check_implementos === 'x' || viaje.check_implementos === '1' || viaje.check_implementos === 1) ? 'checked' : ''} class="rounded border-gray-300 text-green-600 shadow-sm focus:border-green-300 focus:ring focus:ring-green-200 focus:ring-opacity-50">
-                        <span class="ml-2 text-sm text-gray-700">Implementos</span>
+                <h6 class="text-md font-semibold text-gray-800 mb-2 mt-4 flex items-center"><i class="bi bi-check2-square mr-2 text-green-500"></i>Validaciones</h6>
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-3 bg-gray-50 p-3 rounded-lg">
+                    <label class="flex items-center space-x-2 text-sm text-gray-700 cursor-pointer hover:text-gray-900">
+                        <input type="checkbox" id="edit_check_congelado" ${(viaje.check_congelado === 'X' || viaje.check_congelado === 'x' || viaje.check_congelado === '1' || viaje.check_congelado === 1) ? 'checked' : ''} class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-2 focus:ring-blue-500">
+                        <span class="font-medium">Congelado</span>
                     </label>
-                    <label class="flex items-center">
-                        <input type="checkbox" id="edit_check_aseo" ${(viaje.check_aseo === 'X' || viaje.check_aseo === 'x' || viaje.check_aseo === '1' || viaje.check_aseo === 1) ? 'checked' : ''} class="rounded border-gray-300 text-green-600 shadow-sm focus:border-green-300 focus:ring focus:ring-green-200 focus:ring-opacity-50">
-                        <span class="ml-2 text-sm text-gray-700">Aseo</span>
+                    <label class="flex items-center space-x-2 text-sm text-gray-700 cursor-pointer hover:text-gray-900">
+                        <input type="checkbox" id="edit_check_refrigerado" ${(viaje.check_refrigerado === 'X' || viaje.check_refrigerado === 'x' || viaje.check_refrigerado === '1' || viaje.check_refrigerado === 1) ? 'checked' : ''} class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-2 focus:ring-blue-500">
+                        <span class="font-medium">Refrigerado</span>
                     </label>
-                    <label class="flex items-center">
-                        <input type="checkbox" id="edit_check_trazabilidad" ${(viaje.check_trazabilidad === 'X' || viaje.check_trazabilidad === 'x' || viaje.check_trazabilidad === '1' || viaje.check_trazabilidad === 1) ? 'checked' : ''} class="rounded border-gray-300 text-green-600 shadow-sm focus:border-green-300 focus:ring focus:ring-green-200 focus:ring-opacity-50">
-                        <span class="ml-2 text-sm text-gray-700">Trazabilidad</span>
+                    <label class="flex items-center space-x-2 text-sm text-gray-700 cursor-pointer hover:text-gray-900">
+                        <input type="checkbox" id="edit_check_abarrote" ${(viaje.check_abarrote === 'X' || viaje.check_abarrote === 'x' || viaje.check_abarrote === '1' || viaje.check_abarrote === 1) ? 'checked' : ''} class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-2 focus:ring-blue-500">
+                        <span class="font-medium">Abarrote</span>
                     </label>
-                    <label class="flex items-center">
-                        <input type="checkbox" id="edit_check_plataforma_wtck" ${(viaje.check_plataforma_wtck === 'X' || viaje.check_plataforma_wtck === 'x' || viaje.check_plataforma_wtck === '1' || viaje.check_plataforma_wtck === 1) ? 'checked' : ''} class="rounded border-gray-300 text-green-600 shadow-sm focus:border-green-300 focus:ring focus:ring-green-200 focus:ring-opacity-50">
-                        <span class="ml-2 text-sm text-gray-700">Plataforma WTCK</span>
+                    <label class="flex items-center space-x-2 text-sm text-gray-700 cursor-pointer hover:text-gray-900">
+                        <input type="checkbox" id="edit_check_implementos" ${(viaje.check_implementos === 'X' || viaje.check_implementos === 'x' || viaje.check_implementos === '1' || viaje.check_implementos === 1) ? 'checked' : ''} class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-2 focus:ring-blue-500">
+                        <span class="font-medium">Implementos</span>
                     </label>
-                    <label class="flex items-center">
-                        <input type="checkbox" id="edit_check_env_correo_wtck" ${(viaje.check_env_correo_wtck === 'X' || viaje.check_env_correo_wtck === 'x' || viaje.check_env_correo_wtck === '1' || viaje.check_env_correo_wtck === 1) ? 'checked' : ''} class="rounded border-gray-300 text-green-600 shadow-sm focus:border-green-300 focus:ring focus:ring-green-200 focus:ring-opacity-50">
-                        <span class="ml-2 text-sm text-gray-700">Envío Correo WTCK</span>
+                    <label class="flex items-center space-x-2 text-sm text-gray-700 cursor-pointer hover:text-gray-900">
+                        <input type="checkbox" id="edit_check_aseo" ${(viaje.check_aseo === 'X' || viaje.check_aseo === 'x' || viaje.check_aseo === '1' || viaje.check_aseo === 1) ? 'checked' : ''} class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-2 focus:ring-blue-500">
+                        <span class="font-medium">Aseo</span>
                     </label>
-                    <label class="flex items-center">
-                        <input type="checkbox" id="edit_check_revision_planilla_despacho" ${(viaje.check_revision_planilla_despacho === 'X' || viaje.check_revision_planilla_despacho === 'x' || viaje.check_revision_planilla_despacho === '1' || viaje.check_revision_planilla_despacho === 1) ? 'checked' : ''} class="rounded border-gray-300 text-green-600 shadow-sm focus:border-green-300 focus:ring focus:ring-green-200 focus:ring-opacity-50">
-                        <span class="ml-2 text-sm text-gray-700">Revisión Planilla Despacho</span>
+                    <label class="flex items-center space-x-2 text-sm text-gray-700 cursor-pointer hover:text-gray-900">
+                        <input type="checkbox" id="edit_check_trazabilidad" ${(viaje.check_trazabilidad === 'X' || viaje.check_trazabilidad === 'x' || viaje.check_trazabilidad === '1' || viaje.check_trazabilidad === 1) ? 'checked' : ''} class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-2 focus:ring-blue-500">
+                        <span class="font-medium">Trazabilidad</span>
+                    </label>
+                    <label class="flex items-center space-x-2 text-sm text-gray-700 cursor-pointer hover:text-gray-900">
+                        <input type="checkbox" id="edit_check_plataforma_wtck" ${(viaje.check_plataforma_wtck === 'X' || viaje.check_plataforma_wtck === 'x' || viaje.check_plataforma_wtck === '1' || viaje.check_plataforma_wtck === 1) ? 'checked' : ''} class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-2 focus:ring-blue-500">
+                        <span class="font-medium">Plataforma WTCK</span>
+                    </label>
+                    <label class="flex items-center space-x-2 text-sm text-gray-700 cursor-pointer hover:text-gray-900">
+                        <input type="checkbox" id="edit_check_env_correo_wtck" ${(viaje.check_env_correo_wtck === 'X' || viaje.check_env_correo_wtck === 'x' || viaje.check_env_correo_wtck === '1' || viaje.check_env_correo_wtck === 1) ? 'checked' : ''} class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-2 focus:ring-blue-500">
+                        <span class="font-medium">Envío Correo WTCK</span>
+                    </label>
+                    <label class="flex items-center space-x-2 text-sm text-gray-700 cursor-pointer hover:text-gray-900">
+                        <input type="checkbox" id="edit_check_revision_planilla_despacho" ${(viaje.check_revision_planilla_despacho === 'X' || viaje.check_revision_planilla_despacho === 'x' || viaje.check_revision_planilla_despacho === '1' || viaje.check_revision_planilla_despacho === 1) ? 'checked' : ''} class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-2 focus:ring-blue-500">
+                        <span class="font-medium">Revisión Planilla Despacho</span>
                     </label>
                 </div>
             </div>
@@ -477,33 +454,40 @@ function llenarFormulario(viaje, comidas) {
             </div>
         </div>
 
-        <!-- COMIDAS PREPARADAS -->
+        <!-- COMIDAS PREPARADAS / IMPLEMENTOS -->
         <div class="bg-white rounded-xl shadow-lg mb-2 overflow-hidden">
             <div class="bg-gradient-to-r from-amber-500 to-amber-600 px-4 py-2">
                 <h5 class="text-lg font-semibold text-white flex items-center">
-                    <i class="bi bi-egg-fried mr-2"></i>Comidas Preparadas
+                    <i class="bi bi-egg-fried mr-2"></i>Comidas Preparadas / Implementos
                 </h5>
             </div>
             <div class="p-4">
                 <div id="edit-comidas-container">
                     ${comidas.map((comida, index) => `
                         <div class="comida-item-edit mb-3 p-3 bg-gray-50 rounded-lg" id="comida-edit-${index}">
-                            <div class="grid grid-cols-1 md:grid-cols-5 gap-3">
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Guía Comida</label>
-                                    <input type="text" class="comida_guia w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent" value="${comida.guia_comida || ''}">
+                            <div class="grid grid-cols-1 md:grid-cols-7 gap-3">
+                                <div class="flex items-center justify-center">
+                                    <span class="comida-numero text-2xl font-bold text-green-600">#${index + 1}</span>
                                 </div>
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Descripción</label>
-                                    <input type="text" class="comida_descripcion w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent" value="${comida.descripcion || ''}">
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">N° Guía</label>
+                                    <input type="text" class="comida_guia w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent" value="${comida.guia_comida || ''}">
                                 </div>
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Kilos</label>
-                                    <input type="number" class="comida_kilo w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent" value="${comida.kilo || 0}" step="0.01" min="0">
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Proveedor</label>
+                                    <input type="text" class="comida_proveedor w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent" value="${comida.proveedor || ''}">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Descripción <span class="text-red-500">*</span></label>
+                                    <input type="text" class="comida_descripcion w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent" value="${comida.descripcion || ''}">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Kilo</label>
+                                    <input type="number" class="comida_kilo w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent" value="${comida.kilo || 0}" step="0.01" min="0">
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Bultos</label>
-                                    <input type="number" class="comida_bultos w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent" value="${comida.bultos || 0}" min="0">
+                                    <input type="number" class="comida_bultos w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent" value="${comida.bultos || 0}" min="0">
                                 </div>
                                 <div class="flex items-end">
                                     <button type="button" onclick="eliminarComidaEdit(${index})" class="w-full px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors flex items-center justify-center">
@@ -549,35 +533,55 @@ function agregarComidaEdit() {
     }
     
     const container = document.getElementById('edit-comidas-container');
-    const index = contadorComidasEdit++;
+    const nuevoIndex = document.querySelectorAll('.comida-item-edit').length;
+    const numeroFila = nuevoIndex + 1;
     
     container.insertAdjacentHTML('beforeend', `
-        <div class="comida-item-edit mb-3 p-3 bg-gray-50 rounded-lg" id="comida-edit-${index}">
-            <div class="grid grid-cols-1 md:grid-cols-5 gap-3">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Guía Comida</label>
-                    <input type="text" class="comida_guia w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent">
+        <div class="comida-item-edit mb-3 p-3 bg-gray-50 rounded-lg" id="comida-edit-${contadorComidasEdit}">
+            <div class="grid grid-cols-1 md:grid-cols-7 gap-3">
+                <div class="flex items-center justify-center">
+                    <span class="comida-numero text-2xl font-bold text-green-600">#${numeroFila}</span>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Descripción</label>
-                    <input type="text" class="comida_descripcion w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">N° Guía</label>
+                    <input type="text" class="comida_guia w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent" placeholder="N° Guía">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Kilos</label>
-                    <input type="number" class="comida_kilo w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent" value="0" step="0.01" min="0">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Proveedor</label>
+                    <input type="text" class="comida_proveedor w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent" placeholder="Proveedor">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Descripción <span class="text-red-500">*</span></label>
+                    <input type="text" class="comida_descripcion w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent" placeholder="Tipo de comida">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Kilo</label>
+                    <input type="number" class="comida_kilo w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent" value="0" step="0.01" min="0" placeholder="0.00">
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Bultos</label>
-                    <input type="number" class="comida_bultos w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent" value="0" min="0">
+                    <input type="number" class="comida_bultos w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent" value="0" min="0" placeholder="0">
                 </div>
                 <div class="flex items-end">
-                    <button type="button" onclick="eliminarComidaEdit(${index})" class="w-full px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors flex items-center justify-center">
+                    <button type="button" onclick="eliminarComidaEdit(${contadorComidasEdit})" class="w-full px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors flex items-center justify-center">
                         <i class="bi bi-trash mr-1"></i>Eliminar
                     </button>
                 </div>
             </div>
         </div>
     `);
+    contadorComidasEdit++;
+    renumerarComidasEdit();
+}
+
+function renumerarComidasEdit() {
+    const comidas = document.querySelectorAll('#edit-comidas-container > .comida-item-edit');
+    comidas.forEach((comida, index) => {
+        const numeroSpan = comida.querySelector('.comida-numero');
+        if (numeroSpan) {
+            numeroSpan.textContent = `#${index + 1}`;
+        }
+    });
 }
 
 function eliminarComidaEdit(index) {
@@ -588,6 +592,7 @@ function eliminarComidaEdit(index) {
             function(confirmado) {
                 if (confirmado) {
                     elemento.remove();
+                    renumerarComidasEdit();
                 }
             }
         );
@@ -656,6 +661,7 @@ function actualizarViaje(e) {
         if (descripcion) {
             data.comidas.push({
                 guia_comida: item.querySelector('.comida_guia').value,
+                proveedor: item.querySelector('.comida_proveedor').value,
                 descripcion: descripcion,
                 kilo: parseFloat(item.querySelector('.comida_kilo').value) || 0,
                 bultos: parseInt(item.querySelector('.comida_bultos').value) || 0
@@ -695,12 +701,24 @@ function actualizarViaje(e) {
 }
 
 function confirmarEliminar() {
-    const numeroViaje = document.getElementById('edit_numero_viaje').value;
-    const centroCosto = document.getElementById('edit_centro_costo').value;
+    const numeroViaje = document.getElementById('edit_numero_viaje')?.value;
+    const centroCosto = document.getElementById('edit_centro_costo')?.value;
+    
+    console.log('confirmarEliminar - numeroViaje:', numeroViaje, 'centroCosto:', centroCosto);
+    
+    if (!numeroViaje || !centroCosto) {
+        mostrarModalInfo(
+            'ERROR',
+            'No se pudo obtener el número de viaje o centro de costo. Por favor, intenta nuevamente.',
+            'error'
+        );
+        return;
+    }
     
     mostrarModalConfirm(
         `¿Estás seguro de eliminar el viaje ${numeroViaje} - ${centroCosto}? Esta acción eliminará el viaje y todas sus comidas asociadas. No se puede deshacer.`,
         function(confirmado) {
+            console.log('Modal confirmación - confirmado:', confirmado);
             if (confirmado) {
                 eliminarViaje(numeroViaje, centroCosto);
             }
@@ -709,6 +727,8 @@ function confirmarEliminar() {
 }
 
 function eliminarViaje(numeroViaje, centroCosto) {
+    console.log('eliminarViaje - Enviando:', {numero_viaje: numeroViaje, centro_costo: centroCosto});
+    
     fetch('/api/eliminar-viaje', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
@@ -717,8 +737,12 @@ function eliminarViaje(numeroViaje, centroCosto) {
             centro_costo: centroCosto
         })
     })
-    .then(response => response.json())
+    .then(response => {
+        console.log('eliminarViaje - Response status:', response.status);
+        return response.json();
+    })
     .then(result => {
+        console.log('eliminarViaje - Result:', result);
         if (result.success) {
             window.viajeActualizadoExitoso = true;
             mostrarModalInfo(
@@ -735,6 +759,7 @@ function eliminarViaje(numeroViaje, centroCosto) {
         }
     })
     .catch(error => {
+        console.error('eliminarViaje - Error:', error);
         mostrarModalInfo(
             'ERROR DE CONEXIÓN',
             'No se pudo conectar con el servidor. Verifica tu conexión e intenta nuevamente.',

@@ -250,17 +250,33 @@ class DBManager:
             print(f"Error actualizando viaje: {e}")
             return False
     
-    def delete_viaje(self, numero_viaje):
-        """Eliminar viaje y sus comidas asociadas"""
+    def delete_viaje(self, viaje_id):
+        """Eliminar viaje por ID y sus comidas asociadas"""
         try:
             conn = self.get_connection()
             cursor = conn.cursor()
             
-            # Primero eliminar comidas asociadas
-            cursor.execute('DELETE FROM comidas_preparadas WHERE numero_viaje = ?', (numero_viaje,))
+            print(f"[DELETE_VIAJE] Eliminando viaje con ID: {viaje_id}")
             
-            # Luego eliminar el viaje
-            cursor.execute('DELETE FROM viajes WHERE numero_viaje = ?', (numero_viaje,))
+            # Primero obtener numero_viaje para eliminar comidas
+            cursor.execute('SELECT numero_viaje FROM viajes WHERE id = ?', (viaje_id,))
+            result = cursor.fetchone()
+            
+            if result:
+                numero_viaje = result[0]
+                print(f"[DELETE_VIAJE] Numero de viaje encontrado: {numero_viaje}")
+                
+                # Eliminar comidas asociadas
+                cursor.execute('DELETE FROM comidas_preparadas WHERE numero_viaje = ?', (numero_viaje,))
+                comidas_deleted = cursor.rowcount
+                print(f"[DELETE_VIAJE] Comidas eliminadas: {comidas_deleted}")
+                
+                # Eliminar el viaje
+                cursor.execute('DELETE FROM viajes WHERE id = ?', (viaje_id,))
+                viajes_deleted = cursor.rowcount
+                print(f"[DELETE_VIAJE] Viajes eliminados: {viajes_deleted}")
+            else:
+                print(f"[DELETE_VIAJE] ERROR: No se encontró viaje con ID {viaje_id}")
             
             conn.commit()
             conn.close()

@@ -88,6 +88,10 @@
                         <i class="bi bi-clipboard-check"></i>
                         <span>Rendición de Activos</span>
                     </a>
+                    <a href="{{ url_for('dashboard') }}" class="px-4 py-2 rounded-lg text-white hover:bg-white/10 transition-all flex items-center space-x-2">
+                        <i class="bi bi-bar-chart-fill"></i>
+                        <span>Dashboard</span>
+                    </a>
                     {% if session.get('username') == 'admin' %}
                     <div class="border-l border-white/20 ml-2 pl-2">
                         <a href="{{ url_for('gestionar_usuarios') }}" class="px-4 py-2 rounded-lg text-white hover:bg-white/10 transition-all flex items-center space-x-2">
@@ -109,14 +113,12 @@
 
     <!-- Main Content -->
     <main class="flex-grow">
-        <div class="max-w-[98%] mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <!-- Alerts -->
-            <div id="alerts-container">
-                <!-- Flask flash messages -->
-            </div>
-
-            {% block content %}{% endblock %}
+        <!-- Alerts -->
+        <div id="alerts-container" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <!-- Flask flash messages -->
         </div>
+
+        {% block content %}{% endblock %}
     </main>
 
     <!-- Footer Profesional con Tailwind -->

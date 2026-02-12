@@ -1,0 +1,418 @@
+{% extends "layout.html" %}
+
+{% block title %}Dashboard - Control de Gestiones{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 py-6">
+    <!-- Header -->
+    <div class="mb-6">
+        <h1 class="text-3xl font-bold text-gray-900">Dashboard - Control de Gestiones</h1>
+        <p class="text-gray-600 mt-1">Análisis y seguimiento de viajes</p>
+    </div>
+
+    <!-- Filtros -->
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-6">
+        <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Fecha Inicio</label>
+                <input type="date" id="fecha_inicio" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Fecha Fin</label>
+                <input type="date" id="fecha_fin" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Administrativo</label>
+                <select id="administrativo" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    <option value="">Todos</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Vista</label>
+                <select id="vista" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    <option value="diaria">Diaria</option>
+                    <option value="semanal">Semanal</option>
+                    <option value="mensual">Mensual</option>
+                </select>
+            </div>
+            <div class="flex items-end">
+                <button onclick="aplicarFiltros()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md transition">
+                    Aplicar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tarjetas Principales -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg shadow-lg p-5 text-white">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-blue-100 text-sm font-medium">Total Viajes</p>
+                    <h2 class="text-3xl font-bold mt-1" id="total_viajes">0</h2>
+                    <p class="text-blue-100 text-xs mt-1" id="promedio_diario">0/día</p>
+                </div>
+                <svg class="w-12 h-12 text-blue-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                </svg>
+            </div>
+        </div>
+        <div class="bg-gradient-to-br from-cyan-500 to-cyan-600 rounded-lg shadow-lg p-5 text-white">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-cyan-100 text-sm font-medium">N° Wencos</p>
+                    <h2 class="text-3xl font-bold mt-1" id="total_wencos">0</h2>
+                </div>
+                <svg class="w-12 h-12 text-cyan-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+                </svg>
+            </div>
+        </div>
+        <div class="bg-gradient-to-br from-green-500 to-green-600 rounded-lg shadow-lg p-5 text-white">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-green-100 text-sm font-medium">BIN</p>
+                    <h2 class="text-3xl font-bold mt-1" id="total_bin">0</h2>
+                </div>
+                <svg class="w-12 h-12 text-green-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"></path>
+                </svg>
+            </div>
+        </div>
+        <div class="bg-gradient-to-br from-amber-500 to-amber-600 rounded-lg shadow-lg p-5 text-white">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-amber-100 text-sm font-medium">Total Pallets</p>
+                    <h2 class="text-3xl font-bold mt-1" id="total_pallets">0</h2>
+                </div>
+                <svg class="w-12 h-12 text-amber-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+                </svg>
+            </div>
+        </div>
+    </div>
+
+    <!-- Desglose Pallets -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+            <p class="text-gray-600 text-sm font-medium">Pallets</p>
+            <h3 class="text-2xl font-bold text-gray-900 mt-1" id="pallets_std">0</h3>
+        </div>
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+            <p class="text-gray-600 text-sm font-medium">Pallets CHEP</p>
+            <h3 class="text-2xl font-bold text-gray-900 mt-1" id="pallets_chep">0</h3>
+        </div>
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+            <p class="text-gray-600 text-sm font-medium">PL Negro Grueso</p>
+            <h3 class="text-2xl font-bold text-gray-900 mt-1" id="pallets_negro_grueso">0</h3>
+        </div>
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+            <p class="text-gray-600 text-sm font-medium">PL Negro Alt</p>
+            <h3 class="text-2xl font-bold text-gray-900 mt-1" id="pallets_negro_alternativo">0</h3>
+        </div>
+    </div>
+
+    <!-- Validaciones -->
+    <div class="grid grid-cols-2 md:grid-cols-6 gap-4 mb-6">
+        <div class="bg-white rounded-lg shadow-sm border-l-4 border-cyan-500 p-4">
+            <p class="text-gray-600 text-xs font-medium">✓ Congelado</p>
+            <h4 class="text-xl font-bold text-cyan-600 mt-1" id="check_congelado">0</h4>
+        </div>
+        <div class="bg-white rounded-lg shadow-sm border-l-4 border-green-500 p-4">
+            <p class="text-gray-600 text-xs font-medium">✓ Refrigerado</p>
+            <h4 class="text-xl font-bold text-green-600 mt-1" id="check_refrigerado">0</h4>
+        </div>
+        <div class="bg-white rounded-lg shadow-sm border-l-4 border-orange-500 p-4">
+            <p class="text-gray-600 text-xs font-medium">✓ Abarrote</p>
+            <h4 class="text-xl font-bold text-orange-600 mt-1" id="check_abarrote">0</h4>
+        </div>
+        <div class="bg-white rounded-lg shadow-sm border-l-4 border-purple-500 p-4">
+            <p class="text-gray-600 text-xs font-medium">✓ Implementos</p>
+            <h4 class="text-xl font-bold text-purple-600 mt-1" id="check_implementos">0</h4>
+        </div>
+        <div class="bg-white rounded-lg shadow-sm border-l-4 border-pink-500 p-4">
+            <p class="text-gray-600 text-xs font-medium">✓ Aseo</p>
+            <h4 class="text-xl font-bold text-pink-600 mt-1" id="check_aseo">0</h4>
+        </div>
+        <div class="bg-white rounded-lg shadow-sm border-l-4 border-yellow-500 p-4">
+            <p class="text-gray-600 text-xs font-medium">✓ Trazabilidad</p>
+            <h4 class="text-xl font-bold text-yellow-600 mt-1" id="check_trazabilidad">0</h4>
+        </div>
+    </div>
+
+    <!-- Gráficos -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">Tendencia de Viajes</h3>
+            <div style="height: 300px;">
+                <canvas id="chartTendencia"></canvas>
+            </div>
+        </div>
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">Distribución de Validaciones</h3>
+            <div style="height: 300px;">
+                <canvas id="chartValidaciones"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">Viajes por Administrativo</h3>
+            <div style="height: 300px;">
+                <canvas id="chartAdministrativos"></canvas>
+            </div>
+        </div>
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">Activos (Pallets y Wencos)</h3>
+            <div style="height: 300px;">
+                <canvas id="chartActivos"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabla Detalle -->
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">Detalle de Gestiones</h3>
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Fecha</th>
+                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Administrativo</th>
+                        <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">Total</th>
+                        <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">✓ C</th>
+                        <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">✓ R</th>
+                        <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">✓ A</th>
+                        <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">✓ I</th>
+                        <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">✓ As</th>
+                        <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">✓ T</th>
+                        <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">Pallets</th>
+                        <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">Wencos</th>
+                    </tr>
+                </thead>
+                <tbody id="tabla_detalle" class="bg-white divide-y divide-gray-200">
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+let charts = {};
+
+function inicializarFechas() {
+    const hoy = new Date();
+    const hace30dias = new Date();
+    hace30dias.setDate(hoy.getDate() - 30);
+    document.getElementById('fecha_inicio').value = hace30dias.toISOString().split('T')[0];
+    document.getElementById('fecha_fin').value = hoy.toISOString().split('T')[0];
+}
+
+async function cargarAdministrativos() {
+    try {
+        const response = await fetch('/api/dashboard/administrativos');
+        const data = await response.json();
+        const select = document.getElementById('administrativo');
+        data.forEach(admin => {
+            const option = document.createElement('option');
+            option.value = admin;
+            option.textContent = admin;
+            select.appendChild(option);
+        });
+    } catch (error) {
+        console.error('Error:', error);
+    }
+}
+
+async function aplicarFiltros() {
+    const params = new URLSearchParams({
+        fecha_inicio: document.getElementById('fecha_inicio').value,
+        fecha_fin: document.getElementById('fecha_fin').value,
+        vista: document.getElementById('vista').value
+    });
+    
+    const admin = document.getElementById('administrativo').value;
+    if (admin) params.append('administrativo', admin);
+    
+    try {
+        const response = await fetch(`/api/dashboard/estadisticas?${params}`);
+        const data = await response.json();
+        actualizarTarjetas(data.resumen);
+        actualizarGraficos(data);
+        actualizarTabla(data.detalle);
+    } catch (error) {
+        console.error('Error:', error);
+    }
+}
+
+function actualizarTarjetas(resumen) {
+    document.getElementById('total_viajes').textContent = resumen.total_viajes || 0;
+    document.getElementById('total_wencos').textContent = resumen.total_wencos || 0;
+    document.getElementById('total_bin').textContent = resumen.total_bin || 0;
+    document.getElementById('total_pallets').textContent = resumen.total_pallets || 0;
+    document.getElementById('pallets_std').textContent = resumen.pallets_std || 0;
+    document.getElementById('pallets_chep').textContent = resumen.pallets_chep || 0;
+    document.getElementById('pallets_negro_grueso').textContent = resumen.pallets_negro_grueso || 0;
+    document.getElementById('pallets_negro_alternativo').textContent = resumen.pallets_negro_alternativo || 0;
+    document.getElementById('check_congelado').textContent = resumen.check_congelado || 0;
+    document.getElementById('check_refrigerado').textContent = resumen.check_refrigerado || 0;
+    document.getElementById('check_abarrote').textContent = resumen.check_abarrote || 0;
+    document.getElementById('check_implementos').textContent = resumen.check_implementos || 0;
+    document.getElementById('check_aseo').textContent = resumen.check_aseo || 0;
+    document.getElementById('check_trazabilidad').textContent = resumen.check_trazabilidad || 0;
+    
+    const inicio = new Date(document.getElementById('fecha_inicio').value);
+    const fin = new Date(document.getElementById('fecha_fin').value);
+    const dias = Math.ceil((fin - inicio) / (1000 * 60 * 60 * 24)) + 1;
+    const promedio = dias > 0 ? Math.round((resumen.total_viajes || 0) / dias) : 0;
+    document.getElementById('promedio_diario').textContent = `${promedio}/día`;
+}
+
+function actualizarGraficos(data) {
+    // Destruir gráficos anteriores
+    Object.keys(charts).forEach(key => {
+        if (charts[key]) {
+            charts[key].destroy();
+            delete charts[key];
+        }
+    });
+    
+    // Tendencia
+    const ctxTendencia = document.getElementById('chartTendencia');
+    charts.tendencia = new Chart(ctxTendencia, {
+        type: 'line',
+        data: {
+            labels: data.tendencia.map(d => d.periodo),
+            datasets: [{
+                label: 'Viajes',
+                data: data.tendencia.map(d => d.total),
+                borderColor: 'rgb(59, 130, 246)',
+                backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                tension: 0.4,
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } }
+        }
+    });
+    
+    // Validaciones
+    const ctxValidaciones = document.getElementById('chartValidaciones');
+    charts.validaciones = new Chart(ctxValidaciones, {
+        type: 'doughnut',
+        data: {
+            labels: ['Congelado', 'Refrigerado', 'Abarrote', 'Implementos', 'Aseo', 'Trazabilidad'],
+            datasets: [{
+                data: [
+                    data.resumen.check_congelado || 0,
+                    data.resumen.check_refrigerado || 0,
+                    data.resumen.check_abarrote || 0,
+                    data.resumen.check_implementos || 0,
+                    data.resumen.check_aseo || 0,
+                    data.resumen.check_trazabilidad || 0
+                ],
+                backgroundColor: [
+                    'rgba(6, 182, 212, 0.8)',
+                    'rgba(34, 197, 94, 0.8)',
+                    'rgba(251, 146, 60, 0.8)',
+                    'rgba(168, 85, 247, 0.8)',
+                    'rgba(236, 72, 153, 0.8)',
+                    'rgba(234, 179, 8, 0.8)'
+                ]
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { position: 'bottom' } }
+        }
+    });
+    
+    // Administrativos
+    const ctxAdmin = document.getElementById('chartAdministrativos');
+    charts.administrativos = new Chart(ctxAdmin, {
+        type: 'bar',
+        data: {
+            labels: data.por_administrativo.map(d => d.administrativo),
+            datasets: [{
+                label: 'Viajes',
+                data: data.por_administrativo.map(d => d.total),
+                backgroundColor: 'rgba(59, 130, 246, 0.8)'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            indexAxis: 'y',
+            plugins: { legend: { display: false } }
+        }
+    });
+    
+    // Activos
+    const ctxActivos = document.getElementById('chartActivos');
+    charts.activos = new Chart(ctxActivos, {
+        type: 'bar',
+        data: {
+            labels: ['Wencos', 'BIN', 'Pallets', 'CHEP', 'Negro Grueso', 'Negro Alt'],
+            datasets: [{
+                label: 'Cantidad',
+                data: [
+                    data.resumen.total_wencos || 0,
+                    data.resumen.total_bin || 0,
+                    data.resumen.pallets_std || 0,
+                    data.resumen.pallets_chep || 0,
+                    data.resumen.pallets_negro_grueso || 0,
+                    data.resumen.pallets_negro_alternativo || 0
+                ],
+                backgroundColor: [
+                    'rgba(59, 130, 246, 0.8)',
+                    'rgba(34, 197, 94, 0.8)',
+                    'rgba(251, 146, 60, 0.8)',
+                    'rgba(168, 85, 247, 0.8)',
+                    'rgba(75, 85, 99, 0.8)',
+                    'rgba(120, 113, 108, 0.8)'
+                ]
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } }
+        }
+    });
+}
+
+function actualizarTabla(detalle) {
+    const tbody = document.getElementById('tabla_detalle');
+    tbody.innerHTML = '';
+    detalle.forEach(row => {
+        tbody.innerHTML += `
+            <tr class="hover:bg-gray-50">
+                <td class="px-4 py-3 text-sm text-gray-900">${row.periodo}</td>
+                <td class="px-4 py-3 text-sm text-gray-700">${row.administrativo}</td>
+                <td class="px-4 py-3 text-sm text-center font-semibold text-blue-600">${row.total}</td>
+                <td class="px-4 py-3 text-sm text-center text-gray-600">${row.congelado}</td>
+                <td class="px-4 py-3 text-sm text-center text-gray-600">${row.refrigerado}</td>
+                <td class="px-4 py-3 text-sm text-center text-gray-600">${row.abarrote}</td>
+                <td class="px-4 py-3 text-sm text-center text-gray-600">${row.implementos}</td>
+                <td class="px-4 py-3 text-sm text-center text-gray-600">${row.aseo}</td>
+                <td class="px-4 py-3 text-sm text-center text-gray-600">${row.trazabilidad}</td>
+                <td class="px-4 py-3 text-sm text-center text-gray-600">${row.pallets}</td>
+                <td class="px-4 py-3 text-sm text-center text-gray-600">${row.wencos}</td>
+            </tr>
+        `;
+    });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    inicializarFechas();
+    cargarAdministrativos();
+    aplicarFiltros();
+});
+</script>
+{% endblock %}

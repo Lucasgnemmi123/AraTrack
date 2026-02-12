@@ -650,13 +650,30 @@ def actualizar_viaje():
 def eliminar_viaje():
     try:
         data = request.json
-        db_manager.delete_comidas_by_viaje_centro(data.get('numero_viaje'), data.get('centro_costo'))
-        viaje = db_manager.get_viaje_por_numero_y_centro(data.get('numero_viaje'), data.get('centro_costo'))
+        numero_viaje = data.get('numero_viaje')
+        centro_costo = data.get('centro_costo')
+        
+        print(f"\n[ELIMINAR_VIAJE] Solicitud recibida: numero_viaje={numero_viaje}, centro_costo={centro_costo}")
+        
+        # Buscar el viaje
+        viaje = db_manager.get_viaje_por_numero_y_centro(numero_viaje, centro_costo)
+        
         if viaje:
+            print(f"[ELIMINAR_VIAJE] Viaje encontrado con ID: {viaje['id']}")
+            
+            # Eliminar comidas asociadas primero
+            db_manager.delete_comidas_by_viaje_centro(numero_viaje, centro_costo)
+            
+            # Eliminar el viaje por su ID
             db_manager.delete_viaje(viaje['id'])
-            return jsonify({'success': True})
-        return jsonify({'success': False}), 404
+            
+            print(f"[ELIMINAR_VIAJE] Viaje {numero_viaje} eliminado exitosamente\n")
+            return jsonify({'success': True, 'message': f'Viaje {numero_viaje} eliminado correctamente'})
+        else:
+            print(f"[ELIMINAR_VIAJE] ERROR: Viaje no encontrado\n")
+            return jsonify({'success': False, 'message': 'Viaje no encontrado'}), 404
     except Exception as e:
+        print(f"[ELIMINAR_VIAJE] EXCEPCIÓN: {str(e)}\n")
         return jsonify({'success': False, 'message': str(e)}), 500
 
 @app.route('/generar-pdf')
@@ -664,10 +681,210 @@ def eliminar_viaje():
 def generar_pdf_page():
     return render_template('generar_pdf.html')
 
+@app.route('/dashboard')
+@login_required
+def dashboard():
+    return render_template('dashboard.html')
+
 @app.route('/reportes')
 @login_required
 def reportes():
     return render_template('reportes.html')
+
+@app.route('/api/maestras/administrativos')
+def get_administrativos():
+    """API para obtener lista de administrativos"""
+    try:
+        conn = db_manager.get_connection()
+        cursor = conn.cursor()
+        cursor.execute('SELECT nombre FROM maestras_administrativos ORDER BY nombre')
+        administrativos = [{'nombre': row[0]} for row in cursor.fetchall()]
+        conn.close()
+        return jsonify(administrativos)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/dashboard/estadisticas')
+@login_required
+def get_estadisticas_dashboard():
+    """API para obtener estadísticas del dashboard"""
+    try:
+        from datetime import datetime, timedelta
+        
+        fecha_inicio = request.args.get('fecha_inicio')
+        fecha_fin = request.args.get('fecha_fin')
+        administrativo = request.args.get('administrativo', '')
+        vista = request.args.get('vista', 'diaria')
+        
+        conn = db_manager.get_connection()
+        cursor = conn.cursor()
+        
+        # Query base
+        where_clause = "WHERE fecha BETWEEN ? AND ?"
+        params = [fecha_inicio, fecha_fin]
+        
+        if administrativo:
+            where_clause += " AND administrativo_responsable = ?"
+            params.append(administrativo)
+        
+        # Resumen general - Solo activos y validaciones requeridas
+        cursor.execute(f'''
+            SELECT 
+                COUNT(*) as total_viajes,
+                SUM(CASE WHEN check_congelado = 'X' THEN 1 ELSE 0 END) as check_congelado,
+                SUM(CASE WHEN check_refrigerado = 'X' THEN 1 ELSE 0 END) as check_refrigerado,
+                SUM(CASE WHEN check_abarrote = 'X' THEN 1 ELSE 0 END) as check_abarrote,
+                SUM(CASE WHEN check_implementos = 'X' THEN 1 ELSE 0 END) as check_implementos,
+                SUM(CASE WHEN check_aseo = 'X' THEN 1 ELSE 0 END) as check_aseo,
+                SUM(CASE WHEN check_trazabilidad = 'X' THEN 1 ELSE 0 END) as check_trazabilidad,
+                COALESCE(SUM(CAST(COALESCE(num_wencos, '0') AS INTEGER)), 0) as total_wencos,
+                COALESCE(SUM(CAST(COALESCE(bin, '0') AS INTEGER)), 0) as total_bin,
+                COALESCE(SUM(CAST(COALESCE(pallets, '0') AS INTEGER)), 0) as pallets_std,
+                COALESCE(SUM(CAST(COALESCE(pallets_chep, '0') AS INTEGER)), 0) as pallets_chep,
+                COALESCE(SUM(CAST(COALESCE(pallets_pl_negro_grueso, '0') AS INTEGER)), 0) as pallets_negro_grueso,
+                COALESCE(SUM(CAST(COALESCE(pallets_pl_negro_alternativo, '0') AS INTEGER)), 0) as pallets_negro_alternativo
+            FROM viajes
+            {where_clause}
+        ''', params)
+        
+        resumen = cursor.fetchone()
+        
+        # Calcular total de pallets
+        total_pallets = (resumen[9] or 0) + (resumen[10] or 0) + (resumen[11] or 0) + (resumen[12] or 0)
+        
+        # Tendencia temporal según vista
+        if vista == 'diaria':
+            group_format = '%Y-%m-%d'
+        elif vista == 'semanal':
+            group_format = '%Y-W%W'
+        else:  # mensual
+            group_format = '%Y-%m'
+        
+        cursor.execute(f'''
+            SELECT 
+                strftime('{group_format}', fecha) as periodo,
+                COUNT(*) as total
+            FROM viajes
+            {where_clause}
+            GROUP BY periodo
+            ORDER BY periodo
+        ''', params)
+        
+        tendencia = [{'periodo': row[0], 'total': row[1]} for row in cursor.fetchall()]
+        
+        # Tendencia por tipos - incluir las 6 validaciones
+        cursor.execute(f'''
+            SELECT 
+                strftime('{group_format}', fecha) as periodo,
+                SUM(CASE WHEN check_congelado = 'X' THEN 1 ELSE 0 END) as congelado,
+                SUM(CASE WHEN check_refrigerado = 'X' THEN 1 ELSE 0 END) as refrigerado,
+                SUM(CASE WHEN check_abarrote = 'X' THEN 1 ELSE 0 END) as abarrote,
+                SUM(CASE WHEN check_implementos = 'X' THEN 1 ELSE 0 END) as implementos,
+                SUM(CASE WHEN check_aseo = 'X' THEN 1 ELSE 0 END) as aseo,
+                SUM(CASE WHEN check_trazabilidad = 'X' THEN 1 ELSE 0 END) as trazabilidad
+            FROM viajes
+            {where_clause}
+            GROUP BY periodo
+            ORDER BY periodo
+        ''', params)
+        
+        tendencia_tipos = [{'periodo': row[0], 'congelado': row[1], 'refrigerado': row[2], 'abarrote': row[3], 'implementos': row[4], 'aseo': row[5], 'trazabilidad': row[6]} for row in cursor.fetchall()]
+        
+        # Por administrativo
+        cursor.execute(f'''
+            SELECT 
+                COALESCE(administrativo_responsable, 'Sin asignar') as administrativo,
+                COUNT(*) as total
+            FROM viajes
+            {where_clause}
+            GROUP BY administrativo_responsable
+            ORDER BY total DESC
+        ''', params)
+        
+        por_administrativo = [{'administrativo': row[0], 'total': row[1]} for row in cursor.fetchall()]
+        
+        # Top 10 casinos
+        cursor.execute(f'''
+            SELECT 
+                COALESCE(casino, 'Sin especificar') as casino,
+                COUNT(*) as total
+            FROM viajes
+            {where_clause}
+            GROUP BY casino
+            ORDER BY total DESC
+            LIMIT 10
+        ''', params)
+        
+        top_casinos = [{'casino': row[0], 'total': row[1]} for row in cursor.fetchall()]
+        
+        # Detalle para tabla con pallets y wencos totales
+        cursor.execute(f'''
+            SELECT 
+                strftime('{group_format}', fecha) as periodo,
+                COALESCE(administrativo_responsable, 'Sin asignar') as administrativo,
+                COUNT(*) as total,
+                SUM(CASE WHEN check_congelado = 'X' THEN 1 ELSE 0 END) as congelado,
+                SUM(CASE WHEN check_refrigerado = 'X' THEN 1 ELSE 0 END) as refrigerado,
+                SUM(CASE WHEN check_abarrote = 'X' THEN 1 ELSE 0 END) as abarrote,
+                SUM(CASE WHEN check_implementos = 'X' THEN 1 ELSE 0 END) as implementos,
+                SUM(CASE WHEN check_aseo = 'X' THEN 1 ELSE 0 END) as aseo,
+                SUM(CASE WHEN check_trazabilidad = 'X' THEN 1 ELSE 0 END) as trazabilidad,
+                COALESCE(SUM(
+                    CAST(COALESCE(pallets, '0') AS INTEGER) +
+                    CAST(COALESCE(pallets_chep, '0') AS INTEGER) +
+                    CAST(COALESCE(pallets_pl_negro_grueso, '0') AS INTEGER) +
+                    CAST(COALESCE(pallets_pl_negro_alternativo, '0') AS INTEGER)
+                ), 0) as pallets,
+                COALESCE(SUM(CAST(COALESCE(num_wencos, '0') AS INTEGER)), 0) as wencos
+            FROM viajes
+            {where_clause}
+            GROUP BY periodo, administrativo_responsable
+            ORDER BY periodo DESC, total DESC
+        ''', params)
+        
+        detalle = [{
+            'periodo': row[0],
+            'administrativo': row[1],
+            'total': row[2],
+            'congelado': row[3],
+            'refrigerado': row[4],
+            'abarrote': row[5],
+            'implementos': row[6],
+            'aseo': row[7],
+            'trazabilidad': row[8],
+            'pallets': row[9],
+            'wencos': row[10]
+        } for row in cursor.fetchall()]
+        
+        conn.close()
+        
+        return jsonify({
+            'resumen': {
+                'total_viajes': resumen[0],
+                'check_congelado': resumen[1],
+                'check_refrigerado': resumen[2],
+                'check_abarrote': resumen[3],
+                'check_implementos': resumen[4],
+                'check_aseo': resumen[5],
+                'check_trazabilidad': resumen[6],
+                'total_wencos': resumen[7],
+                'total_bin': resumen[8],
+                'pallets_std': resumen[9],
+                'pallets_chep': resumen[10],
+                'pallets_negro_grueso': resumen[11],
+                'pallets_negro_alternativo': resumen[12],
+                'total_pallets': total_pallets
+            },
+            'tendencia': tendencia,
+            'tendencia_tipos': tendencia_tipos,
+            'por_administrativo': por_administrativo,
+            'top_casinos': top_casinos,
+            'detalle': detalle
+        })
+        
+    except Exception as e:
+        print(f"Error en dashboard: {str(e)}")
+        return jsonify({'error': str(e)}), 500
 
 @app.route('/api/descargar-reporte-casinos')
 @login_required
@@ -1559,16 +1776,16 @@ if __name__ == '__main__':
     local_ip = socket.gethostbyname(hostname)
     
     print("\n" + "="*60)
-    print("🚀 Sistema de Viajes DHL - Servidor Producción")
+    print("Sistema de Viajes DHL - Servidor Produccion")
     print("="*60)
-    print(f"\n📍 Acceso LOCAL (esta PC):")
+    print(f"\nAcceso LOCAL (esta PC):")
     print(f"   http://localhost:5000")
     print(f"   http://127.0.0.1:5000")
     print(f"\nAcceso RED LOCAL (otras PCs en la red):")
     print(f"   http://{local_ip}:5000")
-    print(f"\n👥 Usuarios simultáneos: 10")
-    print(f"💾 Base de datos: SQLite con WAL mode (viajes.db)")
-    print(f"Servidor: Waitress (producción)")
+    print(f"\nUsuarios simultaneos: 10")
+    print(f"Base de datos: SQLite con WAL mode (viajes.db)")
+    print(f"Servidor: Waitress (produccion)")
     print("\n" + "="*60 + "\n")
     
     # Usar Waitress para producción (más estable que Flask development server)
