@@ -44,15 +44,27 @@
     </div>
 
     <!-- Tarjetas Principales -->
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+    <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
         <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg shadow-lg p-5 text-white">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-blue-100 text-sm font-medium">Total Viajes</p>
-                    <h2 class="text-3xl font-bold mt-1" id="total_viajes">0</h2>
+                    <p class="text-blue-100 text-sm font-medium">Total Bitácoras</p>
+                    <h2 class="text-3xl font-bold mt-1" id="total_bitacoras">0</h2>
                     <p class="text-blue-100 text-xs mt-1" id="promedio_diario">0/día</p>
                 </div>
                 <svg class="w-12 h-12 text-blue-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
+                </svg>
+            </div>
+        </div>
+        <div class="bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg shadow-lg p-5 text-white">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-purple-100 text-sm font-medium">Total Viajes</p>
+                    <h2 class="text-3xl font-bold mt-1" id="viajes_unicos">0</h2>
+                    <p class="text-purple-100 text-xs mt-1">Únicos</p>
+                </div>
+                <svg class="w-12 h-12 text-purple-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
                 </svg>
             </div>
@@ -143,7 +155,7 @@
     <!-- Gráficos -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
         <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
-            <h3 class="text-lg font-semibold text-gray-900 mb-4">Tendencia de Viajes</h3>
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">Tendencia Bitácoras vs Viajes</h3>
             <div style="height: 300px;">
                 <canvas id="chartTendencia"></canvas>
             </div>
@@ -158,7 +170,7 @@
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
         <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
-            <h3 class="text-lg font-semibold text-gray-900 mb-4">Viajes por Administrativo</h3>
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">Bitácoras por Administrativo</h3>
             <div style="height: 300px;">
                 <canvas id="chartAdministrativos"></canvas>
             </div>
@@ -180,7 +192,8 @@
                     <tr>
                         <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Fecha</th>
                         <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Administrativo</th>
-                        <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">Total</th>
+                        <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">Bitácoras</th>
+                        <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">Viajes</th>
                         <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">✓ C</th>
                         <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">✓ R</th>
                         <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">✓ A</th>
@@ -195,12 +208,31 @@
                 </tbody>
             </table>
         </div>
+        
+        <!-- Controles de Paginación -->
+        <div class="flex items-center justify-between mt-4 border-t pt-4">
+            <div class="text-sm text-gray-600">
+                Mostrando <span id="rango_actual">0</span> de <span id="total_registros">0</span> registros
+            </div>
+            <div class="flex gap-2">
+                <button id="btn_anterior" onclick="cambiarPagina(-1)" class="px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 rounded disabled:opacity-50 disabled:cursor-not-allowed">
+                    Anterior
+                </button>
+                <div id="numeros_pagina" class="flex gap-1"></div>
+                <button id="btn_siguiente" onclick="cambiarPagina(1)" class="px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 rounded disabled:opacity-50 disabled:cursor-not-allowed">
+                    Siguiente
+                </button>
+            </div>
+        </div>
     </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
 let charts = {};
+let datosTabla = [];
+let paginaActual = 1;
+const registrosPorPagina = 10;
 
 function inicializarFechas() {
     const hoy = new Date();
@@ -248,7 +280,8 @@ async function aplicarFiltros() {
 }
 
 function actualizarTarjetas(resumen) {
-    document.getElementById('total_viajes').textContent = resumen.total_viajes || 0;
+    document.getElementById('total_bitacoras').textContent = resumen.total_bitacoras || 0;
+    document.getElementById('viajes_unicos').textContent = resumen.viajes_unicos || 0;
     document.getElementById('total_wencos').textContent = resumen.total_wencos || 0;
     document.getElementById('total_bin').textContent = resumen.total_bin || 0;
     document.getElementById('total_pallets').textContent = resumen.total_pallets || 0;
@@ -266,7 +299,7 @@ function actualizarTarjetas(resumen) {
     const inicio = new Date(document.getElementById('fecha_inicio').value);
     const fin = new Date(document.getElementById('fecha_fin').value);
     const dias = Math.ceil((fin - inicio) / (1000 * 60 * 60 * 24)) + 1;
-    const promedio = dias > 0 ? Math.round((resumen.total_viajes || 0) / dias) : 0;
+    const promedio = dias > 0 ? Math.round((resumen.total_bitacoras || 0) / dias) : 0;
     document.getElementById('promedio_diario').textContent = `${promedio}/día`;
 }
 
@@ -279,25 +312,40 @@ function actualizarGraficos(data) {
         }
     });
     
-    // Tendencia
+    // Tendencia - Mostrar bitácoras y viajes únicos
     const ctxTendencia = document.getElementById('chartTendencia');
     charts.tendencia = new Chart(ctxTendencia, {
         type: 'line',
         data: {
             labels: data.tendencia.map(d => d.periodo),
-            datasets: [{
-                label: 'Viajes',
-                data: data.tendencia.map(d => d.total),
-                borderColor: 'rgb(59, 130, 246)',
-                backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                tension: 0.4,
-                fill: true
-            }]
+            datasets: [
+                {
+                    label: 'Bitácoras',
+                    data: data.tendencia.map(d => d.total_bitacoras),
+                    borderColor: 'rgb(59, 130, 246)',
+                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                },
+                {
+                    label: 'Viajes Únicos',
+                    data: data.tendencia.map(d => d.viajes_unicos),
+                    borderColor: 'rgb(168, 85, 247)',
+                    backgroundColor: 'rgba(168, 85, 247, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                }
+            ]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            plugins: { legend: { display: false } }
+            plugins: { 
+                legend: { 
+                    display: true,
+                    position: 'top'
+                } 
+            }
         }
     });
     
@@ -333,23 +381,35 @@ function actualizarGraficos(data) {
         }
     });
     
-    // Administrativos
+    // Administrativos - Mostrar bitácoras y viajes
     const ctxAdmin = document.getElementById('chartAdministrativos');
     charts.administrativos = new Chart(ctxAdmin, {
         type: 'bar',
         data: {
             labels: data.por_administrativo.map(d => d.administrativo),
-            datasets: [{
-                label: 'Viajes',
-                data: data.por_administrativo.map(d => d.total),
-                backgroundColor: 'rgba(59, 130, 246, 0.8)'
-            }]
+            datasets: [
+                {
+                    label: 'Bitácoras',
+                    data: data.por_administrativo.map(d => d.total_bitacoras),
+                    backgroundColor: 'rgba(59, 130, 246, 0.8)'
+                },
+                {
+                    label: 'Viajes',
+                    data: data.por_administrativo.map(d => d.viajes_unicos),
+                    backgroundColor: 'rgba(168, 85, 247, 0.8)'
+                }
+            ]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
             indexAxis: 'y',
-            plugins: { legend: { display: false } }
+            plugins: { 
+                legend: { 
+                    display: true,
+                    position: 'top'
+                } 
+            }
         }
     });
     
@@ -388,14 +448,25 @@ function actualizarGraficos(data) {
 }
 
 function actualizarTabla(detalle) {
+    datosTabla = detalle;
+    paginaActual = 1;
+    renderizarTabla();
+}
+
+function renderizarTabla() {
     const tbody = document.getElementById('tabla_detalle');
+    const inicio = (paginaActual - 1) * registrosPorPagina;
+    const fin = inicio + registrosPorPagina;
+    const datosPagina = datosTabla.slice(inicio, fin);
+    
     tbody.innerHTML = '';
-    detalle.forEach(row => {
+    datosPagina.forEach(row => {
         tbody.innerHTML += `
             <tr class="hover:bg-gray-50">
                 <td class="px-4 py-3 text-sm text-gray-900">${row.periodo}</td>
                 <td class="px-4 py-3 text-sm text-gray-700">${row.administrativo}</td>
-                <td class="px-4 py-3 text-sm text-center font-semibold text-blue-600">${row.total}</td>
+                <td class="px-4 py-3 text-sm text-center font-semibold text-blue-600">${row.total_bitacoras}</td>
+                <td class="px-4 py-3 text-sm text-center font-semibold text-purple-600">${row.viajes_unicos}</td>
                 <td class="px-4 py-3 text-sm text-center text-gray-600">${row.congelado}</td>
                 <td class="px-4 py-3 text-sm text-center text-gray-600">${row.refrigerado}</td>
                 <td class="px-4 py-3 text-sm text-center text-gray-600">${row.abarrote}</td>
@@ -407,6 +478,76 @@ function actualizarTabla(detalle) {
             </tr>
         `;
     });
+    
+    actualizarControlesPaginacion();
+}
+
+function cambiarPagina(direccion) {
+    const totalPaginas = Math.ceil(datosTabla.length / registrosPorPagina);
+    const nuevaPagina = paginaActual + direccion;
+    
+    if (nuevaPagina >= 1 && nuevaPagina <= totalPaginas) {
+        paginaActual = nuevaPagina;
+        renderizarTabla();
+    }
+}
+
+function irAPagina(pagina) {
+    paginaActual = pagina;
+    renderizarTabla();
+}
+
+function actualizarControlesPaginacion() {
+    const totalPaginas = Math.ceil(datosTabla.length / registrosPorPagina);
+    const inicio = (paginaActual - 1) * registrosPorPagina + 1;
+    const fin = Math.min(inicio + registrosPorPagina - 1, datosTabla.length);
+    
+    // Actualizar rango
+    document.getElementById('rango_actual').textContent = datosTabla.length > 0 ? `${inicio}-${fin}` : '0';
+    document.getElementById('total_registros').textContent = datosTabla.length;
+    
+    // Botones anterior/siguiente
+    document.getElementById('btn_anterior').disabled = paginaActual === 1;
+    document.getElementById('btn_siguiente').disabled = paginaActual === totalPaginas || totalPaginas === 0;
+    
+    // Números de página
+    const contenedorNumeros = document.getElementById('numeros_pagina');
+    contenedorNumeros.innerHTML = '';
+    
+    if (totalPaginas <= 7) {
+        // Mostrar todas las páginas
+        for (let i = 1; i <= totalPaginas; i++) {
+            contenedorNumeros.innerHTML += crearBotonPagina(i);
+        }
+    } else {
+        // Mostrar con puntos suspensivos
+        contenedorNumeros.innerHTML += crearBotonPagina(1);
+        
+        if (paginaActual > 3) {
+            contenedorNumeros.innerHTML += '<span class="px-2 py-1 text-gray-500">...</span>';
+        }
+        
+        let inicio = Math.max(2, paginaActual - 1);
+        let fin = Math.min(totalPaginas - 1, paginaActual + 1);
+        
+        for (let i = inicio; i <= fin; i++) {
+            contenedorNumeros.innerHTML += crearBotonPagina(i);
+        }
+        
+        if (paginaActual < totalPaginas - 2) {
+            contenedorNumeros.innerHTML += '<span class="px-2 py-1 text-gray-500">...</span>';
+        }
+        
+        contenedorNumeros.innerHTML += crearBotonPagina(totalPaginas);
+    }
+}
+
+function crearBotonPagina(numero) {
+    const activo = numero === paginaActual;
+    const clases = activo 
+        ? 'px-3 py-1 text-sm bg-blue-600 text-white rounded font-semibold' 
+        : 'px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 rounded';
+    return `<button onclick="irAPagina(${numero})" class="${clases}">${numero}</button>`;
 }
 
 document.addEventListener('DOMContentLoaded', () => {

@@ -1,4 +1,51 @@
-# Sistema de Viajes DHL
+# # Sistema de Viajes DHL
+=========================================
+
+## 🚀 INICIO RÁPIDO
+
+### ▶️ OPCIÓN 1: Panel de Control (RECOMENDADO)
+```
+Doble click en: PANEL_CONTROL.bat
+```
+- Interfaz gráfica intuitiva
+- Encender/Apagar servidor
+- Ver estado en tiempo real
+- Acceso rápido a todas las funciones
+
+### ▶️ OPCIÓN 2: Línea de comandos
+```
+iniciar_web.bat          → Modo producción
+iniciar_desarrollo.bat   → Modo desarrollo (con depuración)
+```
+
+## 🔐 ACCESO
+```
+URL:        http://localhost:5000
+Usuario:    admin
+Contraseña: admin123
+```
+
+## 🌐 ACCESO DESDE RED
+El servidor acepta conexiones desde otras PCs.
+Cuando inicies el servidor verás tu IP local (ej: 192.168.1.100)
+
+Desde otras PCs: `http://IP-DEL-SERVIDOR:5000`
+
+## 📁 ARCHIVOS PRINCIPALES
+
+```
+PANEL_CONTROL.bat        ← Panel gráfico (RECOMENDADO)
+iniciar_web.bat          ← Modo producción
+iniciar_desarrollo.bat   ← Modo desarrollo
+reparar_rutas.bat        ← Si hay problemas de rutas
+GUIA_USO.txt             ← Guía completa
+
+_scripts_antiguos/       ← Scripts bat antiguos
+_utilidades/             ← Scripts de diagnóstico
+_logs/                   ← Archivos de log
+```
+
+## Sistema de Viajes DHL
 
 Sistema web para gestión de viajes, choferes, centros de costo y generación de PDFs.
 

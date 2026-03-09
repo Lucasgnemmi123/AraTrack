@@ -1,0 +1,156 @@
+╔══════════════════════════════════════════════════════════════╗
+║       🎛️  CÓMO USAR EL PANEL DE CONTROL                     ║
+╚══════════════════════════════════════════════════════════════╝
+
+┌──────────────────────────────────────────────────────────────┐
+│ PASO 1: INICIAR EL PANEL                                     │
+└──────────────────────────────────────────────────────────────┘
+
+   🖱️ Doble click en:  PANEL_CONTROL.bat
+
+   Se abrirá una ventana gráfica con interfaz visual
+
+
+┌──────────────────────────────────────────────────────────────┐
+│ PASO 2: USAR LA INTERFAZ                                     │
+└──────────────────────────────────────────────────────────────┘
+
+   La ventana muestra:
+
+   ╔════════════════════════════════════════════════════════╗
+   ║  🚚 Sistema de Viajes DHL                              ║
+   ║                                                         ║
+   ║  ┌────────────────────────────────────────────────┐   ║
+   ║  │  Control del Servidor                          │   ║
+   ║  │                                                 │   ║
+   ║  │  [▶️ ENCENDER]  [⏹️ APAGAR]  [🌐 ABRIR NAVEGADOR]│   ║
+   ║  │                                                 │   ║
+   ║  │  Estado: ⚫ APAGADO                             │   ║
+   ║  └────────────────────────────────────────────────┘   ║
+   ║                                                         ║
+   ║  ┌────────────────────────────────────────────────┐   ║
+   ║  │  Información de Red                            │   ║
+   ║  │                                                 │   ║
+   ║  │  Acceso LOCAL:    http://localhost:5000        │   ║
+   ║  │  Acceso desde RED: http://192.168.1.100:5000   │   ║
+   ║  └────────────────────────────────────────────────┘   ║
+   ║                                                         ║
+   ║  ┌────────────────────────────────────────────────┐   ║
+   ║  │  Utilidades                                     │   ║
+   ║  │                                                 │   ║
+   ║  │  [📊 Ver Estado] [🔧 Verificar]                │   ║
+   ║  │  [🛡️ Firewall]   [📂 Abrir Carpeta]           │   ║
+   ║  └────────────────────────────────────────────────┘   ║
+   ║                                                         ║
+   ║  ┌────────────────────────────────────────────────┐   ║
+   ║  │  Log del Servidor                              │   ║
+   ║  │                                                 │   ║
+   ║  │  [09:30:15] Panel iniciado correctamente       │   ║
+   ║  │  [09:30:15] Usuario: admin / Pass: admin123    │   ║
+   ║  │  ...                                            │   ║
+   ║  └────────────────────────────────────────────────┘   ║
+   ╚════════════════════════════════════════════════════════╝
+
+
+┌──────────────────────────────────────────────────────────────┐
+│ PASO 3: ENCENDER EL SERVIDOR                                 │
+└──────────────────────────────────────────────────────────────┘
+
+   1. Click en botón [▶️ ENCENDER]
+   
+   2. Verás en el log:
+      ✓ Iniciando servidor...
+      ✓ Servidor corriendo en puerto 5000
+      
+   3. El estado cambiará a: 🟢 ENCENDIDO
+
+
+┌──────────────────────────────────────────────────────────────┐
+│ PASO 4: ABRIR EL SISTEMA EN NAVEGADOR                        │
+└──────────────────────────────────────────────────────────────┘
+
+   Click en botón [🌐 ABRIR NAVEGADOR]
+   
+   → Se abrirá http://localhost:5000 automáticamente
+   → Login con: admin / admin123
+
+
+┌──────────────────────────────────────────────────────────────┐
+│ PASO 5: APAGAR EL SERVIDOR                                   │
+└──────────────────────────────────────────────────────────────┘
+
+   Click en botón [⏹️ APAGAR]
+   
+   → El servidor se detendrá
+   → Estado: ⚫ APAGADO
+
+
+╔══════════════════════════════════════════════════════════════╗
+║  📋 BOTONES ADICIONALES                                      ║
+╚══════════════════════════════════════════════════════════════╝
+
+   📊 Ver Estado
+      → Muestra si el servidor está encendido/apagado
+      → Verifica base de datos
+   
+   🔧 Verificar Sistema
+      → Ejecuta diagnóstico completo
+      → Verifica dependencias
+   
+   🛡️ Firewall
+      → Abre puerto 5000 en Windows Firewall
+      → Necesario para acceso desde red
+      → Requiere permisos de administrador
+   
+   📂 Abrir Carpeta
+      → Abre el directorio del proyecto en explorador
+
+
+╔══════════════════════════════════════════════════════════════╗
+║  🌐 ACCESO DESDE OTRAS COMPUTADORAS                         ║
+╚══════════════════════════════════════════════════════════════╝
+
+   1. En el panel verás tu IP (ej: 192.168.1.100)
+   
+   2. Comparte esa IP con otros usuarios
+   
+   3. Ellos abren navegador y van a:
+      http://TU-IP:5000
+      
+   4. Si no funciona, click en [🛡️ Firewall]
+
+
+╔══════════════════════════════════════════════════════════════╗
+║  ⚠️ IMPORTANTE                                               ║
+╚══════════════════════════════════════════════════════════════╝
+
+   ✓ NO cierres el panel mientras el servidor esté encendido
+   
+   ✓ El log muestra TODO lo que pasa en tiempo real
+   
+   ✓ Si cierras el panel por accidente:
+     → Abre PANEL_CONTROL.bat de nuevo
+     → Click en [⏹️ APAGAR] por seguridad
+     → Luego [▶️ ENCENDER] para reiniciar
+
+
+╔══════════════════════════════════════════════════════════════╗
+║  🚀 ALTERNATIVA: MODO COMANDO                               ║
+╚══════════════════════════════════════════════════════════════╝
+
+   Si prefieres la línea de comandos:
+   
+   📁 iniciar_web.bat           → Modo producción
+   📁 iniciar_desarrollo.bat    → Modo desarrollo (con debug)
+
+
+╔══════════════════════════════════════════════════════════════╗
+║  📚 MÁS AYUDA                                                ║
+╚══════════════════════════════════════════════════════════════╝
+
+   📖 GUIA_USO.txt     → Guía completa detallada
+   📖 README.md        → Documentación del proyecto
+   
+═══════════════════════════════════════════════════════════════
+   Fecha: 27/02/2026 | Sistema de Viajes DHL v1.0
+═══════════════════════════════════════════════════════════════

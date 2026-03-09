@@ -1,0 +1,87 @@
+═══════════════════════════════════════════════════════════════
+  🎉 DIRECTORIO ORGANIZADO - Sistema de Viajes DHL
+═══════════════════════════════════════════════════════════════
+
+✨ MEJORAS REALIZADAS:
+
+1️⃣ PANEL DE CONTROL GRÁFICO
+   ↳ Nuevo archivo: PANEL_CONTROL.bat
+   ↳ Interfaz visual con todas las funciones
+   ↳ Reemplaza a todos los scripts individuales
+
+2️⃣ DIRECTORIO ORGANIZADO
+   ↳ Scripts antiguos → _scripts_antiguos/
+   ↳ Scripts de diagnóstico → _utilidades/
+   ↳ Archivos de log → _logs/
+
+3️⃣ ARCHIVOS PRINCIPALES (Solo 5)
+   ✓ PANEL_CONTROL.bat        (Panel gráfico - USA ESTE)
+   ✓ iniciar_web.bat          (Producción)
+   ✓ iniciar_desarrollo.bat   (Desarrollo)
+   ✓ reparar_rutas.bat        (Reparar rutas)
+   ✓ build_ejecutable.bat     (Crear .exe)
+
+═══════════════════════════════════════════════════════════════
+
+🚀 ¿CÓMO USAR EL NUEVO SISTEMA?
+
+Simplemente ejecuta:
+   📁 PANEL_CONTROL.bat
+
+Verás una ventana gráfica con botones para:
+   ▶️  Encender el servidor
+   ⏹️  Apagar el servidor
+   🌐 Abrir en navegador
+   📊 Ver estado
+   🔧 Verificar sistema
+   🛡️  Configurar firewall
+   📂 Abrir carpeta
+
+═══════════════════════════════════════════════════════════════
+
+🗂️ ¿QUÉ PASÓ CON LOS ARCHIVOS ANTIGUOS?
+
+NO SE ELIMINÓ NADA, solo se organizó:
+
+📂 _scripts_antiguos/
+   ├── ENCENDER.bat
+   ├── APAGAR.bat
+   ├── ABRIR_NAVEGADOR.bat
+   ├── ESTADO.bat
+   ├── VER_MI_IP.bat
+   ├── TEST_SISTEMA.bat
+   └── ... (y otros)
+
+📂 _utilidades/
+   ├── test_simple.py
+   ├── verificar_completo.py
+   └── ... (scripts de diagnóstico)
+
+📂 _logs/
+   └── ... (archivos de log)
+
+Si necesitas recuperar algún archivo, está en estas carpetas.
+
+═══════════════════════════════════════════════════════════════
+
+💡 VENTAJAS DEL PANEL DE CONTROL:
+
+✅ TODO en una sola ventana
+✅ No más archivos .bat dispersos
+✅ Interfaz gráfica amigable
+✅ Ver logs en tiempo real
+✅ Control del estado del servidor
+✅ Información de red visible
+✅ Acceso rápido a utilidades
+
+═══════════════════════════════════════════════════════════════
+
+📖 MÁS INFORMACIÓN:
+
+   README.md     → Documentación general
+   GUIA_USO.txt  → Guía completa actualizada
+
+═══════════════════════════════════════════════════════════════
+Fecha de organización: 27/02/2026
+Si tienes problemas, revisa _scripts_antiguos/ o contacta soporte
+═══════════════════════════════════════════════════════════════

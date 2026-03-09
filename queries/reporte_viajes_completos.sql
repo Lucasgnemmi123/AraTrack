@@ -11,7 +11,7 @@ SELECT
     patente_camion,
     patente_semi,
     numero_rampa,
-    peso_camion,
+    transporte,
     costo_codigo,
     termografos_gps,
     fecha,

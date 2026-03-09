@@ -5,19 +5,12 @@ Estructura exacta según documento: viajes + comidas_preparadas
 import sqlite3
 import os
 import sys
+from config import config
 
 class DBManager:
     def __init__(self):
-        # Si se ejecuta empaquetado, usar directorio del ejecutable
-        # Si no, usar directorio del script
-        if getattr(sys, 'frozen', False):
-            # Ejecutable empaquetado: viajes.db está junto al .exe
-            base_dir = os.path.dirname(sys.executable)
-        else:
-            # Desarrollo: viajes.db está junto a db_manager.py
-            base_dir = os.path.dirname(__file__)
-        
-        self.db_path = os.path.join(base_dir, 'viajes.db')
+        # Usar configuración centralizada
+        self.db_path = config.get_db_path()
     
     def get_connection(self):
         """Obtener conexión a la base de datos con configuración óptima"""
@@ -66,7 +59,7 @@ class DBManager:
             # Lista de todos los campos (SIN columnas de firmas - solo aparecen en PDF)
             campos = [
                 'numero_viaje', 'casino', 'ruta', 'tipo_camion', 
-                'patente_camion', 'patente_semi', 'numero_rampa', 'peso_camion', 
+                'patente_camion', 'patente_semi', 'numero_rampa', 'transporte', 
                 'costo_codigo', 'termografos_gps', 'fecha', 'fecha_hora_llegada_dhl', 
                 'fecha_hora_salida_dhl', 'conductor', 'celular', 'rut', 'numero_camion', 
                 'num_wencos', 'bin', 'pallets', 'pallets_chep', 
@@ -124,7 +117,7 @@ class DBManager:
                 # Lista de todos los campos (SIN columnas de firmas - solo aparecen en PDF)
                 campos = [
                     'numero_viaje', 'casino', 'ruta', 'tipo_camion', 
-                    'patente_camion', 'patente_semi', 'numero_rampa', 'peso_camion', 
+                    'patente_camion', 'patente_semi', 'numero_rampa', 'transporte', 
                     'costo_codigo', 'termografos_gps', 'fecha', 'fecha_hora_llegada_dhl', 
                     'fecha_hora_salida_dhl', 'conductor', 'celular', 'rut', 'numero_camion', 
                     'num_wencos', 'bin', 'pallets', 'pallets_chep', 
@@ -285,6 +278,34 @@ class DBManager:
             return True
         except Exception as e:
             print(f"Error eliminando viaje: {e}")
+            return False
+    
+    def delete_viaje_unico(self, viaje_id, numero_viaje, centro_costo):
+        """Eliminar SOLO un registro específico de viaje por ID y SUS comidas específicas por centro de costo"""
+        try:
+            conn = self.get_connection()
+            cursor = conn.cursor()
+            
+            print(f"[DELETE_VIAJE_UNICO] Eliminando registro único - ID: {viaje_id}, Viaje: {numero_viaje}, Centro: {centro_costo}")
+            
+            # Primero eliminar SOLO las comidas de este viaje + centro de costo
+            cursor.execute('''
+                DELETE FROM comidas_preparadas 
+                WHERE numero_viaje = ? AND numero_centro_costo = ?
+            ''', (numero_viaje, centro_costo))
+            comidas_deleted = cursor.rowcount
+            print(f"[DELETE_VIAJE_UNICO] Comidas eliminadas: {comidas_deleted}")
+            
+            # Luego eliminar SOLO el registro de viaje específico por ID
+            cursor.execute('DELETE FROM viajes WHERE id = ?', (viaje_id,))
+            viajes_deleted = cursor.rowcount
+            print(f"[DELETE_VIAJE_UNICO] Registros de viaje eliminados: {viajes_deleted}")
+            
+            conn.commit()
+            conn.close()
+            return True
+        except Exception as e:
+            print(f"Error eliminando registro único de viaje: {e}")
             return False
     
     def delete_comida(self, comida_id):
@@ -608,10 +629,11 @@ class DBManager:
             # Lista de campos actualizables (EXCLUIR numero_viaje y costo_codigo que son la clave)
             campos = [
                 'casino', 'ruta', 'tipo_camion', 
-                'patente_camion', 'patente_semi', 'numero_rampa', 'peso_camion', 
+                'patente_camion', 'patente_semi', 'numero_rampa', 'transporte', 
                 'termografos_gps', 'fecha', 'fecha_hora_llegada_dhl', 
                 'fecha_hora_salida_dhl', 'conductor', 'celular', 'rut', 'numero_camion', 
-                'num_wencos', 'bin', 'pallets', 'pallets_chep', 'pallets_refrigerado', 
+                'num_wencos', 'bin', 'pallets', 'pallets_chep', 'pallets_pl_negro_grueso', 
+                'pallets_pl_negro_alternativo', 'pallets_refrigerado', 
                 'wencos_refrigerado', 'pallets_congelado', 'wencos_congelado', 
                 'pallets_abarrote', 'check_congelado', 'check_refrigerado', 'check_abarrote', 
                 'check_implementos', 'check_aseo', 'check_trazabilidad', 'check_plataforma_wtck', 

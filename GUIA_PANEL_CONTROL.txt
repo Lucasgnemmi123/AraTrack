@@ -1,0 +1,163 @@
+═══════════════════════════════════════════════════════════════
+            CÓMO USAR EL PANEL DE CONTROL
+═══════════════════════════════════════════════════════════════
+
+📋 ¿QUÉ ES EL PANEL DE CONTROL?
+────────────────────────────────────────────────────────────────
+Es un menú interactivo en consola que te permite gestionar
+el servidor del Sistema de Viajes DHL de forma fácil.
+
+
+🚀 CÓMO INICIAR EL PANEL
+────────────────────────────────────────────────────────────────
+
+1. Doble clic en: PANEL_CONTROL.bat
+
+2. Se abrirá una ventana CMD con un menú interactivo:
+
+   ============================================================
+       🚚 PANEL DE CONTROL - Sistema de Viajes DHL
+   ============================================================
+
+     Estado: ⚫ SERVIDOR APAGADO
+
+     📡 Acceso LOCAL:     http://localhost:5000
+     📡 Acceso desde RED: http://192.168.X.X:5000
+
+     👤 Usuario: admin | Contraseña: admin123
+
+   ============================================================
+
+     OPCIONES:
+     ─────────
+     1. ▶️  Encender servidor
+     2. ⏹️  Apagar servidor
+     3. 🌐 Abrir en navegador
+     4. 📊 Ver estado detallado
+     5. 🔧 Verificar sistema
+     6. 📂 Abrir carpeta del proyecto
+     0. ❌ Salir
+
+   ────────────────────────────────────────────────────────────
+
+     Selecciona una opción:
+
+
+📝 OPCIONES DEL MENÚ
+────────────────────────────────────────────────────────────────
+
+1. ENCENDER SERVIDOR
+   - Inicia el servidor web en el puerto 5000
+   - Se abre una SEGUNDA ventana CMD con el servidor
+   - NO cierres esa ventana mientras uses el sistema
+   - Vuelve al panel para gestionar el servidor
+
+2. APAGAR SERVIDOR
+   - Detiene el servidor completamente
+   - Cierra la ventana del servidor
+
+3. ABRIR EN NAVEGADOR
+   - Abre automáticamente el navegador en http://localhost:5000
+   - Solo funciona si el servidor está encendido
+
+4. VER ESTADO DETALLADO
+   - Muestra información del sistema:
+     * Estado del servidor (ON/OFF)
+    * Base de datos (tamaño)
+     * Entorno virtual
+     * IP local
+
+5. VERIFICAR SISTEMA
+   - Comprueba que todas las librerías estén instaladas:
+     * Python
+     * Flask
+     * ReportLab
+     * Pandas
+
+6. ABRIR CARPETA
+   - Abre el explorador de archivos en la carpeta del proyecto
+
+0. SALIR
+   - Cierra el panel de control
+   - El servidor seguirá corriendo si lo encendiste
+
+
+⚡ FLUJO DE TRABAJO TÍPICO
+────────────────────────────────────────────────────────────────
+
+1. Ejecutar PANEL_CONTROL.bat
+2. Presionar "1" para ENCENDER servidor
+3. Esperar que inicie (5 segundos)
+4. Presionar "3" para ABRIR NAVEGADOR
+5. Usar el sistema normalmente
+6. Cuando termines, presionar "2" para APAGAR servidor
+7. Presionar "0" para SALIR del panel
+
+
+⚠️  IMPORTANTE - LEE ESTO
+────────────────────────────────────────────────────────────────
+
+• El panel se ejecuta en UNA ventana CMD
+• El servidor se ejecuta en OTRA ventana CMD (se abre al encender)
+• NO cierres la ventana del servidor mientras lo uses
+• Si cierras el panel, el servidor sigue corriendo
+• Para apagar el servidor, usa la opción "2" del panel
+• Si algo falla, ejecuta la opción "5" para verificar
+
+
+🔐 CREDENCIALES POR DEFECTO
+────────────────────────────────────────────────────────────────
+
+Usuario:    admin
+Contraseña: admin123
+
+
+📡 ACCESO DESDE RED
+────────────────────────────────────────────────────────────────
+
+Otros equipos en la misma red pueden acceder usando:
+
+http://TU_IP_LOCAL:5000
+
+Tu IP local se muestra en el panel.
+
+
+🆘 SOLUCIÓN DE PROBLEMAS
+────────────────────────────────────────────────────────────────
+
+Problema: "El panel no muestra nada"
+Solución:
+  - El panel está funcionando, solo escribe el número y ENTER
+  - Los emojis pueden no verse bien en Windows antiguo
+
+Problema: "No se puede iniciar el servidor"
+Solución: 
+  - Verifica que el puerto 5000 esté libre
+  - Ejecuta opción "5" para verificar el sistema
+  - Cierra otros Python.exe que puedan estar corriendo
+  - Usa el Administrador de Tareas para cerrar Python.exe
+
+Problema: "El navegador no abre"
+Solución:
+  - Asegúrate de que el servidor esté encendido (opción "1")
+  - Abre manualmente: http://localhost:5000
+
+Problema: "Otros equipos no pueden acceder"
+Solución:
+  - Verifica que el firewall permita el puerto 5000
+  - Usa la IP que muestra el panel (no 127.0.0.1)
+  - Ambos equipos deben estar en la misma red
+
+
+📌 NOTAS ADICIONALES
+────────────────────────────────────────────────────────────────
+
+• Puedes minimizar el panel mientras usas el sistema
+• Para volver al panel, restaura su ventana
+• El servidor solo se detiene con la opción "2" o cerrando
+  la ventana del servidor manualmente
+
+
+═══════════════════════════════════════════════════════════════
+                    ¡Listo para usar!
+═══════════════════════════════════════════════════════════════

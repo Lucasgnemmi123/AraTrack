@@ -1,0 +1,91 @@
+========================================
+  GUÍA DE REPARACIÓN
+  Sistema de Viajes DHL
+========================================
+
+PROBLEMA DETECTADO:
+-------------------
+El proyecto fue transferido de otra PC y el entorno
+virtual (.venv) tiene rutas de la PC anterior.
+
+
+SOLUCIÓN - Ejecuta estos pasos EN ORDEN:
+-----------------------------------------
+
+OPCIÓN A - Reparación Rápida (5 minutos)
+══════════════════════════════════════════
+1. Ejecuta:     reparar_rutas.bat
+2. Luego ejecuta:  TEST_SISTEMA.bat
+3. Si todo muestra "OK", ejecuta:  iniciar_web.bat
+
+
+OPCIÓN B - Reinstalación Completa (10 minutos)
+═══════════════════════════════════════════════
+Si la Opción A no funciona:
+
+1. Cierra VS Code completamente
+
+2. Elimina la carpeta .venv manualmente
+   (Shift + Click Derecho > Eliminar)
+
+3. Abre PowerShell o CMD en esta carpeta
+
+4. Ejecuta:
+   python -m venv .venv
+   .venv\Scripts\activate
+   python -m pip install --upgrade pip
+   pip install -r requirements.txt
+
+5. Ejecuta: TEST_SISTEMA.bat
+
+6. Ejecuta: iniciar_web.bat
+
+
+VERIFICACIÓN:
+═════════════
+Cuando ejecutes iniciar_web.bat deberías ver:
+
+  ========================================
+  Sistema de Viajes DHL - PRODUCCIÓN  
+  ========================================
+  
+  Entorno: production
+  Base de datos: viajes.db
+  Puerto: 5000
+  
+  Acceso LOCAL (esta PC):
+     http://localhost:5000
+
+
+PROBLEMAS COMUNES:
+═════════════════
+❌ "Flask not found" 
+   → Ejecuta pip install flask
+
+❌ "No module named 'waitress'"
+   → Ejecuta pip install waitress
+
+❌ "No module named 'reportlab'"
+   → Ejecuta pip install reportlab
+
+❌ La página no carga
+   → Verifica que existe: viajes.db
+   → Si no existe, necesitas el backup de la base de datos
+
+
+CREDENCIALES DEFAULT:
+═══════════════════
+Usuario: admin
+Contraseña: admin123
+
+(Cámbialas desde Gestionar Usuarios)
+
+
+¿NECESITAS AYUDA?
+════════════════
+Ejecuta: TEST_SISTEMA.bat
+Y envíame la salida completa
+
+========================================
+Creado: 27/02/2026
+========================================

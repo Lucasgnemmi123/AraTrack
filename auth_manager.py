@@ -7,7 +7,7 @@ import hashlib
 import os
 import sys
 from functools import wraps
-from flask import session, redirect, url_for, flash
+from flask import session, redirect, url_for, flash, jsonify, request
 
 class AuthManager:
     def __init__(self):
@@ -246,6 +246,14 @@ def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if 'user_id' not in session:
+            # Si es una petición API, devolver JSON en lugar de redirigir
+            if request.path.startswith('/api/'):
+                return jsonify({
+                    'success': False, 
+                    'message': 'Sesión expirada. Por favor, inicia sesión nuevamente.',
+                    'redirect': '/login'
+                }), 401
+            # Para peticiones normales, redirigir al login
             flash('Debes iniciar sesión para acceder a esta página', 'warning')
             return redirect(url_for('login'))
         return f(*args, **kwargs)

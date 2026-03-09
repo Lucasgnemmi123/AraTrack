@@ -1,10 +1,11 @@
 import sqlite3
 import pandas as pd
 from datetime import datetime
+from config import config
 
 def obtener_conexion():
-    """Obtiene una conexión a la base de datos viajes.db"""
-    conn = sqlite3.connect('viajes.db')
+    """Obtiene una conexión a la base de datos configurada"""
+    conn = sqlite3.connect(config.get_db_path())
     conn.row_factory = sqlite3.Row
     return conn
 
@@ -142,6 +143,31 @@ def actualizar_estado_rendicion(nro_viaje, nuevo_estado):
         
     except Exception as e:
         return {'success': False, 'error': str(e)}
+
+def eliminar_rendicion(nro_viaje):
+    """
+    Elimina una rendición de la base de datos.
+    """
+    try:
+        conn = obtener_conexion()
+        cursor = conn.cursor()
+        
+        cursor.execute('''
+            DELETE FROM rendiciones
+            WHERE nro_viaje = ?
+        ''', (nro_viaje,))
+        
+        if cursor.rowcount == 0:
+            conn.close()
+            return {'success': False, 'message': 'Rendición no encontrada'}
+        
+        conn.commit()
+        conn.close()
+        
+        return {'success': True, 'message': 'Rendición eliminada correctamente'}
+        
+    except Exception as e:
+        return {'success': False, 'message': str(e)}
 
 def obtener_rendiciones_por_fecha(fecha_inicio, fecha_fin):
     """

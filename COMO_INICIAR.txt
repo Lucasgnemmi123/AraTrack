@@ -1,0 +1,48 @@
+========================================
+  SISTEMA DE VIAJES DHL
+========================================
+
+PARA INICIAR EL SERVIDOR:
+
+  → Doble clic en: INICIAR.bat
+  
+  El sistema hará automáticamente:
+  1. Verificar Waitress
+  2. Instalar si falta
+  3. Iniciar servidor
+  
+  Verás las URLs para acceder:
+     → http://localhost:5000
+     → http://[TU-IP]:5000
+
+========================================
+
+CREDENCIALES:
+
+  Usuario: admin
+  Contraseña: admin123
+
+========================================
+
+PARA APAGAR:
+
+  - Cierra la ventana del servidor (X)
+  O presiona: Ctrl + C
+
+========================================
+
+SI HAY PROBLEMAS:
+
+  1. Ejecuta: LIMPIAR_PROCESOS.bat
+  2. Espera a que termine
+  3. Ejecuta de nuevo: INICIAR.bat
+
+========================================
+
+ACCESO DESDE OTRA PC:
+
+  - Usa la IP que aparece en la ventana
+  - Formato: http://IP:5000
+  - Firewall debe permitir puerto 5000
+
+========================================

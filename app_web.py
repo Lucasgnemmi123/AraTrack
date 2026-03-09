@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, jsonify, send_file, redirect,
 from datetime import datetime
 import os
 import sys
+from config import config
 from db_manager import DBManager
 from maestras_manager import MaestrasManager
 from pdf_generator import PDFGenerator
@@ -9,7 +10,7 @@ from auth_manager import AuthManager, login_required
 import rendiciones_manager
 
 app = Flask(__name__)
-app.secret_key = 'aratrack-pro-2025-secure-key'
+app.secret_key = config.secret_key
 db_manager = DBManager()
 maestras_manager = MaestrasManager()
 pdf_generator = PDFGenerator()
@@ -382,7 +383,7 @@ def guardar_viaje():
             'patente_camion': str(data.get('patente_camion', '')).upper(),
             'patente_semi': str(data.get('patente_semi', '')).upper(),
             'numero_rampa': data.get('numero_rampa', ''),
-            'peso_camion': data.get('peso_camion', ''),
+            'transporte': data.get('transporte', ''),
             'numero_camion': data.get('numero_camion', ''),
             'termografos_gps': str(data.get('termografos_gps', '')).upper(),
             'conductor': str(data.get('chofer', '')).upper(),
@@ -561,7 +562,7 @@ def actualizar_viaje():
             'patente_camion': str(data.get('patente_camion', '')).upper(),
             'patente_semi': str(data.get('patente_semi', '')).upper(),
             'numero_rampa': data.get('numero_rampa'),
-            'peso_camion': data.get('peso_camion'),
+            'transporte': data.get('transporte'),
             'numero_camion': data.get('numero_camion'),
             'termografos_gps': str(data.get('termografos_gps', '')).upper(),
             'conductor': str(data.get('chofer', '')).upper(),
@@ -690,6 +691,35 @@ def eliminar_viaje():
         print(f"[ELIMINAR_VIAJE] EXCEPCIÓN: {str(e)}\n")
         return jsonify({'success': False, 'message': str(e)}), 500
 
+@app.route('/api/eliminar-registro-unico', methods=['POST'])
+def eliminar_registro_unico():
+    try:
+        data = request.json
+        viaje_id = data.get('viaje_id')
+        numero_viaje = data.get('numero_viaje')
+        centro_costo = data.get('centro_costo')
+        
+        print(f"\n[ELIMINAR_REGISTRO_UNICO] Solicitud recibida: ID={viaje_id}, numero_viaje={numero_viaje}, centro_costo={centro_costo}")
+        
+        if not viaje_id:
+            return jsonify({'success': False, 'message': 'ID de viaje no proporcionado'}), 400
+        
+        # Eliminar SOLO este registro específico y sus comidas específicas
+        success = db_manager.delete_viaje_unico(viaje_id, numero_viaje, centro_costo)
+        
+        if success:
+            print(f"[ELIMINAR_REGISTRO_UNICO] Registro {viaje_id} ({numero_viaje}/{centro_costo}) eliminado exitosamente\n")
+            return jsonify({
+                'success': True, 
+                'message': f'Registro del viaje {numero_viaje} - Centro {centro_costo} eliminado correctamente'
+            })
+        else:
+            print(f"[ELIMINAR_REGISTRO_UNICO] ERROR: No se pudo eliminar el registro\n")
+            return jsonify({'success': False, 'message': 'No se pudo eliminar el registro'}), 500
+    except Exception as e:
+        print(f"[ELIMINAR_REGISTRO_UNICO] EXCEPCIÓN: {str(e)}\n")
+        return jsonify({'success': False, 'message': str(e)}), 500
+
 @app.route('/generar-pdf')
 @login_required
 def generar_pdf_page():
@@ -744,7 +774,8 @@ def get_estadisticas_dashboard():
         # Resumen general - Solo activos y validaciones requeridas
         cursor.execute(f'''
             SELECT 
-                COUNT(*) as total_viajes,
+                COUNT(*) as total_bitacoras,
+                COUNT(DISTINCT numero_viaje) as viajes_unicos,
                 SUM(CASE WHEN check_congelado = 'X' THEN 1 ELSE 0 END) as check_congelado,
                 SUM(CASE WHEN check_refrigerado = 'X' THEN 1 ELSE 0 END) as check_refrigerado,
                 SUM(CASE WHEN check_abarrote = 'X' THEN 1 ELSE 0 END) as check_abarrote,
@@ -763,8 +794,8 @@ def get_estadisticas_dashboard():
         
         resumen = cursor.fetchone()
         
-        # Calcular total de pallets
-        total_pallets = (resumen[9] or 0) + (resumen[10] or 0) + (resumen[11] or 0) + (resumen[12] or 0)
+        # Calcular total de pallets (ajustado por nuevo índice)
+        total_pallets = (resumen[10] or 0) + (resumen[11] or 0) + (resumen[12] or 0) + (resumen[13] or 0)
         
         # Tendencia temporal según vista
         if vista == 'diaria':
@@ -777,14 +808,15 @@ def get_estadisticas_dashboard():
         cursor.execute(f'''
             SELECT 
                 strftime('{group_format}', fecha) as periodo,
-                COUNT(*) as total
+                COUNT(*) as total_bitacoras,
+                COUNT(DISTINCT numero_viaje) as viajes_unicos
             FROM viajes
             {where_clause}
             GROUP BY periodo
             ORDER BY periodo
         ''', params)
         
-        tendencia = [{'periodo': row[0], 'total': row[1]} for row in cursor.fetchall()]
+        tendencia = [{'periodo': row[0], 'total_bitacoras': row[1], 'viajes_unicos': row[2]} for row in cursor.fetchall()]
         
         # Tendencia por tipos - incluir las 6 validaciones
         cursor.execute(f'''
@@ -808,14 +840,15 @@ def get_estadisticas_dashboard():
         cursor.execute(f'''
             SELECT 
                 COALESCE(administrativo_responsable, 'Sin asignar') as administrativo,
-                COUNT(*) as total
+                COUNT(*) as total_bitacoras,
+                COUNT(DISTINCT numero_viaje) as viajes_unicos
             FROM viajes
             {where_clause}
             GROUP BY administrativo_responsable
-            ORDER BY total DESC
+            ORDER BY total_bitacoras DESC
         ''', params)
         
-        por_administrativo = [{'administrativo': row[0], 'total': row[1]} for row in cursor.fetchall()]
+        por_administrativo = [{'administrativo': row[0], 'total_bitacoras': row[1], 'viajes_unicos': row[2]} for row in cursor.fetchall()]
         
         # Top 10 casinos
         cursor.execute(f'''
@@ -836,7 +869,8 @@ def get_estadisticas_dashboard():
             SELECT 
                 strftime('{group_format}', fecha) as periodo,
                 COALESCE(administrativo_responsable, 'Sin asignar') as administrativo,
-                COUNT(*) as total,
+                COUNT(*) as total_bitacoras,
+                COUNT(DISTINCT numero_viaje) as viajes_unicos,
                 SUM(CASE WHEN check_congelado = 'X' THEN 1 ELSE 0 END) as congelado,
                 SUM(CASE WHEN check_refrigerado = 'X' THEN 1 ELSE 0 END) as refrigerado,
                 SUM(CASE WHEN check_abarrote = 'X' THEN 1 ELSE 0 END) as abarrote,
@@ -853,40 +887,42 @@ def get_estadisticas_dashboard():
             FROM viajes
             {where_clause}
             GROUP BY periodo, administrativo_responsable
-            ORDER BY periodo DESC, total DESC
+            ORDER BY periodo DESC, total_bitacoras DESC
         ''', params)
         
         detalle = [{
             'periodo': row[0],
             'administrativo': row[1],
-            'total': row[2],
-            'congelado': row[3],
-            'refrigerado': row[4],
-            'abarrote': row[5],
-            'implementos': row[6],
-            'aseo': row[7],
-            'trazabilidad': row[8],
-            'pallets': row[9],
-            'wencos': row[10]
+            'total_bitacoras': row[2],
+            'viajes_unicos': row[3],
+            'congelado': row[4],
+            'refrigerado': row[5],
+            'abarrote': row[6],
+            'implementos': row[7],
+            'aseo': row[8],
+            'trazabilidad': row[9],
+            'pallets': row[10],
+            'wencos': row[11]
         } for row in cursor.fetchall()]
         
         conn.close()
         
         return jsonify({
             'resumen': {
-                'total_viajes': resumen[0],
-                'check_congelado': resumen[1],
-                'check_refrigerado': resumen[2],
-                'check_abarrote': resumen[3],
-                'check_implementos': resumen[4],
-                'check_aseo': resumen[5],
-                'check_trazabilidad': resumen[6],
-                'total_wencos': resumen[7],
-                'total_bin': resumen[8],
-                'pallets_std': resumen[9],
-                'pallets_chep': resumen[10],
-                'pallets_negro_grueso': resumen[11],
-                'pallets_negro_alternativo': resumen[12],
+                'total_bitacoras': resumen[0],
+                'viajes_unicos': resumen[1],
+                'check_congelado': resumen[2],
+                'check_refrigerado': resumen[3],
+                'check_abarrote': resumen[4],
+                'check_implementos': resumen[5],
+                'check_aseo': resumen[6],
+                'check_trazabilidad': resumen[7],
+                'total_wencos': resumen[8],
+                'total_bin': resumen[9],
+                'pallets_std': resumen[10],
+                'pallets_chep': resumen[11],
+                'pallets_negro_grueso': resumen[12],
+                'pallets_negro_alternativo': resumen[13],
                 'total_pallets': total_pallets
             },
             'tendencia': tendencia,
@@ -1169,7 +1205,7 @@ def descargar_reporte_viajes():
         # Encabezados (todos los campos de viajes)
         headers = [
             'NRO VIAJE', 'CASINO', 'RUTA', 'TIPO CAMIÓN', 'PATENTE CAMIÓN', 'PATENTE SEMI',
-            'NRO RAMPA', 'PESO CAMIÓN', 'CÓDIGO COSTO', 'TERMÓGRAFOS GPS', 'FECHA',
+            'NRO RAMPA', 'TRANSPORTE', 'CÓDIGO COSTO', 'TERMÓGRAFOS GPS', 'FECHA',
             'LLEGADA DHL', 'SALIDA DHL', 'CONDUCTOR', 'CELULAR', 'RUT', 'NRO CAMIÓN',
             'WENCOS', 'BIN', 'PALLETS', 'PALLETS CHEP', 'PALLETS NEGRO GRUESO',
             'PALLETS NEGRO ALT', 'PALLETS REFRIG', 'WENCOS REFRIG', 'PALLETS CONG',
@@ -1598,6 +1634,285 @@ def listar_administrativos():
     except Exception as e:
         return jsonify({'success': False, 'message': str(e)}), 500
 
+# ====== RUTAS API PARA PROVEEDORES ======
+
+@app.route('/api/listar-proveedores')
+def listar_proveedores():
+    """Listar todos los proveedores activos"""
+    try:
+        conn = db_manager.get_connection()
+        cursor = conn.cursor()
+        cursor.execute('SELECT id, nombre FROM proveedores WHERE activo = 1 ORDER BY nombre')
+        proveedores = [{'id': row[0], 'nombre': row[1]} for row in cursor.fetchall()]
+        conn.close()
+        return jsonify({'success': True, 'proveedores': proveedores})
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+@app.route('/api/agregar-proveedor', methods=['POST'])
+def agregar_proveedor():
+    """Agregar un nuevo proveedor (o reactivar si existe inactivo)"""
+    try:
+        data = request.json
+        nombre = data.get('nombre', '').strip().upper()
+        
+        if not nombre:
+            return jsonify({'success': False, 'message': 'El nombre del proveedor es obligatorio'}), 400
+        
+        conn = db_manager.get_connection()
+        cursor = conn.cursor()
+        
+        # Verificar si ya existe
+        cursor.execute('SELECT id, activo FROM proveedores WHERE UPPER(nombre) = ?', (nombre,))
+        existente = cursor.fetchone()
+        
+        if existente:
+            if existente[1] == 1:  # Si está activo
+                conn.close()
+                return jsonify({'success': False, 'message': 'El proveedor ya existe y está activo'}), 400
+            else:  # Si está inactivo, reactivar
+                cursor.execute('UPDATE proveedores SET activo = 1 WHERE id = ?', (existente[0],))
+                conn.commit()
+                conn.close()
+                return jsonify({'success': True, 'message': 'Proveedor reactivado exitosamente', 'id': existente[0]})
+        
+        # Insertar nuevo proveedor
+        cursor.execute('INSERT INTO proveedores (nombre, activo) VALUES (?, 1)', (nombre,))
+        conn.commit()
+        nuevo_id = cursor.lastrowid
+        conn.close()
+        
+        return jsonify({'success': True, 'message': 'Proveedor agregado exitosamente', 'id': nuevo_id})
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+@app.route('/api/editar-proveedor', methods=['POST'])
+def editar_proveedor():
+    """Editar un proveedor existente"""
+    try:
+        data = request.json
+        proveedor_id = data.get('id')
+        nombre = data.get('nombre', '').strip().upper()
+        
+        if not proveedor_id or not nombre:
+            return jsonify({'success': False, 'message': 'ID y nombre son obligatorios'}), 400
+        
+        conn = db_manager.get_connection()
+        cursor = conn.cursor()
+        
+        # Verificar si el nuevo nombre ya existe en otro proveedor
+        cursor.execute('SELECT id FROM proveedores WHERE UPPER(nombre) = ? AND id != ?', (nombre, proveedor_id))
+        if cursor.fetchone():
+            conn.close()
+            return jsonify({'success': False, 'message': 'Ya existe otro proveedor con ese nombre'}), 400
+        
+        # Actualizar proveedor
+        cursor.execute('''
+            UPDATE proveedores 
+            SET nombre = ?
+            WHERE id = ?
+        ''', (nombre, proveedor_id))
+        
+        conn.commit()
+        conn.close()
+        
+        return jsonify({'success': True, 'message': 'Proveedor actualizado exitosamente'})
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+@app.route('/api/eliminar-proveedor', methods=['POST'])
+def eliminar_proveedor():
+    """Desactivar un proveedor (soft delete)"""
+    try:
+        data = request.json
+        proveedor_id = data.get('id')
+        
+        if not proveedor_id:
+            return jsonify({'success': False, 'message': 'ID del proveedor es obligatorio'}), 400
+        
+        conn = db_manager.get_connection()
+        cursor = conn.cursor()
+        
+        # Desactivar proveedor
+        cursor.execute('''
+            UPDATE proveedores 
+            SET activo = 0
+            WHERE id = ?
+        ''', (proveedor_id,))
+        
+        conn.commit()
+        conn.close()
+        
+        return jsonify({'success': True, 'message': 'Proveedor desactivado exitosamente'})
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+# ====== RUTAS API PARA TRANSPORTES ======
+
+@app.route('/api/listar-transportes')
+def listar_transportes():
+    """Listar todos los transportes activos"""
+    try:
+        conn = db_manager.get_connection()
+        cursor = conn.cursor()
+        
+        cursor.execute('''
+            SELECT id, patente, transporte, tipo_camion 
+            FROM transportes 
+            WHERE activo = 1
+            ORDER BY patente
+        ''')
+        
+        transportes = []
+        for row in cursor.fetchall():
+            transportes.append({
+                'id': row[0],
+                'patente': row[1],
+                'transporte': row[2] if row[2] else '',
+                'tipo_camion': row[3] if row[3] else ''
+            })
+        
+        conn.close()
+        return jsonify({'success': True, 'transportes': transportes})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/api/obtener-transporte/<patente>')
+def obtener_transporte(patente):
+    """Obtener información completa de un transporte por su patente"""
+    try:
+        conn = db_manager.get_connection()
+        cursor = conn.cursor()
+        
+        cursor.execute('''
+            SELECT id, patente, transporte, tipo_camion 
+            FROM transportes 
+            WHERE patente = ? AND activo = 1
+        ''', (patente,))
+        
+        row = cursor.fetchone()
+        conn.close()
+        
+        if row:
+            return jsonify({
+                'success': True,
+                'data': {
+                    'id': row[0],
+                    'patente': row[1],
+                    'transporte': row[2] if row[2] else '',
+                    'tipo_camion': row[3] if row[3] else ''
+                }
+            })
+        else:
+            return jsonify({'success': False, 'message': 'Transporte no encontrado'}), 404
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+@app.route('/api/agregar-transporte', methods=['POST'])
+def agregar_transporte():
+    """Agregar una nueva patente con su transporte y tipo de camión (o reactivar si existe inactiva)"""
+    try:
+        data = request.json
+        patente = data.get('patente', '').strip().upper()
+        transporte = data.get('transporte', '').strip().upper()
+        tipo_camion = data.get('tipo_camion', '').strip().upper()
+        
+        if not patente or not transporte or not tipo_camion:
+            return jsonify({'success': False, 'message': 'Todos los campos son obligatorios'}), 400
+        
+        conn = db_manager.get_connection()
+        cursor = conn.cursor()
+        
+        # Verificar si ya existe
+        cursor.execute('SELECT id, activo FROM transportes WHERE patente = ?', (patente,))
+        existente = cursor.fetchone()
+        
+        if existente:
+            if existente[1] == 1:  # Si está activo
+                conn.close()
+                return jsonify({'success': False, 'message': 'La patente ya existe y está activa'}), 400
+            else:  # Si está inactivo, reactivar
+                cursor.execute('''
+                    UPDATE transportes 
+                    SET transporte = ?, tipo_camion = ?, activo = 1, fecha_creacion = CURRENT_TIMESTAMP
+                    WHERE id = ?
+                ''', (transporte, tipo_camion, existente[0]))
+                conn.commit()
+                conn.close()
+                return jsonify({'success': True, 'message': 'Patente reactivada exitosamente'})
+        
+        # Insertar nueva
+        cursor.execute('''
+            INSERT INTO transportes (patente, transporte, tipo_camion, activo, fecha_creacion)
+            VALUES (?, ?, ?, 1, CURRENT_TIMESTAMP)
+        ''', (patente, transporte, tipo_camion))
+        
+        conn.commit()
+        conn.close()
+        
+        return jsonify({'success': True, 'message': 'Patente agregada exitosamente'})
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+@app.route('/api/editar-transporte', methods=['PUT'])
+def editar_transporte():
+    """Editar información de un transporte existente"""
+    try:
+        data = request.json
+        id_transporte = data.get('id')
+        patente = data.get('patente', '').strip().upper()
+        transporte = data.get('transporte', '').strip().upper()
+        tipo_camion = data.get('tipo_camion', '').strip().upper()
+        
+        if not id_transporte or not patente or not transporte or not tipo_camion:
+            return jsonify({'success': False, 'message': 'Todos los campos son obligatorios'}), 400
+        
+        conn = db_manager.get_connection()
+        cursor = conn.cursor()
+        
+        # Verificar si la patente ya existe en otro registro
+        cursor.execute('SELECT id FROM transportes WHERE patente = ? AND id != ?', (patente, id_transporte))
+        if cursor.fetchone():
+            conn.close()
+            return jsonify({'success': False, 'message': 'La patente ya existe en otro registro'}), 400
+        
+        # Actualizar
+        cursor.execute('''
+            UPDATE transportes 
+            SET patente = ?, transporte = ?, tipo_camion = ?
+            WHERE id = ?
+        ''', (patente, transporte, tipo_camion, id_transporte))
+        
+        conn.commit()
+        conn.close()
+        
+        return jsonify({'success': True, 'message': 'Transporte actualizado exitosamente'})
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+@app.route('/api/eliminar-transporte', methods=['DELETE'])
+def eliminar_transporte():
+    """Eliminar (desactivar) un transporte"""
+    try:
+        data = request.json
+        id_transporte = data.get('id')
+        
+        if not id_transporte:
+            return jsonify({'success': False, 'message': 'ID es obligatorio'}), 400
+        
+        conn = db_manager.get_connection()
+        cursor = conn.cursor()
+        
+        # Soft delete
+        cursor.execute('UPDATE transportes SET activo = 0 WHERE id = ?', (id_transporte,))
+        
+        conn.commit()
+        conn.close()
+        
+        return jsonify({'success': True, 'message': 'Transporte eliminado exitosamente'})
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
+
 # ====== RUTAS API PARA ACTUALIZAR REGISTROS EN MAESTRAS ======
 
 @app.route('/api/actualizar-centro-costo', methods=['POST'])
@@ -1771,6 +2086,27 @@ def actualizar_rendicion_api():
     except Exception as e:
         return jsonify({'success': False, 'message': str(e)}), 500
 
+@app.route('/api/eliminar-rendicion', methods=['POST'])
+@login_required
+def eliminar_rendicion_api():
+    """Eliminar una rendición"""
+    try:
+        data = request.json
+        nro_viaje = data.get('nro_viaje')
+        
+        if not nro_viaje:
+            return jsonify({'success': False, 'message': 'Falta el número de viaje'}), 400
+        
+        resultado = rendiciones_manager.eliminar_rendicion(nro_viaje)
+        
+        if resultado['success']:
+            return jsonify(resultado)
+        else:
+            return jsonify(resultado), 400
+            
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
+
 # ========== SERVIDOR ==========
 
 if __name__ == '__main__':
@@ -1790,30 +2126,55 @@ if __name__ == '__main__':
     hostname = socket.gethostname()
     local_ip = socket.gethostbyname(hostname)
     
-    print("\n" + "="*60)
-    print("Sistema de Viajes DHL - Servidor Produccion")
-    print("="*60)
-    print(f"\nAcceso LOCAL (esta PC):")
-    print(f"   http://localhost:5000")
-    print(f"   http://127.0.0.1:5000")
-    print(f"\nAcceso RED LOCAL (otras PCs en la red):")
-    print(f"   http://{local_ip}:5000")
-    print(f"\nUsuarios simultaneos: 10")
-    print(f"Base de datos: SQLite con WAL mode (viajes.db)")
-    print(f"Servidor: Waitress (produccion)")
-    print("\n" + "="*60 + "\n")
+    # Obtener configuración
+    port = config.get_port()
+    environment = config.environment
+    db_name = config.db_name
     
-    # Usar Waitress para producción (más estable que Flask development server)
+    # Título según entorno
+    env_label = "DESARROLLO" if config.is_development() else "PRODUCCIÓN"
+    
+    print("\n" + "="*60)
+    print(f"Sistema de Viajes DHL - {env_label}")
+    print("="*60)
+    print(f"\nEntorno: {environment}")
+    print(f"Base de datos: {db_name}")
+    print(f"Puerto: {port}")
+    print(f"\nAcceso LOCAL (esta PC):")
+    print(f"   http://localhost:{port}")
+    print(f"   http://127.0.0.1:{port}")
+    print(f"\nAcceso RED LOCAL (otras PCs en la red):")
+    print(f"   http://{local_ip}:{port}")
+    print(f"\nUsuarios simultáneos: {config.threads}")
+    print(f"Servidor: Waitress (producción)")
+    print("\n" + "="*60)
+    print("INICIANDO SERVIDOR...")
+    print("="*60 + "\n")
+    
+    # Intentar Waitress primero (producción)
     try:
         from waitress import serve
-        serve(app, host='0.0.0.0', port=5000, threads=10)
+        print("[OK] Servidor Waitress iniciando...")
+        print(f"\nEl servidor estara disponible en:")
+        print(f"   => http://localhost:{port}")
+        print(f"   => http://{local_ip}:{port}")
+        print(f"\nLogin: admin / admin123")
+        print("\n[!] NO CIERRES ESTA VENTANA")
+        print("="*60 + "\n")
+        serve(app, host=config.host, port=port, threads=config.threads)
     except ImportError:
-        print("Waitress no instalado. Usando Flask development server...")
-        print("   Para producción ejecuta: pip install waitress\n")
+        # Si Waitress no está, usar Flask como fallback
+        print("[!] Waitress no encontrado, usando Flask...")
+        print(f"\nEl servidor estara disponible en:")
+        print(f"   => http://localhost:{port}")
+        print(f"   => http://{local_ip}:{port}")
+        print(f"\nLogin: admin / admin123")
+        print("\n[!] NO CIERRES ESTA VENTANA")
+        print("="*60 + "\n")
         app.run(
             debug=False,
-            host='0.0.0.0',
-            port=5000,
+            host=config.host,
+            port=port,
             threaded=True,
             use_reloader=False
         )

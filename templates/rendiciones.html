@@ -79,6 +79,7 @@
                             <th class="px-4 py-3 text-left font-semibold">Ruta</th>
                             <th class="px-4 py-3 text-left font-semibold">Estado</th>
                             <th class="px-4 py-3 text-left font-semibold">Fecha Modificación</th>
+                            <th class="px-4 py-3 text-center font-semibold">Acciones</th>
                         </tr>
                     </thead>
                     <tbody id="tablaRendiciones">
@@ -178,7 +179,7 @@ function mostrarRendiciones(rendiciones) {
     if (rendiciones.length === 0) {
         tabla.innerHTML = `
             <tr>
-                <td colspan="5" class="px-4 py-8 text-center text-gray-500">
+                <td colspan="6" class="px-4 py-8 text-center text-gray-500">
                     <i class="bi bi-inbox text-4xl mb-2 block"></i>
                     No hay rendiciones pendientes
                 </td>
@@ -218,6 +219,16 @@ function mostrarRendiciones(rendiciones) {
                     </select>
                 </td>
                 <td class="px-4 py-3 text-gray-600 text-sm">${fechaMod}</td>
+                <td class="px-4 py-3 text-center">
+                    <button 
+                        onclick="confirmarEliminarRendicion(${r.nro_viaje})"
+                        class="px-3 py-1 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors duration-200 flex items-center gap-1 mx-auto text-sm font-semibold"
+                        title="Eliminar rendición"
+                    >
+                        <i class="bi bi-trash"></i>
+                        Eliminar
+                    </button>
+                </td>
             </tr>
         `;
     }).join('');
@@ -273,6 +284,59 @@ function actualizarEstado(nroViaje, nuevoEstado) {
     .catch(error => {
         mostrarModalInfo('❌ Error: ' + error.message, 'error');
         cargarRendiciones();
+    });
+}
+
+function confirmarEliminarRendicion(nroViaje) {
+    mostrarModalConfirm(
+        `¿Estás seguro de que deseas eliminar la rendición del viaje ${nroViaje}?\n\nEsta acción no se puede deshacer.`,
+        function(confirmado) {
+            if (confirmado) {
+                eliminarRendicion(nroViaje);
+            }
+        }
+    );
+}
+
+function eliminarRendicion(nroViaje) {
+    fetch('/api/eliminar-rendicion', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            nro_viaje: nroViaje
+        })
+    })
+    .then(response => {
+        // Verificar si la respuesta es JSON
+        const contentType = response.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+            return response.json().then(data => ({ status: response.status, data }));
+        } else {
+            throw new Error('El servidor devolvió una respuesta inesperada (no JSON). Verifica que estés autenticado.');
+        }
+    })
+    .then(({ status, data }) => {
+        // Manejar sesión expirada (401)
+        if (status === 401 && data.redirect) {
+            mostrarModalInfo('❌ ' + data.message, 'error');
+            setTimeout(() => {
+                window.location.href = data.redirect;
+            }, 2000);
+            return;
+        }
+        
+        if (data.success) {
+            mostrarModalInfo('✓ Rendición eliminada correctamente', 'success');
+            cargarRendiciones();
+        } else {
+            mostrarModalInfo('❌ ' + data.message, 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error completo:', error);
+        mostrarModalInfo('❌ Error al eliminar: ' + error.message, 'error');
     });
 }
 </script>

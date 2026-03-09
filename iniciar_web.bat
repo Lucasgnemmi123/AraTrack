@@ -6,35 +6,47 @@ echo.
 
 cd /d "%~dp0"
 
+REM Establecer modo PRODUCCIÓN
+set ARATRACK_ENV=production
+
 REM Activar entorno virtual
 if exist ".venv\Scripts\activate.bat" (
     call .venv\Scripts\activate.bat
 ) else (
-    echo ERROR: No se encuentra el entorno virtual
-    echo Por favor crea el entorno virtual primero con: python -m venv .venv
+    echo ERROR: No se encuentra el entorno virtual en .venv
+    echo.
+    echo Por favor, ejecuta primero: python -m venv .venv
+    echo Luego: .venv\Scripts\pip.exe install -r requirements.txt
+    echo.
     pause
     exit /b 1
 )
 
-REM Verificar que Flask esté instalado
-python -c "import flask" 2>nul
-if errorlevel 1 (
-    echo Instalando Flask...
-    pip install Flask
-)
-
-REM Iniciar servidor Flask
+REM Usar siempre el Python del entorno virtual para iniciar la app
 echo.
 echo ========================================
 echo  Iniciando Sistema de Viajes DHL
 echo ========================================
 echo.
-echo Modo: RED LOCAL (5 usuarios)
-echo Base de datos: SQLite
+echo Configuracion:
+echo   - Entorno: PRODUCCION
+echo   - Base de datos: viajes.db
+echo   - Puerto: 5000
 echo.
 echo El servidor mostrara las direcciones de acceso...
 echo.
 
-python app_web.py
+REM Ejecutar usando el Python del entorno virtual
+if exist ".venv\Scripts\python.exe" (
+    .venv\Scripts\python.exe app_web.py
+) else (
+    echo ERROR: No se encontró el entorno virtual. No se puede iniciar la aplicación.
+    echo.
+    echo Por favor, ejecuta primero: python -m venv .venv
+    echo Luego: .venv\Scripts\pip.exe install -r requirements.txt
+    echo.
+    pause
+    exit /b 1
+)
 
 pause

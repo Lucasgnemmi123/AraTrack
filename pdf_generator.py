@@ -100,7 +100,7 @@ class PDFGenerator:
             ['CASINO', get('casino'), 'C.COSTO', get('costo_codigo')],
             ['RUTA', get('ruta'), 'PATENTE CAMION', get('patente_camion')],
             ['FECHA', get('fecha'), 'PATENTE SEMI', get('patente_semi')],
-            ['PESO', get('peso_camion'), 'TIPO CAMION', get('tipo_camion')],
+            ['TRANSPORTE', get('transporte'), 'TIPO CAMION', get('tipo_camion')],
             ['TERMOGRAFOS', get('termografos_gps'), 'N° DE RAMPLA', get('numero_rampa')],
             ['CONDUCTOR', get('conductor'), 'N° CAMION', get('numero_camion')],
             ['RUT', get('rut'), 'FECHA HORA LLEGADA', get('fecha_hora_llegada_dhl')],
@@ -270,10 +270,11 @@ class PDFGenerator:
         ]))
         content.append(comidas_header)
         
-        # Tabla de comidas - 20 FILAS
+        # Tabla de comidas - DIN\u00c1MICA (se adapta a la cantidad de comidas)
         comidas_data = [['GUIAS', 'PROVEEDOR', 'DESCRIPCION', 'KILO', 'BULTOS']]
         
-        for comida in comidas[:20]:
+        # Agregar todas las comidas (sin l\u00edmite)
+        for comida in comidas:
             proveedor = comida.get('proveedor', '') or ''
             if len(proveedor) > 15:
                 proveedor = proveedor[:15]
@@ -302,13 +303,18 @@ class PDFGenerator:
                 bultos
             ])
         
-        while len(comidas_data) < 21:
+        # Si no hay comidas, agregar al menos una fila vac\u00eda
+        if len(comidas_data) == 1:
             comidas_data.append(['', '', '', '', ''])
+        
+        # Calcular altura de filas din\u00e1micamente
+        num_filas = len(comidas_data)
+        altura_fila = 0.18*inch
         
         comidas_table = Table(
             comidas_data, 
             colWidths=[1.2*inch, 1.6*inch, 3.5*inch, 0.6*inch, 0.6*inch],
-            rowHeights=[0.18*inch] * len(comidas_data)
+            rowHeights=[altura_fila] * num_filas
         )
         comidas_table.setStyle(TableStyle([
             ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#D0D0D0')),

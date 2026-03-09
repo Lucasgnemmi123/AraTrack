@@ -103,23 +103,27 @@
             <div class="p-4">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <div>
-                        <label for="tipo_camion" class="block text-sm font-medium text-gray-700 mb-1">Tipo de Camión</label>
-                        <select id="tipo_camion" name="tipo_camion" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                            <option value="">Seleccione tipo...</option>
-                            <option value="1 Toneladas">1 Toneladas</option>
-                            <option value="1.7 Toneladas">1.7 Toneladas</option>
-                            <option value="5 Toneladas">5 Toneladas</option>
-                            <option value="10 Toneladas">10 Toneladas</option>
-                            <option value="12 Toneladas">12 Toneladas</option>
-                            <option value="24 Toneladas">24 Toneladas</option>
-                        </select>
-                    </div>
-                    <div>
                         <label for="patente_camion" class="block text-sm font-medium text-gray-700 mb-1">
                             Patente Camión <span class="text-red-500">*</span>
                         </label>
-                        <input type="text" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent uppercase" 
-                               id="patente_camion" name="patente_camion" placeholder="Ej: ABCD12">
+                        <div class="flex gap-2">
+                            <select id="patente_camion" name="patente_camion" class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent select2-patente">
+                                <option value="">Seleccione patente...</option>
+                            </select>
+                            <button type="button" onclick="abrirModalTransportes()" class="px-3 py-2 bg-green-500 hover:bg-green-600 text-white font-bold rounded-lg transition-colors" title="Gestionar patentes">
+                                <i class="bi bi-plus-lg"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div>
+                        <label for="transporte" class="block text-sm font-medium text-gray-700 mb-1">Transporte</label>
+                        <input type="text" class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-100 cursor-not-allowed text-gray-600" 
+                               id="transporte" name="transporte" readonly>
+                    </div>
+                    <div>
+                        <label for="tipo_camion" class="block text-sm font-medium text-gray-700 mb-1">Tipo de Camión</label>
+                        <input type="text" class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-100 cursor-not-allowed text-gray-600" 
+                               id="tipo_camion" name="tipo_camion" readonly>
                     </div>
                     <div>
                         <label for="patente_semi" class="block text-sm font-medium text-gray-700 mb-1">Patente Semi</label>
@@ -130,11 +134,6 @@
                         <label for="numero_rampa" class="block text-sm font-medium text-gray-700 mb-1">N° de Rampla</label>
                         <input type="text" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
                                id="numero_rampa" name="numero_rampa">
-                    </div>
-                    <div>
-                        <label for="peso_camion" class="block text-sm font-medium text-gray-700 mb-1">Peso Camión</label>
-                        <input type="text" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
-                               id="peso_camion" name="peso_camion">
                     </div>
                     <div>
                         <label for="numero_camion" class="block text-sm font-medium text-gray-700 mb-1">N° Camión</label>
@@ -217,10 +216,13 @@
 
         <!-- ACTIVOS SALIDA -->
         <div class="bg-white rounded-xl shadow-lg mb-2 overflow-hidden">
-            <div class="bg-gradient-to-r from-red-500 to-red-600 px-4 py-2">
+            <div class="bg-gradient-to-r from-red-500 to-red-600 px-4 py-2 flex justify-between items-center">
                 <h5 class="text-lg font-semibold text-white flex items-center">
                     <i class="bi bi-box-arrow-right mr-2"></i>Activos Salida
                 </h5>
+                <button type="button" class="px-4 py-2 bg-white/20 hover:bg-white/30 text-white font-semibold rounded-lg transition-colors" onclick="limpiarActivosYPallets()" title="Limpiar todos los campos de activos y pallets">
+                    <i class="bi bi-eraser mr-1"></i>Limpiar Activos/Pallets
+                </button>
             </div>
             <div class="p-4">
                 <!-- ACTIVOS -->
@@ -228,7 +230,7 @@
                 <div class="grid grid-cols-2 md:grid-cols-3 gap-3 mb-4">
                     <div>
                         <label for="num_wencos" class="block text-sm font-medium text-gray-700 mb-1">N° Wencos</label>
-                        <input type="number" id="num_wencos" name="num_wencos" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" min="0" max="9999" step="1">
+                        <input type="text" id="num_wencos" name="num_wencos" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" maxlength="6" inputmode="numeric" pattern="[0-9]*">
                     </div>
                     <div>
                         <label for="bin" class="block text-sm font-medium text-gray-700 mb-1">BIN</label>
@@ -236,11 +238,11 @@
                     </div>
                     <div>
                         <label for="pallets" class="block text-sm font-medium text-gray-700 mb-1">Pallets</label>
-                        <input type="number" id="pallets" name="pallets" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" min="0" max="9999" step="1">
+                        <input type="text" id="pallets" name="pallets" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" maxlength="6" inputmode="numeric" pattern="[0-9]*">
                     </div>
                     <div>
                         <label for="pallets_chep" class="block text-sm font-medium text-gray-700 mb-1">Pallets CHEP</label>
-                        <input type="number" id="pallets_chep" name="pallets_chep" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" min="0" max="9999" step="1">
+                        <input type="text" id="pallets_chep" name="pallets_chep" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" maxlength="6" inputmode="numeric" pattern="[0-9]*">
                     </div>
                     <div>
                         <label for="pallets_pl_negro_grueso" class="block text-sm font-medium text-gray-700 mb-1">PL Negro Grueso</label>
@@ -257,23 +259,23 @@
                 <div class="grid grid-cols-2 md:grid-cols-3 gap-3 mb-4">
                     <div>
                         <label for="pallets_congelado" class="block text-sm font-medium text-gray-700 mb-1">Pallets Congelado</label>
-                        <input type="number" id="pallets_congelado" name="pallets_congelado" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" min="0" max="9999" step="1">
+                        <input type="text" id="pallets_congelado" name="pallets_congelado" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" maxlength="6" inputmode="numeric" pattern="[0-9]*">
                     </div>
                     <div>
                         <label for="wencos_congelado" class="block text-sm font-medium text-gray-700 mb-1">Wencos Congelado</label>
-                        <input type="number" id="wencos_congelado" name="wencos_congelado" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" min="0" max="9999" step="1">
+                        <input type="text" id="wencos_congelado" name="wencos_congelado" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" maxlength="6" inputmode="numeric" pattern="[0-9]*">
                     </div>
                     <div>
                         <label for="pallets_refrigerado" class="block text-sm font-medium text-gray-700 mb-1">Pallets Refrigerado</label>
-                        <input type="number" id="pallets_refrigerado" name="pallets_refrigerado" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" min="0" max="9999" step="1">
+                        <input type="text" id="pallets_refrigerado" name="pallets_refrigerado" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" maxlength="6" inputmode="numeric" pattern="[0-9]*">
                     </div>
                     <div>
                         <label for="wencos_refrigerado" class="block text-sm font-medium text-gray-700 mb-1">Wencos Refrigerado</label>
-                        <input type="number" id="wencos_refrigerado" name="wencos_refrigerado" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" min="0" max="9999" step="1">
+                        <input type="text" id="wencos_refrigerado" name="wencos_refrigerado" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" maxlength="6" inputmode="numeric" pattern="[0-9]*">
                     </div>
                     <div>
                         <label for="pallets_abarrote" class="block text-sm font-medium text-gray-700 mb-1">Pallets Abarrote</label>
-                        <input type="number" id="pallets_abarrote" name="pallets_abarrote" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" min="0" max="9999" step="1">
+                        <input type="text" id="pallets_abarrote" name="pallets_abarrote" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" maxlength="6" inputmode="numeric" pattern="[0-9]*">
                     </div>
                 </div>
 
@@ -322,10 +324,13 @@
 
         <!-- GUÍAS ALPES -->
         <div class="bg-white rounded-xl shadow-lg mb-2 overflow-hidden">
-            <div class="bg-gradient-to-r from-purple-500 to-purple-600 px-4 py-2">
+            <div class="bg-gradient-to-r from-purple-500 to-purple-600 px-4 py-2 flex justify-between items-center">
                 <h5 class="text-lg font-semibold text-white flex items-center">
                     <i class="bi bi-file-text mr-2"></i>Guías
                 </h5>
+                <button type="button" class="px-4 py-2 bg-red-500/90 hover:bg-red-600 text-white font-semibold rounded-lg transition-colors" onclick="limpiarTodasGuias()" title="Limpiar todos los campos de las guías 1-21">
+                    <i class="bi bi-eraser mr-1"></i>Limpiar Guías
+                </button>
             </div>
             <div class="p-4">
         
@@ -543,7 +548,14 @@
                 <h5 class="text-lg font-semibold text-white flex items-center">
                     <i class="bi bi-egg-fried mr-2"></i>Comidas Preparadas / Implementos
                 </h3>
-                <button type="button" class="px-4 py-2 bg-white/20 hover:bg-white/30 text-white rounded-lg transition-colors" onclick="agregarComida()">+ Agregar Comida</button>
+                <div class="flex gap-2 items-center">
+                    <button type="button" class="px-3 py-2 bg-white/30 hover:bg-white/40 text-white rounded-lg transition-colors" onclick="abrirModalProveedores()" title="Gestionar Proveedores">
+                        <i class="bi bi-gear mr-1"></i>Proveedores
+                    </button>
+                    <button type="button" class="px-4 py-2 bg-white/20 hover:bg-white/30 text-white rounded-lg transition-colors" onclick="agregarComida()">+ Agregar 1</button>
+                    <input type="number" id="cantidad_comidas" min="1" max="100" value="5" class="w-20 px-3 py-2 rounded-lg border-2 border-white/30 bg-white/10 text-white font-semibold text-center focus:outline-none focus:border-white" placeholder="#">
+                    <button type="button" class="px-4 py-2 bg-white/30 hover:bg-white/40 text-white font-semibold rounded-lg transition-colors" onclick="agregarMultiplesComidas()">+ Agregar Varias</button>
+                </div>
             </div>
             <div class="p-4">
                 <p class="text-gray-600 mb-4">Las comidas se asignarán automáticamente al centro de costo especificado arriba.</p>
@@ -729,6 +741,191 @@
         </div>
     </div>
 </div>
+
+<!-- MODAL GESTIÓN DE PROVEEDORES -->
+<div id="modalProveedores" class="fixed inset-0 bg-gray-900 bg-opacity-50 hidden flex items-center justify-center z-50" style="display: none;">
+    <div class="bg-white rounded-xl shadow-2xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-hidden">
+        <div class="bg-gradient-to-r from-green-500 to-green-600 px-6 py-4 flex justify-between items-center">
+            <h3 class="text-xl font-bold text-white flex items-center">
+                <i class="bi bi-box-seam mr-2"></i>Gestión de Proveedores
+            </h3>
+            <button onclick="cerrarModalProveedores()" class="text-white hover:text-gray-200 transition-colors">
+                <i class="bi bi-x-lg text-2xl"></i>
+            </button>
+        </div>
+        <div class="p-6 overflow-y-auto max-h-[75vh]">
+            <!-- Formulario agregar nuevo proveedor -->
+            <div class="mb-6 p-4 bg-blue-50 border-2 border-blue-300 rounded-lg">
+                <h4 class="font-semibold text-blue-800 mb-3 flex items-center">
+                    <i class="bi bi-plus-circle mr-2"></i>Agregar Nuevo Proveedor
+                </h4>
+                <form id="formNuevoProveedor" class="flex gap-2">
+                    <input type="text" id="nuevoProveedorNombre" placeholder="Nombre del proveedor" 
+                           class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent uppercase"
+                           required>
+                    <button type="submit" class="px-6 py-2 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-lg transition-colors">
+                        <i class="bi bi-plus-lg mr-1"></i>Agregar
+                    </button>
+                </form>
+            </div>
+
+            <!-- Lista de proveedores existentes -->
+            <div>
+                <h4 class="font-semibold text-gray-800 mb-3 flex items-center">
+                    <i class="bi bi-list-ul mr-2"></i>Proveedores Existentes (<span id="totalProveedores">0</span>)
+                </h4>
+                <div class="mb-3">
+                    <input type="text" id="buscarProveedor" placeholder="🔍 Buscar proveedor..." 
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
+                           onkeyup="filtrarProveedores()">
+                </div>
+                <div id="listaProveedores" class="space-y-2 max-h-96 overflow-y-auto">
+                    <!-- Se llenará dinámicamente -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Gestionar Transportes -->
+<div id="modalTransportes" class="fixed inset-0 bg-gray-900 bg-opacity-50 hidden flex items-center justify-center z-50" style="display: none;">
+    <div class="bg-white rounded-xl shadow-2xl max-w-5xl w-full mx-4 max-h-[90vh] overflow-hidden">
+        <div class="bg-gradient-to-r from-blue-500 to-blue-600 px-6 py-4 flex justify-between items-center">
+            <h3 class="text-xl font-bold text-white flex items-center">
+                <i class="bi bi-truck mr-2"></i>Gestión de Transportes y Patentes
+            </h3>
+            <button onclick="cerrarModalTransportes()" class="text-white hover:text-gray-200 transition-colors">
+                <i class="bi bi-x-lg text-2xl"></i>
+            </button>
+        </div>
+        <div class="p-6 overflow-y-auto max-h-[75vh]">
+            <!-- Formulario agregar nueva patente -->
+            <div class="mb-6 p-4 bg-blue-50 border-2 border-blue-300 rounded-lg">
+                <h4 class="font-semibold text-blue-800 mb-3 flex items-center">
+                    <i class="bi bi-plus-circle mr-2"></i>Agregar Nueva Patente
+                </h4>
+                <form id="formNuevaPatente" class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <div>
+                        <input type="text" id="nuevaPatentePatente" placeholder="Patente (ej: ABCD-12)" 
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent uppercase"
+                               required maxlength="10">
+                    </div>
+                    <div>
+                        <input type="text" id="nuevaPatenteTransporte" placeholder="Nombre del transporte" 
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent uppercase"
+                               required>
+                    </div>
+                    <div class="flex gap-2">
+                        <select id="nuevaPatenteTipoCamion" class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
+                            <option value="">Tipo de camión...</option>
+                            <option value="1 TONELADAS">1 TONELADAS</option>
+                            <option value="1.7 TONELADAS">1.7 TONELADAS</option>
+                            <option value="5 TONELADAS">5 TONELADAS</option>
+                            <option value="10 TONELADAS">10 TONELADAS</option>
+                            <option value="12 TONELADAS">12 TONELADAS</option>
+                            <option value="24 TONELADAS">24 TONELADAS</option>
+                        </select>
+                        <button type="submit" class="px-6 py-2 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-lg transition-colors whitespace-nowrap">
+                            <i class="bi bi-plus-lg mr-1"></i>Agregar
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Lista de patentes existentes -->
+            <div>
+                <div class="flex justify-between items-center mb-3">
+                    <h4 class="font-semibold text-gray-800 flex items-center">
+                        <i class="bi bi-list-ul mr-2"></i>Patentes Existentes (<span id="totalPatentes">0</span>)
+                    </h4>
+                    <div class="flex gap-2">
+                        <select id="filtroTransporte" class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" onchange="filtrarPatentes()">
+                            <option value="">Todos los transportes</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <input type="text" id="buscarPatente" placeholder="🔍 Buscar por patente..." 
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                           onkeyup="filtrarPatentes()">
+                </div>
+                <div id="listaPatentes" class="space-y-2 max-h-96 overflow-y-auto">
+                    <!-- Se llenará dinámicamente -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Confirmación Limpiar Guías -->
+<div id="modalConfirmLimpiarGuias" class="fixed inset-0 bg-gray-900 bg-opacity-50 hidden flex items-center justify-center z-50" style="display: none;">
+    <div class="bg-white rounded-xl shadow-2xl max-w-md w-full mx-4 animate-bounce-in">
+        <div class="bg-gradient-to-r from-red-500 to-red-600 px-6 py-4 rounded-t-xl">
+            <h3 class="text-xl font-bold text-white flex items-center">
+                <i class="bi bi-exclamation-triangle-fill mr-2 text-2xl"></i>Confirmar Acción
+            </h3>
+        </div>
+        <div class="p-6">
+            <p class="text-gray-700 text-lg mb-2">¿Está seguro de limpiar todos los campos de las guías?</p>
+            <p class="text-gray-500 text-sm">Se borrarán los campos de la Guía 1 a la Guía 21. Esta acción no se puede deshacer.</p>
+        </div>
+        <div class="px-6 pb-6 flex gap-3">
+            <button onclick="confirmarLimpiarGuias()" class="flex-1 px-6 py-3 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-semibold rounded-lg transition-all duration-200 flex items-center justify-center">
+                <i class="bi bi-check-circle mr-2"></i>Sí, Limpiar
+            </button>
+            <button onclick="cerrarModalConfirmLimpiarGuias()" class="flex-1 px-6 py-3 bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold rounded-lg transition-all duration-200 flex items-center justify-center">
+                <i class="bi bi-x-circle mr-2"></i>Cancelar
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Confirmación Eliminar Patente -->
+<div id="modalConfirmEliminarPatente" class="fixed inset-0 bg-gray-900 bg-opacity-50 hidden flex items-center justify-center z-50" style="display: none;">
+    <div class="bg-white rounded-xl shadow-2xl max-w-md w-full mx-4 animate-bounce-in">
+        <div class="bg-gradient-to-r from-orange-500 to-orange-600 px-6 py-4 rounded-t-xl">
+            <h3 class="text-xl font-bold text-white flex items-center">
+                <i class="bi bi-exclamation-triangle-fill mr-2 text-2xl"></i>Confirmar Eliminación
+            </h3>
+        </div>
+        <div class="p-6">
+            <p class="text-gray-700 text-lg mb-2">¿Está seguro de eliminar la patente <span id="patenteAEliminarTexto" class="font-bold text-orange-600"></span>?</p>
+            <p class="text-gray-500 text-sm">Esta acción desactivará la patente del sistema.</p>
+        </div>
+        <div class="px-6 pb-6 flex gap-3">
+            <button onclick="confirmarEliminarPatente()" class="flex-1 px-6 py-3 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-semibold rounded-lg transition-all duration-200 flex items-center justify-center">
+                <i class="bi bi-trash mr-2"></i>Sí, Eliminar
+            </button>
+            <button onclick="cerrarModalConfirmEliminarPatente()" class="flex-1 px-6 py-3 bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold rounded-lg transition-all duration-200 flex items-center justify-center">
+                <i class="bi bi-x-circle mr-2"></i>Cancelar
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Confirmación Eliminar Proveedor -->
+<div id="modalConfirmEliminarProveedor" class="fixed inset-0 bg-gray-900 bg-opacity-50 hidden flex items-center justify-center z-50" style="display: none;">
+    <div class="bg-white rounded-xl shadow-2xl max-w-md w-full mx-4 animate-bounce-in">
+        <div class="bg-gradient-to-r from-orange-500 to-orange-600 px-6 py-4 rounded-t-xl">
+            <h3 class="text-xl font-bold text-white flex items-center">
+                <i class="bi bi-exclamation-triangle-fill mr-2 text-2xl"></i>Confirmar Eliminación
+            </h3>
+        </div>
+        <div class="p-6">
+            <p class="text-gray-700 text-lg mb-2">¿Está seguro de eliminar el proveedor <span id="proveedorAEliminarTexto" class="font-bold text-orange-600"></span>?</p>
+            <p class="text-gray-500 text-sm">Esta acción desactivará el proveedor del sistema.</p>
+        </div>
+        <div class="px-6 pb-6 flex gap-3">
+            <button onclick="confirmarEliminarProveedor()" class="flex-1 px-6 py-3 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-semibold rounded-lg transition-all duration-200 flex items-center justify-center">
+                <i class="bi bi-trash mr-2"></i>Sí, Eliminar
+            </button>
+            <button onclick="cerrarModalConfirmEliminarProveedor()" class="flex-1 px-6 py-3 bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold rounded-lg transition-all duration-200 flex items-center justify-center">
+                <i class="bi bi-x-circle mr-2"></i>Cancelar
+            </button>
+        </div>
+    </div>
+</div>
+
 {% endblock %}
 
 {% block scripts %}
@@ -789,9 +986,14 @@
 let contadorComidas = 0;
 let casinosData = {{ casinos | tojson }};
 let choferesData = []; // Se cargará con datos completos
+let proveedoresData = []; // Se cargará desde la API
 
 // Cargar datos de viaje existente cuando se escribe el número
 document.addEventListener('DOMContentLoaded', function() {
+    // Cargar proveedores y transportes al iniciar
+    cargarProveedores();
+    cargarTransportes();
+    
     // Inicializar Select2 en todos los select con clase select2-search
     $('.select2-search').select2({
         placeholder: 'Buscar...',
@@ -902,7 +1104,7 @@ function cargarDatosViajeExistente(numeroViaje) {
                 document.getElementById('tipo_camion').value = viaje.tipo_camion || '';
                 document.getElementById('patente_semi').value = viaje.patente_semi || '';
                 document.getElementById('numero_rampa').value = viaje.numero_rampa || '';
-                document.getElementById('peso_camion').value = viaje.peso_camion || '';
+                document.getElementById('transporte').value = viaje.transporte || '';
                 document.getElementById('numero_camion').value = viaje.numero_camion || '';
                 document.getElementById('termografos_gps').value = viaje.termografos_gps || '';
                 
@@ -1061,26 +1263,11 @@ function cargarDatosViajeExistente(numeroViaje) {
                 document.getElementById('revision_limpieza_camion_acciones').value = viaje.revision_limpieza_camion_acciones || '';
                 $('#administrativo_responsable').val(viaje.administrativo_responsable || '').trigger('change');
                 
-                // CARGAR COMIDAS
-                if (data.comidas && data.comidas.length > 0) {
-                    console.log('Cargando comidas:', data.comidas.length);
-                    // Limpiar comidas existentes
-                    contadorComidas = 0;
-                    document.getElementById('comidas-container').innerHTML = '';
-                    
-                    // Agregar cada comida
-                    data.comidas.forEach(comida => {
-                        agregarComida();
-                        const index = contadorComidas - 1;
-                        document.getElementById(`guia_comida_${index}`).value = comida.guia_comida || '';
-                        document.getElementById(`descripcion_${index}`).value = comida.descripcion || '';
-                        document.getElementById(`kilo_${index}`).value = comida.kilo || '';
-                        document.getElementById(`bultos_${index}`).value = comida.bultos || '';
-                    });
-                }
+                // NO CARGAR COMIDAS - Cada bitácora lleva carga distinta
+                console.log('Comidas NO precargadas (cada viaje lleva carga diferente)');
                 
-                console.log('TODOS LOS CAMPOS CARGADOS');
-                mostrarMensaje('success', '✓ Viaje completo precargado - Todos los campos llenados');
+                console.log('TODOS LOS CAMPOS CARGADOS (excepto comidas)');
+                mostrarMensaje('success', '✓ Viaje precargado - Agrega las comidas manualmente');
             } else {
                 console.log('Viaje no encontrado');
             }
@@ -1153,7 +1340,7 @@ function editarCasino() {
 
     const casino = casinosData.find(c => c.codigo == codigoCasino);
     if (!casino) {
-        alert('Casino no encontrado');
+        mostrarNotificacion('Casino no encontrado', 'warning');
         return;
     }
 
@@ -1190,7 +1377,7 @@ function editarConductor() {
 
     const chofer = choferesData.find(c => c.nombre === nombreChofer);
     if (!chofer) {
-        alert('Conductor no encontrado');
+        mostrarNotificacion('Conductor no encontrado', 'warning');
         return;
     }
 
@@ -1222,11 +1409,7 @@ function agregarComida() {
     // Contar comidas actuales en el DOM
     const comidasActuales = document.querySelectorAll('#comidas-container > div[id^="comida-"]').length;
     
-    // Limitar a 20 comidas máximo
-    if (comidasActuales >= 20) {
-        alert('⚠️ Máximo 20 comidas permitidas');
-        return;
-    }
+    // SIN LÍMITE - se pueden agregar cuantas comidas sean necesarias
     
     contadorComidas++;
     const numeroFila = comidasActuales + 1; // Número visual basado en comidas actuales
@@ -1234,51 +1417,87 @@ function agregarComida() {
     const container = document.getElementById('comidas-container');
     const comidaDiv = document.createElement('div');
     comidaDiv.id = `comida-${contadorComidas}`;
-    comidaDiv.className = 'grid grid-cols-1 md:grid-cols-7 gap-4 p-5 mb-4 bg-gradient-to-r from-green-50 to-blue-50 border-2 border-green-300 rounded-lg shadow-sm hover:shadow-md transition-shadow';
+    comidaDiv.className = 'grid grid-cols-12 gap-3 p-4 mb-3 bg-gradient-to-r from-green-50 to-blue-50 border-2 border-green-300 rounded-lg shadow-sm hover:shadow-md transition-shadow items-end';
     
     comidaDiv.innerHTML = `
-        <div class="flex items-center justify-center">
-            <span class="comida-numero text-2xl font-bold text-green-600">#${numeroFila}</span>
+        <div class="col-span-1 flex items-center justify-start">
+            <span class="comida-numero text-lg font-bold text-green-600">#${numeroFila}</span>
         </div>
-        <div>
+        <div class="col-span-2">
             <label class="block text-sm font-medium text-gray-700 mb-1">N° Guía</label>
             <input type="text" name="comida_guia_${contadorComidas}" 
                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                    placeholder="N° Guía">
         </div>
-        <div>
+        <div class="col-span-3">
             <label class="block text-sm font-medium text-gray-700 mb-1">Proveedor</label>
-            <input type="text" name="comida_proveedor_${contadorComidas}"
-                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                   placeholder="Proveedor">
+            <select name="comida_proveedor_${contadorComidas}" id="comida_proveedor_${contadorComidas}"
+                   class="proveedor-select w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                <option value="">Seleccione proveedor...</option>
+            </select>
         </div>
-        <div>
+        <div class="col-span-1 flex items-end justify-center">
+            <button type="button" onclick="copiarProveedorAnterior(${contadorComidas})" 
+                    class="flex items-center justify-center w-10 h-10 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors" 
+                    title="Copiar proveedor de la línea anterior">
+                <i class="bi bi-arrow-down text-lg"></i>
+            </button>
+        </div>
+        <div class="col-span-2">
             <label class="block text-sm font-medium text-gray-700 mb-1">Descripción <span class="text-red-500">*</span></label>
             <input type="text" name="comida_descripcion_${contadorComidas}"
                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                    placeholder="Tipo de comida">
         </div>
-        <div>
+        <div class="col-span-1">
             <label class="block text-sm font-medium text-gray-700 mb-1">Kilo</label>
             <input type="number" name="comida_kilo_${contadorComidas}" min="0" step="0.01"
                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                    placeholder="0.00">
         </div>
-        <div>
+        <div class="col-span-1">
             <label class="block text-sm font-medium text-gray-700 mb-1">Bultos</label>
             <input type="number" name="comida_bultos_${contadorComidas}" min="0"
                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                    placeholder="0">
         </div>
-        <div class="flex items-end">
+        <div class="col-span-1 flex items-end justify-end">
             <button type="button" onclick="eliminarComida(${contadorComidas})"
-                    class="w-full px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors flex items-center justify-center">
-                <i class="bi bi-trash mr-1"></i> Eliminar
+                    class="w-10 h-10 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors flex items-center justify-center"
+                    title="Eliminar línea">
+                <i class="bi bi-x-lg text-xl"></i>
             </button>
         </div>
     `;
     
     container.appendChild(comidaDiv);
+    
+    // Inicializar Select2 en el proveedor recién agregado con verificación
+    const selector = `#comida_proveedor_${contadorComidas}`;
+    
+    // Verificar si proveedoresData está cargado
+    if (!proveedoresData || proveedoresData.length === 0) {
+        console.warn('⚠️ proveedoresData vacío, recargando...');
+        // Recargar proveedores y luego inicializar
+        fetch('/api/listar-proveedores')
+            .then(response => response.json())
+            .then(result => {
+                if (result.success) {
+                    proveedoresData = result.proveedores;
+                    console.log('✅ Proveedores recargados:', proveedoresData.length);
+                    inicializarProveedorSelect2(selector);
+                } else {
+                    console.error('Error cargando proveedores:', result.message);
+                    inicializarProveedorSelect2(selector); // Inicializar aunque sea vacío
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                inicializarProveedorSelect2(selector);
+            });
+    } else {
+        inicializarProveedorSelect2(selector);
+    }
 }
 
 function renumerarComidas() {
@@ -1290,6 +1509,655 @@ function renumerarComidas() {
         }
     });
 }
+
+function agregarMultiplesComidas() {
+    const cantidad = parseInt(document.getElementById('cantidad_comidas').value) || 1;
+    
+    if (cantidad < 1 || cantidad > 100) {
+        mostrarNotificacion('Por favor ingrese una cantidad entre 1 y 100', 'warning');
+        return;
+    }
+    
+    // Agregar múltiples comidas de una vez
+    for (let i = 0; i < cantidad; i++) {
+        agregarComida();
+    }
+    
+    // Mensaje de confirmación
+    const mensaje = cantidad === 1 ? '1 comida agregada' : `${cantidad} comidas agregadas`;
+    console.log(`✅ ${mensaje}`);
+}
+
+// ============ FUNCIONES PARA PROVEEDORES ============
+
+function cargarProveedores() {
+    fetch('/api/listar-proveedores')
+        .then(response => response.json())
+        .then(result => {
+            if (result.success) {
+                proveedoresData = result.proveedores;
+                console.log('✅ Proveedores cargados:', proveedoresData.length);
+            } else {
+                console.error('Error cargando proveedores:', result.message);
+            }
+        })
+        .catch(error => console.error('Error:', error));
+}
+
+function inicializarProveedorSelect2(selector) {
+    const $select = $(selector);
+    
+    // Destruir Select2 si ya existe para evitar duplicados
+    if ($select.data('select2')) {
+        $select.select2('destroy');
+    }
+    
+    $select.select2({
+        data: proveedoresData.map(p => ({ id: p.nombre, text: p.nombre })),
+        placeholder: 'Seleccione o escriba proveedor...',
+        allowClear: true,
+        tags: true,
+        width: '100%',
+        createTag: function (params) {
+            const term = $.trim(params.term);
+            if (term === '') {
+                return null;
+            }
+            return {
+                id: term.toUpperCase(),
+                text: term.toUpperCase(),
+                newTag: true // Marcar como nuevo
+            };
+        }
+    }).on('select2:select', function (e) {
+        const data = e.params.data;
+        // Si es un nuevo tag, agregarlo a la BD
+        if (data.newTag) {
+            agregarNuevoProveedor(data.text);
+        }
+    });
+    
+    console.log('✅ Select2 inicializado en', selector, 'con', proveedoresData.length, 'proveedores');
+}
+
+function agregarNuevoProveedor(nombre) {
+    fetch('/api/agregar-proveedor', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ nombre: nombre })
+    })
+    .then(response => response.json())
+    .then(result => {
+        if (result.success) {
+            console.log('✅ Proveedor agregado:', nombre);
+            // Recargar proveedores
+            cargarProveedores();
+        } else {
+            console.warn('Proveedor no agregado:', result.message);
+        }
+    })
+    .catch(error => console.error('Error agregando proveedor:', error));
+}
+
+function copiarProveedorAnterior(comidaId) {
+    // Obtener todas las comidas en orden
+    const comidas = document.querySelectorAll('#comidas-container > div[id^="comida-"]');
+    
+    if (comidas.length <= 1) {
+        mostrarNotificacion('No hay línea anterior para copiar', 'warning');
+        return;
+    }
+    
+    // Buscar el índice de la comida actual
+    let indiceActual = -1;
+    comidas.forEach((comida, index) => {
+        if (comida.id === `comida-${comidaId}`) {
+            indiceActual = index;
+        }
+    });
+    
+    if (indiceActual <= 0) {
+        mostrarNotificacion('Esta es la primera línea, no hay proveedor anterior', 'warning');
+        return;
+    }
+    
+    // Obtener el proveedor de la línea anterior
+    const comidaAnterior = comidas[indiceActual - 1];
+    const selectAnterior = comidaAnterior.querySelector('.proveedor-select');
+    
+    if (selectAnterior && selectAnterior.value) {
+        // Copiar valor al select actual
+        const selectActual = $(`#comida_proveedor_${comidaId}`);
+        selectActual.val(selectAnterior.value).trigger('change');
+        console.log(`✅ Proveedor copiado: ${selectAnterior.value}`);
+    } else {
+        mostrarNotificacion('La línea anterior no tiene proveedor seleccionado', 'warning');
+    }
+}
+
+// ============ FUNCIONES MODAL GESTIÓN PROVEEDORES ============
+
+function abrirModalProveedores() {
+    const modal = document.getElementById('modalProveedores');
+    modal.style.display = 'flex';
+    cargarListaProveedoresModal();
+}
+
+function cerrarModalProveedores() {
+    const modal = document.getElementById('modalProveedores');
+    modal.style.display = 'none';
+}
+
+function cargarListaProveedoresModal() {
+    fetch('/api/listar-proveedores')
+        .then(response => response.json())
+        .then(result => {
+            if (result.success) {
+                const lista = document.getElementById('listaProveedores');
+                const total = document.getElementById('totalProveedores');
+                
+                total.textContent = result.proveedores.length;
+                
+                lista.innerHTML = result.proveedores.map(proveedor => `
+                    <div class="flex items-center justify-between p-3 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors proveedor-item" data-nombre="${proveedor.nombre}">
+                        <span class="font-medium text-gray-800">${proveedor.nombre}</span>
+                        <div class="flex gap-2">
+                            <button onclick="editarProveedorModal(${proveedor.id}, '${proveedor.nombre.replace(/'/g, "\\'")}')" 
+                                    class="px-3 py-1 bg-blue-500 hover:bg-blue-600 text-white text-sm rounded transition-colors">
+                                <i class="bi bi-pencil"></i> Editar
+                            </button>
+                            <button onclick="eliminarProveedorModal(${proveedor.id}, '${proveedor.nombre.replace(/'/g, "\\'")}')" 
+                                    class="px-3 py-1 bg-red-500 hover:bg-red-600 text-white text-sm rounded transition-colors">
+                                <i class="bi bi-trash"></i> Eliminar
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        })
+        .catch(error => console.error('Error cargando proveedores:', error));
+}
+
+function filtrarProveedores() {
+    const busqueda = document.getElementById('buscarProveedor').value.toUpperCase();
+    const items = document.querySelectorAll('.proveedor-item');
+    
+    items.forEach(item => {
+        const nombre = item.getAttribute('data-nombre');
+        if (nombre.includes(busqueda)) {
+            item.style.display = 'flex';
+        } else {
+            item.style.display = 'none';
+        }
+    });
+}
+
+// Agregar nuevo proveedor desde modal
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('formNuevoProveedor');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const nombre = document.getElementById('nuevoProveedorNombre').value.trim().toUpperCase();
+            
+            if (!nombre) {
+                mostrarNotificacion('Ingrese un nombre para el proveedor', 'warning');
+                return;
+            }
+            
+            fetch('/api/agregar-proveedor', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ nombre: nombre })
+            })
+            .then(response => response.json())
+            .then(result => {
+                if (result.success) {
+                    mostrarNotificacion('Proveedor agregado exitosamente', 'success');
+                    document.getElementById('nuevoProveedorNombre').value = '';
+                    cargarProveedores(); // Recargar para los selects
+                    cargarListaProveedoresModal(); // Recargar la lista del modal
+                } else {
+                    mostrarNotificacion('Error: ' + result.message, 'error');
+                }
+            })
+            .catch(error => {
+                mostrarNotificacion('Error de conexión: ' + error.message, 'error');
+            });
+        });
+    }
+});
+
+function editarProveedorModal(id, nombreActual) {
+    const nuevoNombre = prompt('✏️ Editar nombre del proveedor:', nombreActual);
+    
+    if (nuevoNombre === null) return; // Cancelado
+    
+    const nombreFinal = nuevoNombre.trim().toUpperCase();
+    
+    if (!nombreFinal) {
+        mostrarNotificacion('El nombre no puede estar vacío', 'warning');
+        return;
+    }
+    
+    fetch('/api/editar-proveedor', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ id: id, nombre: nombreFinal })
+    })
+    .then(response => response.json())
+    .then(result => {
+        if (result.success) {
+            mostrarNotificacion('Proveedor actualizado exitosamente', 'success');
+            cargarProveedores();
+            cargarListaProveedoresModal();
+        } else {
+            mostrarNotificacion('Error: ' + result.message, 'error');
+        }
+    })
+    .catch(error => {
+        mostrarNotificacion('Error de conexión: ' + error.message, 'error');
+    });
+}
+
+// Variables globales para eliminar proveedor
+let proveedorAEliminar = { id: null, nombre: '' };
+
+function eliminarProveedorModal(id, nombre) {
+    proveedorAEliminar = { id: id, nombre: nombre };
+    document.getElementById('proveedorAEliminarTexto').textContent = nombre;
+    document.getElementById('modalConfirmEliminarProveedor').classList.remove('hidden');
+    document.getElementById('modalConfirmEliminarProveedor').style.display = 'flex';
+}
+
+function cerrarModalConfirmEliminarProveedor() {
+    document.getElementById('modalConfirmEliminarProveedor').classList.add('hidden');
+    document.getElementById('modalConfirmEliminarProveedor').style.display = 'none';
+    proveedorAEliminar = { id: null, nombre: '' };
+}
+
+function confirmarEliminarProveedor() {
+    fetch('/api/eliminar-proveedor', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ id: proveedorAEliminar.id })
+    })
+    .then(response => response.json())
+    .then(result => {
+        if (result.success) {
+            mostrarNotificacion('Proveedor desactivado exitosamente', 'success');
+            cargarProveedores();
+            cargarListaProveedoresModal();
+            cerrarModalConfirmEliminarProveedor();
+        } else {
+            mostrarNotificacion('Error: ' + result.message, 'error');
+        }
+    })
+    .catch(error => {
+        mostrarNotificacion('Error de conexión: ' + error.message, 'error');
+    });
+}
+
+// ============ FIN FUNCIONES MODAL PROVEEDORES ============
+
+// ============ FIN FUNCIONES PROVEEDORES ============
+
+
+// ============ FUNCIONES PARA TRANSPORTES ============
+
+let transportesData = [];
+
+function cargarTransportes() {
+    fetch('/api/listar-transportes')
+        .then(response => response.json())
+        .then(result => {
+            if (result.success) {
+                transportesData = result.transportes;
+                console.log('✅ Transportes cargados:', transportesData.length);
+                inicializarPatenteSelect2();
+            } else {
+                console.error('Error cargando transportes:', result.message);
+            }
+        })
+        .catch(error => console.error('Error:', error));
+}
+
+function inicializarPatenteSelect2() {
+    $('#patente_camion').select2({
+        data: transportesData.map(t => ({ 
+            id: t.patente, 
+            text: t.patente 
+        })),
+        placeholder: 'Seleccione patente...',
+        allowClear: true,
+        width: '100%',
+        language: {
+            noResults: function() {
+                return "No se encontró la patente";
+            },
+            searching: function() {
+                return "Buscando...";
+            }
+        }
+    }).on('change', function() {
+        const patente = $(this).val();
+        if (patente) {
+            cargarDatosTransporte(patente);
+        } else {
+            // Limpiar campos si se borra la selección
+            $('#transporte').val('');
+            $('#tipo_camion').val('');
+        }
+    });
+}
+
+function cargarDatosTransporte(patente) {
+    fetch(`/api/obtener-transporte/${patente}`)
+        .then(response => response.json())
+        .then(result => {
+            if (result.success) {
+                const data = result.data;
+                // Autocompletar transporte y tipo_camion
+                $('#transporte').val(data.transporte || '');
+                $('#tipo_camion').val(data.tipo_camion || '');
+                console.log('✅ Datos de transporte cargados para:', patente);
+            } else {
+                console.error('Error obteniendo transporte:', result.message);
+                $('#transporte').val('');
+                $('#tipo_camion').val('');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            $('#transporte').val('');
+            $('#tipo_camion').val('');
+        });
+}
+
+// ============ FIN FUNCIONES TRANSPORTES ============
+
+
+// ============ FUNCIONES MODAL GESTIÓN TRANSPORTES ============
+
+function abrirModalTransportes() {
+    const modal = document.getElementById('modalTransportes');
+    modal.style.display = 'flex';
+    cargarListaPatentesModal();
+    cargarFiltroTransportes();
+}
+
+function cerrarModalTransportes() {
+    const modal = document.getElementById('modalTransportes');
+    modal.style.display = 'none';
+}
+
+function cargarListaPatentesModal() {
+    fetch('/api/listar-transportes')
+        .then(response => response.json())
+        .then(result => {
+            if (result.success) {
+                const lista = document.getElementById('listaPatentes');
+                const total = document.getElementById('totalPatentes');
+                
+                total.textContent = result.transportes.length;
+                
+                lista.innerHTML = result.transportes.map(t => `
+                    <div class="flex items-center justify-between p-3 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors patente-item" 
+                         data-patente="${t.patente}" 
+                         data-transporte="${t.transporte || ''}"
+                         data-tipo="${t.tipo_camion || ''}">
+                        <div class="flex-1 grid grid-cols-3 gap-4">
+                            <span class="font-bold text-blue-600">${t.patente}</span>
+                            <span class="text-gray-700">${t.transporte || '<em class="text-gray-400">Sin transporte</em>'}</span>
+                            <span class="text-gray-600 text-sm">${t.tipo_camion || '<em class="text-gray-400">Sin tipo</em>'}</span>
+                        </div>
+                        <div class="flex gap-2">
+                            <button onclick="eliminarPatenteModal(${t.id}, '${t.patente}');" 
+                                    class="px-3 py-1 bg-red-500 hover:bg-red-600 text-white text-sm rounded transition-colors">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        })
+        .catch(error => console.error('Error cargando patentes:', error));
+}
+
+function cargarFiltroTransportes() {
+    const filtro = document.getElementById('filtroTransporte');
+    filtro.innerHTML = '<option value="">Todos los transportes</option>';
+    
+    // Extraer lista única de transportes
+    const transportesSet = new Set();
+    transportesData.forEach(t => {
+        if (t.transporte && t.transporte.trim() !== '') {
+            transportesSet.add(t.transporte.trim());
+        }
+    });
+    
+    const transportesUnicos = Array.from(transportesSet).sort();
+    transportesUnicos.forEach(t => {
+        filtro.innerHTML += `<option value="${t}">${t}</option>`;
+    });
+}
+
+function filtrarPatentes() {
+    const busqueda = document.getElementById('buscarPatente').value.toUpperCase();
+    const filtroTransporte = document.getElementById('filtroTransporte').value;
+    const items = document.querySelectorAll('.patente-item');
+    
+    items.forEach(item => {
+        const patente = item.getAttribute('data-patente');
+        const transporte = item.getAttribute('data-transporte');
+        
+        const coincideBusqueda = patente.includes(busqueda);
+        const coindiceFiltro = !filtroTransporte || transporte === filtroTransporte;
+        
+        if (coincideBusqueda && coindiceFiltro) {
+            item.style.display = 'flex';
+        } else {
+            item.style.display = 'none';
+        }
+    });
+}
+
+// Variables globales para eliminar patente
+let patenteAEliminar = { id: null, patente: '' };
+
+function eliminarPatenteModal(id, patente) {
+    patenteAEliminar = { id: id, patente: patente };
+    document.getElementById('patenteAEliminarTexto').textContent = patente;
+    document.getElementById('modalConfirmEliminarPatente').classList.remove('hidden');
+    document.getElementById('modalConfirmEliminarPatente').style.display = 'flex';
+}
+
+function cerrarModalConfirmEliminarPatente() {
+    document.getElementById('modalConfirmEliminarPatente').classList.add('hidden');
+    document.getElementById('modalConfirmEliminarPatente').style.display = 'none';
+    patenteAEliminar = { id: null, patente: '' };
+}
+
+function confirmarEliminarPatente() {
+    fetch('/api/eliminar-transporte', {
+        method: 'DELETE',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ id: patenteAEliminar.id })
+    })
+    .then(response => response.json())
+    .then(result => {
+        if (result.success) {
+            mostrarNotificacion('Patente eliminada exitosamente', 'success');
+            cargarTransportes();
+            cargarListaPatentesModal();
+            cerrarModalConfirmEliminarPatente();
+        } else {
+            mostrarNotificacion('Error: ' + result.message, 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        mostrarNotificacion('Error de conexión', 'error');
+    });
+}
+
+// Agregar nueva patente desde modal
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('formNuevaPatente');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const patente = document.getElementById('nuevaPatentePatente').value.trim().toUpperCase();
+            const transporte = document.getElementById('nuevaPatenteTransporte').value.trim().toUpperCase();
+            const tipoCamion = document.getElementById('nuevaPatenteTipoCamion').value;
+            
+            if (!patente || !transporte || !tipoCamion) {
+                mostrarNotificacion('Complete todos los campos', 'warning');
+                return;
+            }
+            
+            fetch('/api/agregar-transporte', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    patente: patente,
+                    transporte: transporte,
+                    tipo_camion: tipoCamion
+                })
+            })
+            .then(response => response.json())
+            .then(result => {
+                if (result.success) {
+                    mostrarNotificacion('Patente agregada exitosamente', 'success');
+                    document.getElementById('nuevaPatentePatente').value = '';
+                    document.getElementById('nuevaPatenteTransporte').value = '';
+                    document.getElementById('nuevaPatenteTipoCamion').value = '';
+                    cargarTransportes();
+                    cargarListaPatentesModal();
+                } else {
+                    mostrarNotificacion('Error: ' + result.message, 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                mostrarNotificacion('Error de conexión', 'error');
+            });
+        });
+    }
+});
+
+// ============ FIN FUNCIONES MODAL TRANSPORTES ============
+
+// ============ FUNCIONES MODAL CONFIRMACIÓN LIMPIAR GUÍAS ============
+function limpiarTodasGuias() {
+    document.getElementById('modalConfirmLimpiarGuias').classList.remove('hidden');
+    document.getElementById('modalConfirmLimpiarGuias').style.display = 'flex';
+}
+
+function cerrarModalConfirmLimpiarGuias() {
+    document.getElementById('modalConfirmLimpiarGuias').classList.add('hidden');
+    document.getElementById('modalConfirmLimpiarGuias').style.display = 'none';
+}
+
+function confirmarLimpiarGuias() {
+    // Limpiar todos los campos de guía_1 a guía_21
+    for (let i = 1; i <= 21; i++) {
+        const campo = document.getElementById(`guia_${i}`);
+        if (campo) {
+            campo.value = '';
+        }
+    }
+    
+    console.log('✅ Todos los campos de guías (1-21) han sido limpiados');
+    cerrarModalConfirmLimpiarGuias();
+    mostrarNotificacion('Guías limpiadas exitosamente', 'success');
+}
+// ============ FIN FUNCIONES MODAL CONFIRMACIÓN LIMPIAR GUÍAS ============
+
+// ============ LIMPIAR ACTIVOS Y PALLETS ============
+function limpiarActivosYPallets() {
+    console.log('🔧 [LIMPIAR] Iniciando limpieza de activos y pallets...');
+    mostrarModalConfirm('¿Está seguro de limpiar todos los campos de Activos y Pallets?\n\nTodos los campos quedarán en blanco. Esta acción no se puede deshacer.', function(confirmado) {
+        if (confirmado) {
+            console.log('🔧 [LIMPIAR] Usuario confirmó limpieza');
+            
+            // Obtener todos los elementos
+            const numWencosEl = document.getElementById('num_wencos');
+            const binEl = document.getElementById('bin');
+            const palletsEl = document.getElementById('pallets');
+            const palletsChepEl = document.getElementById('pallets_chep');
+            const plNegroGruesoEl = document.getElementById('pallets_pl_negro_grueso');
+            const plNegroAltEl = document.getElementById('pallets_pl_negro_alternativo');
+            const palletsCongeladoEl = document.getElementById('pallets_congelado');
+            const wencosCongeladoEl = document.getElementById('wencos_congelado');
+            const palletsRefrigeradoEl = document.getElementById('pallets_refrigerado');
+            const wencosRefrigeradoEl = document.getElementById('wencos_refrigerado');
+            const palletsAbarroteEl = document.getElementById('pallets_abarrote');
+            
+            // Array con todos los campos
+            const todosCampos = [
+                numWencosEl, binEl, palletsEl, palletsChepEl, 
+                plNegroGruesoEl, plNegroAltEl, palletsCongeladoEl, 
+                wencosCongeladoEl, palletsRefrigeradoEl, 
+                wencosRefrigeradoEl, palletsAbarroteEl
+            ];
+            
+            // Estrategia agresiva: eliminar el value del DOM completamente
+            todosCampos.forEach(campo => {
+                if (campo) {
+                    // Método 1: Usar setAttribute
+                    campo.setAttribute('value', '');
+                    // Método 2: Propiedad value
+                    campo.value = '';
+                    // Método 3: Remover atributo completamente
+                    campo.removeAttribute('value');
+                }
+            });
+            
+            // Segunda pasada después de delay
+            setTimeout(() => {
+                todosCampos.forEach(campo => {
+                    if (campo) {
+                        campo.value = '';
+                        campo.removeAttribute('value');
+                        console.log(`Campo ${campo.id}: "${campo.value}"`);
+                    }
+                });
+                console.log('✓ Limpieza completada');
+            }, 100);
+            
+            console.log('✅ [LIMPIAR] Limpieza completada');
+            mostrarNotificacion('Activos y Pallets limpiados exitosamente', 'success');
+        } else {
+            console.log('❌ [LIMPIAR] Usuario canceló la limpieza');
+        }
+    });
+}
+// ============ FIN LIMPIAR ACTIVOS Y PALLETS ============
+
+// ============ FUNCIÓN NOTIFICACIONES ESTILIZADAS ============
+function mostrarNotificacion(mensaje, tipo = 'info') {
+    const colores = {
+        'success': 'bg-green-500',
+        'error': 'bg-red-500',
+        'warning': 'bg-yellow-500',
+        'info': 'bg-blue-500'
+    };
+    
+    const iconos = {
+        'success': 'bi-check-circle-fill',
+        'error': 'bi-x-circle-fill',
+        'warning': 'bi-exclamation-triangle-fill',
+        'info': 'bi-info-circle-fill'
+    };
+    
+    const notification = document.createElement('div');
+    notification.className = `fixed top-4 right-4 ${colores[tipo]} text-white px-6 py-3 rounded-lg shadow-lg z-[9999] flex items-center animate-bounce-in`;
+    notification.innerHTML = `<i class="bi ${iconos[tipo]} mr-2 text-xl"></i><span class="font-semibold">${mensaje}</span>`;
+    document.body.appendChild(notification);
+    setTimeout(() => notification.remove(), 3000);
+}
+// ============ FIN FUNCIÓN NOTIFICACIONES ESTILIZADAS ============
 
 function eliminarComida(comidaId) {
     const elemento = document.getElementById(`comida-${comidaId}`);
@@ -1321,7 +2189,7 @@ document.getElementById('formNuevoViaje').addEventListener('submit', function(e)
         patente_camion: formData.get('patente_camion'),
         patente_semi: formData.get('patente_semi'),
         numero_rampa: formData.get('numero_rampa'),
-        peso_camion: formData.get('peso_camion'),
+        transporte: formData.get('transporte'),
         numero_camion: formData.get('numero_camion'),
         termografos_gps: formData.get('termografos_gps'),
         chofer: formData.get('chofer'),
@@ -1634,14 +2502,14 @@ function guardarCentroCosto(event) {
             document.getElementById('codigo_casino').value = data.casino;
             document.getElementById('ruta').value = data.ruta;
             
-            alert('✓ Centro de Costo creado exitosamente');
+            mostrarNotificacion('Centro de Costo creado exitosamente', 'success');
             cerrarModalCentroCosto();
         } else {
-            alert('✖ Error: ' + result.message);
+            mostrarNotificacion('Error: ' + result.message, 'error');
         }
     })
     .catch(error => {
-        alert('✖ Error de conexión: ' + error.message);
+        mostrarNotificacion('Error de conexión: ' + error.message, 'error');
     });
 }
 
@@ -1686,14 +2554,14 @@ function guardarChofer(event) {
             document.getElementById('celular').value = data.celular;
             document.getElementById('rut').value = data.rut;
             
-            alert('✓ Chofer creado exitosamente');
+            mostrarNotificacion('Chofer creado exitosamente', 'success');
             cerrarModalChofer();
         } else {
-            alert('✖ Error: ' + result.message);
+            mostrarNotificacion('Error: ' + result.message, 'error');
         }
     })
     .catch(error => {
-        alert('✖ Error de conexión: ' + error.message);
+        mostrarNotificacion('Error de conexión: ' + error.message, 'error');
     });
 }
 
@@ -1726,14 +2594,14 @@ function guardarAdministrativo(event) {
             // Actualizar el campo select2
             $('#administrativo_responsable').append(`<option value="${nombre}" selected>${nombre}</option>`).trigger('change');
             
-            alert('✓ Administrativo creado exitosamente');
+            mostrarNotificacion('Administrativo creado exitosamente', 'success');
             cerrarModalAdministrativo();
         } else {
-            alert('✖ Error: ' + result.message);
+            mostrarNotificacion('Error: ' + result.message, 'error');
         }
     })
     .catch(error => {
-        alert('✖ Error de conexión: ' + error.message);
+        mostrarNotificacion('Error de conexión: ' + error.message, 'error');
     });
 }
 

@@ -1,0 +1,121 @@
+# GUÍA RÁPIDA - Sistema de Viajes DHL
+=========================================
+
+# GUÍA RÁPIDA - Sistema de Viajes DHL
+=========================================
+
+## ⚡ INICIO RÁPIDO
+
+### 🎛️ PANEL DE CONTROL (RECOMENDADO)
+   📁 Doble click en: **PANEL_CONTROL.bat**
+   
+   Ventana gráfica con todas las funciones:
+   ✓ ▶️  Botón ENCENDER servidor
+   ✓ ⏹️  Botón APAGAR servidor
+   ✓ 🌐 Botón ABRIR NAVEGADOR
+   ✓ 📊 Ver estado en tiempo real
+   ✓ 🔧 Verificar sistema
+   ✓ 🛡️  Configurar firewall
+   ✓ 📂 Abrir carpeta del proyecto
+
+### 📝 ALTERNATIVA (Línea de comandos)
+   📁 Doble click en: **iniciar_web.bat**
+   ✓ Se abrirá una ventana negra
+   ✓ NO la cierres mientras uses el sistema
+
+
+## 🔐 ACCESO AL SISTEMA
+
+**Usuario:** admin
+**Contraseña:** admin123
+
+(Puedes cambiarlas desde "Gestionar Usuarios" en el menú)
+
+
+## 📋 ARCHIVOS PRINCIPALES
+
+| Archivo | Función |
+|---------|---------|
+| **PANEL_CONTROL.bat** | 🎛️ Panel gráfico (USA ESTE) |
+| **iniciar_web.bat** | Inicia servidor (producción) |
+| **iniciar_desarrollo.bat** | Inicia servidor (desarrollo) |
+| **reparar_rutas.bat** | Repara rutas del entorno virtual |
+| **build_ejecutable.bat** | Crea ejecutable standalone |
+
+### 📂 Carpetas de utilidades:
+- **_scripts_antiguos/** - Scripts .bat movidos aquí
+- **_utilidades/** - Scripts de diagnóstico Python
+- **_logs/** - Archivos de log generados
+
+
+## 🌐 ACCESO DESDE OTRAS COMPUTADORAS
+
+✅ **El sistema YA ESTÁ configurado para acceso de red**
+
+### Pasos para acceder desde otras PCs:
+
+1. **En tu PC (servidor):**
+   - Ejecuta: **VER_MI_IP.bat** para ver tu IP
+   - O ejecuta ENCENDER.bat (mostrará tu IP)
+   - Copia tu IP local (ej: 192.168.1.100)
+
+2. **En otras PCs de la red:**
+   - Abre el navegador
+   - Escribe: **http://TU-IP:5000**
+   - Ejemplo: http://192.168.1.100:5000
+
+3. **Si no funciona (problema de Firewall):**
+   - Click derecho en: **ABRIR_FIREWALL.bat**
+   - Selecciona: "Ejecutar como administrador"
+   - Esto abrirá el puerto 5000 en Windows
+
+### Configuración de red:
+- Host: 0.0.0.0 (acepta conexiones de cualquier PC)
+- Puerto: 5000
+- Usuarios simultáneos: 10
+
+
+## ⚠️ SOLUCIÓN DE PROBLEMAS
+
+### El navegador no carga la página:
+   1. Verifica que ENCENDER.bat esté corriendo
+   2. Ejecuta ESTADO.bat para confirmar
+   3. Intenta: http://127.0.0.1:5000
+
+### Se cerró la ventana por accidente:
+   1. Ejecuta APAGAR.bat (por seguridad)
+   2. Ejecuta ENCENDER.bat nuevamente
+
+### Error al encender:
+   1. Ejecuta APAGAR.bat primero
+   2. Ejecuta TEST_SISTEMA.bat
+   3. Luego ENCENDER.bat
+
+
+## 📁 UBICACIÓN DE ARCHIVOS
+
+- Base de datos: `viajes.db`
+- PDFs generados: carpeta `pdfs/`
+- Configuración: `config.py`
+
+
+## 💾 BACKUP
+
+Para hacer respaldo de la base de datos:
+   - Copia el archivo: `viajes.db`
+   - Guárdalo en un lugar seguro
+
+
+## 🔄 ACTUALIZACIÓN DESDE OTRA PC
+
+Si copias el proyecto a otra PC:
+   1. Copia toda la carpeta
+   2. Ejecuta: reparar_rutas.bat
+   3. Ejecuta: TEST_SISTEMA.bat
+   4. Ejecuta: ENCENDER.bat
+
+
+=========================================
+Creado: 27/02/2026
+Sistema de Viajes DHL - Versión 1.0
+=========================================

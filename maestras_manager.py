@@ -3,18 +3,15 @@ import sys
 import os
 from typing import List, Dict, Optional
 from datetime import datetime
+from config import config
 
 class MaestrasManager:
     """Clase para manejar las tablas maestras (choferes, administrativos, casinos)"""
     
     def __init__(self, db_path: str = None):
         if db_path is None:
-            # Si se ejecuta empaquetado, usar directorio del ejecutable
-            if getattr(sys, 'frozen', False):
-                base_dir = os.path.dirname(sys.executable)
-            else:
-                base_dir = os.path.dirname(__file__)
-            self.db_path = os.path.join(base_dir, 'viajes.db')
+            # Usar configuración centralizada
+            self.db_path = config.get_db_path()
         else:
             self.db_path = db_path
     
