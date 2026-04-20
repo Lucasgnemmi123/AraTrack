@@ -25,15 +25,10 @@ class Config:
         self.environment = os.getenv('ARATRACK_ENV', 'development')
         
         # Configuración de base de datos
-        if self.environment == 'production':
-            self.db_name = 'viajes.db'
-            self.port = 5000
-        else:
-            # Desarrollo: usar base de datos separada
-            self.db_name = 'viajes_dev.db'
-            self.port = 5000
-        
-        self.db_path = os.path.join(self.base_dir, self.db_name)
+        # USAR BD DE LA RAÍZ DEL PROYECTO
+        self.db_path = os.path.join(self.base_dir, 'viajes.db')
+        self.db_name = 'viajes.db'
+        self.port = 5000
         
         # Configuración del servidor
         self.host = os.getenv('ARATRACK_HOST', '0.0.0.0')

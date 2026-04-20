@@ -8,6 +8,7 @@ from maestras_manager import MaestrasManager
 from pdf_generator import PDFGenerator
 from auth_manager import AuthManager, login_required
 import rendiciones_manager
+import backup_manager
 
 app = Flask(__name__)
 app.secret_key = config.secret_key
@@ -1202,7 +1203,7 @@ def descargar_reporte_viajes():
         header_font = Font(bold=True, color="FFFFFF", size=12)
         header_alignment = Alignment(horizontal="center", vertical="center")
         
-        # Encabezados (todos los campos de viajes)
+        # Encabezados (todos los campos de viajes) - ORDEN CORRECTO SEGÚN TABLA DB
         headers = [
             'NRO VIAJE', 'CASINO', 'RUTA', 'TIPO CAMIÓN', 'PATENTE CAMIÓN', 'PATENTE SEMI',
             'NRO RAMPA', 'TRANSPORTE', 'CÓDIGO COSTO', 'TERMÓGRAFOS GPS', 'FECHA',
@@ -1211,12 +1212,12 @@ def descargar_reporte_viajes():
             'PALLETS NEGRO ALT', 'PALLETS REFRIG', 'WENCOS REFRIG', 'PALLETS CONG',
             'WENCOS CONG', 'PALLETS ABARROTE', 'CHECK CONG', 'CHECK REFRIG', 'CHECK ABARROTE',
             'CHECK IMPLEMENTOS', 'CHECK ASEO', 'CHECK TRAZAB', 'CHECK WTCK', 'CHECK CORREO WTCK',
-            'CHECK PLANILLA', 'SELLO SAL 1P', 'SELLO SAL 2P', 'SELLO SAL 3P', 'SELLO SAL 4P',
-            'SELLO SAL 5P', 'SELLO RET 1P', 'SELLO RET 2P', 'SELLO RET 3P', 'SELLO RET 4P',
-            'SELLO RET 5P', 'GUÍA 1', 'GUÍA 2', 'GUÍA 3', 'GUÍA 4', 'GUÍA 5', 'GUÍA 6',
+            'CHECK PLANILLA', 'GUÍA 1', 'GUÍA 2', 'GUÍA 3', 'GUÍA 4', 'GUÍA 5', 'GUÍA 6',
             'GUÍA 7', 'GUÍA 8', 'GUÍA 9', 'GUÍA 10', 'GUÍA 11', 'GUÍA 12', 'GUÍA 13', 'GUÍA 14',
             'GUÍA 15', 'GUÍA 16', 'GUÍA 17', 'GUÍA 18', 'GUÍA 19', 'GUÍA 20', 'GUÍA 21',
-            'CERT FUMIGACIÓN', 'REVISIÓN LIMPIEZA', 'ADMIN RESPONSABLE'
+            'SELLO SAL 1P', 'SELLO SAL 2P', 'SELLO SAL 3P', 'SELLO SAL 4P',
+            'SELLO SAL 5P', 'SELLO RET 1P', 'SELLO RET 2P', 'SELLO RET 3P', 'SELLO RET 4P',
+            'SELLO RET 5P', 'CERT FUMIGACIÓN', 'REVISIÓN LIMPIEZA', 'ADMIN RESPONSABLE'
         ]
         
         for col_num, header in enumerate(headers, 1):
@@ -2151,6 +2152,9 @@ if __name__ == '__main__':
     print("INICIANDO SERVIDOR...")
     print("="*60 + "\n")
     
+    # Iniciar backup automático a OneDrive
+    backup_manager.iniciar()
+
     # Intentar Waitress primero (producción)
     try:
         from waitress import serve

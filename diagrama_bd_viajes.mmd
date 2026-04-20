@@ -1,0 +1,150 @@
+erDiagram
+    viajes ||--o{ comidas_preparadas : "tiene"
+    viajes ||--o| rendiciones : "genera"
+    maestras_casinos ||--o{ viajes : "origen"
+    maestras_choferes ||--o{ viajes : "conduce"
+    maestras_administrativos ||--o{ viajes : "supervisa"
+    transportes ||--o{ viajes : "utiliza"
+    proveedores ||--o{ comidas_preparadas : "provee"
+
+    viajes {
+        INTEGER id PK "AUTO_INCREMENT"
+        TEXT numero_viaje UK "NOT NULL"
+        TEXT casino
+        TEXT ruta
+        TEXT tipo_camion
+        TEXT patente_camion
+        TEXT patente_semi
+        TEXT numero_rampa
+        TEXT transporte
+        TEXT costo_codigo UK "NOT NULL"
+        TEXT termografos_gps
+        TEXT fecha
+        TEXT fecha_hora_llegada_dhl
+        TEXT fecha_hora_salida_dhl
+        TEXT conductor
+        TEXT celular
+        TEXT rut
+        TEXT numero_camion
+        TEXT num_wencos
+        TEXT bin
+        TEXT pallets
+        TEXT pallets_chep
+        TEXT pallets_pl_negro_grueso
+        TEXT pallets_pl_negro_alternativo
+        TEXT pallets_refrigerado
+        TEXT wencos_refrigerado
+        TEXT pallets_congelado
+        TEXT wencos_congelado
+        TEXT pallets_abarrote
+        TEXT check_congelado
+        TEXT check_refrigerado
+        TEXT check_abarrote
+        TEXT check_implementos
+        TEXT check_aseo
+        TEXT check_trazabilidad
+        TEXT check_plataforma_wtck
+        TEXT check_env_correo_wtck
+        TEXT check_revision_planilla_despacho
+        TEXT guia_1
+        TEXT guia_2
+        TEXT guia_3
+        TEXT guia_4
+        TEXT guia_5
+        TEXT guia_6
+        TEXT guia_7
+        TEXT guia_8
+        TEXT guia_9
+        TEXT guia_10
+        TEXT guia_11
+        TEXT guia_12
+        TEXT guia_13
+        TEXT guia_14
+        TEXT guia_15
+        TEXT guia_16
+        TEXT guia_17
+        TEXT guia_18
+        TEXT guia_19
+        TEXT guia_20
+        TEXT guia_21
+        TEXT sello_salida_1p
+        TEXT sello_salida_2p
+        TEXT sello_salida_3p
+        TEXT sello_salida_4p
+        TEXT sello_salida_5p
+        TEXT sello_retorno_1p
+        TEXT sello_retorno_2p
+        TEXT sello_retorno_3p
+        TEXT sello_retorno_4p
+        TEXT sello_retorno_5p
+        TEXT numero_certificado_fumigacion
+        TEXT revision_limpieza_camion_acciones
+        TEXT administrativo_responsable
+    }
+
+    comidas_preparadas {
+        INTEGER id PK "AUTO_INCREMENT"
+        TEXT numero_viaje FK "NOT NULL"
+        TEXT numero_centro_costo FK "NOT NULL"
+        TEXT guia_comida
+        TEXT descripcion
+        REAL kilo
+        INTEGER bultos
+        TEXT proveedor
+    }
+
+    usuarios {
+        INTEGER id PK "AUTO_INCREMENT"
+        TEXT username UK "UNIQUE NOT NULL"
+        TEXT password_hash "NOT NULL"
+        TEXT nombre_completo "NOT NULL"
+        TEXT email
+        INTEGER activo "DEFAULT 1"
+        TIMESTAMP fecha_creacion "DEFAULT CURRENT_TIMESTAMP"
+    }
+
+    maestras_casinos {
+        INTEGER id PK "AUTO_INCREMENT"
+        INTEGER codigo_costo UK "UNIQUE NOT NULL"
+        TEXT casino "NOT NULL"
+        TEXT ruta
+        TIMESTAMP fecha_creacion "DEFAULT CURRENT_TIMESTAMP"
+    }
+
+    maestras_administrativos {
+        INTEGER id PK "AUTO_INCREMENT"
+        TEXT nombre UK "UNIQUE NOT NULL"
+        TIMESTAMP fecha_creacion "DEFAULT CURRENT_TIMESTAMP"
+    }
+
+    maestras_choferes {
+        INTEGER id PK "AUTO_INCREMENT"
+        TEXT nombre UK "NOT NULL UNIQUE"
+        TEXT rut
+        TEXT celular
+    }
+
+    rendiciones {
+        INTEGER id PK "AUTO_INCREMENT"
+        INTEGER nro_viaje UK "UNIQUE NOT NULL"
+        TEXT pdt
+        TEXT ruta
+        DATETIME fecha_creacion "DEFAULT CURRENT_TIMESTAMP"
+        DATETIME fecha_modificacion
+        TEXT estado_rendicion "DEFAULT 'SIN REVISAR'"
+    }
+
+    transportes {
+        INTEGER id PK "AUTO_INCREMENT"
+        TEXT patente UK "NOT NULL UNIQUE"
+        TEXT transporte
+        TEXT tipo_camion
+        INTEGER activo "DEFAULT 1"
+        TIMESTAMP fecha_creacion "DEFAULT CURRENT_TIMESTAMP"
+    }
+
+    proveedores {
+        INTEGER id PK "AUTO_INCREMENT"
+        TEXT nombre UK "NOT NULL UNIQUE"
+        INTEGER activo "DEFAULT 1"
+    }
